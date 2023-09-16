@@ -1,0 +1,12 @@
+{
+    "name": "clue-less",
+    "version": "0.0.1",
+    "description": "clue-less",
+    "type": "module",
+    "dependencies": {
+        "esm": "^3.2.25",
+        "express": "^4.18.2",
+        "socket.io": "^4.7.2",
+        "uuid": "^9.0.1"
+    }
+}
