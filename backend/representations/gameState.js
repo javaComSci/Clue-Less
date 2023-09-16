@@ -1,12 +1,11 @@
-import { v4 as uuidv4 } from 'uuid';
 import { Character, CharacterConstants } from  '../../common/representations/character.mjs';
 import { LocationConstants } from '../../common/representations/location.mjs';
 
 export class GameState
 {
-    constructor()
+    constructor(gameId)
 	{
-		this.gameId = uuidv4();
+		this.gameId = gameId;
 		this.characters = this.createCharacters();
 		this.players = [];
 		this.currentPlayer;
@@ -40,7 +39,7 @@ export class GameState
 	{
 		if (this.getPlayerCount < 3)
 		{
-			alertGameCannotStart();
+			alertGameCannotStart(this.gameId);
 		}
 		else
 		{
