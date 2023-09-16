@@ -13,7 +13,7 @@ server.listen(3000, () => {
 // Below is only for testing out initialization of GameState.
 import { GameState } from './representations/gameState.js';
 import { Player } from '../common/representations/player.mjs';
-var game = new GameState()
+var game = new GameState('1809d725-d3c0-4ec4-8365-fd40b38236da')
 var player1 = new Player('9809d725-d3c0-4ec4-8365-fd40b38236de');
 game.addPlayer(player1);
 game.printGameState();

@@ -1,25 +1,35 @@
-import { io } from '../index';
-import { GameState } from '../representations/gameState.mjs';
+import { io } from '../index.js';
+import { GameState } from '../representations/gameState.js';
 
-// Initially, there will only be one instance of the game that can be played.
-// Thus, keep the game state as global.
-currentGameState = undefined;
+// Keep the games object as global to map the gameId to game instance.
+games = {};
 
-io.on('start', player, callback => {
-	if (currentGameState === undefined)
-    {
-        // Start up a timer to start the game in 1 min.
-        setTimeout(() => {
-            console.log('1 minute has elapsed. Starting game if possible.');
-            currentGameState.startGame();
-          }, '60000');
-        
-        currentGameState = GameState();
-    }
+io.on('connection', (socket) => {
 
-    // Expecting a player object to be sent from client with the playerId.
-    // Rest of player info will be filled out by server.
-    currentGameState.addPlayer(player);
+    // Id of game to join must be provided by client.
+    // For now, the gameId is to be hard-coded by client as there is only single game instance.
+    socket.on('start', ({ gameId, player }, callback) => {
 
-    callback(player);
+        // Join game room.
+        socket.join(gameId);
+
+        // Join room with just single player.
+        socket.join(player.playerId);
+
+        if (!(gameId in games)){
+            // Start up a timer to start the game in 1 min.
+            setTimeout(() => {
+                console.log('1 minute has elapsed. Starting game if possible.');
+                games[gameId].startGame();
+              }, '60000');
+            
+            games[gameId] = GameState(gameId);
+        }
+    
+        // Expecting a player object to be sent from client with the playerId.
+        // Rest of player info will be filled out by server.
+        games[gameId].addPlayer(player);
+    
+        callback(player);
+    });
 });
