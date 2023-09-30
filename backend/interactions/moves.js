@@ -1,12 +1,13 @@
-import { io } from '../index.js';
+import { getIOInstance } from '../index.js';
 
-export function requestMove(playerId);
+export function requestMove(playerId)
 {
-    moves = [];
-    io.to(playerId).emit('Requesting move.', { potentialMoves: moves });
+    let moves = [];
+    getIOInstance().to(playerId).emit('Requesting move.', { potentialMoves: moves });
 }
 
-export function alertGameCannotStart(gameId)
+export function emitGameCannotStart(gameId)
 {
-    io.to(gameId).emit('Game cannot start due to game having less than 3 players.');
+    console.log('At least 3 players are required for playing the game.');
+    getIOInstance().to(gameId).emit('insufficientPlayerCount');
 }

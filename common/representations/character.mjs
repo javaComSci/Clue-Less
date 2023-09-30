@@ -1,3 +1,5 @@
+import { GameCard } from "./gameCard.mjs";
+
 export const CharacterConstants = {
     SCARLET: 'SCARLET',
     PLUM: 'PLUM',
@@ -7,11 +9,11 @@ export const CharacterConstants = {
     PEACOCK: 'PEACOCK'
 };
 
-export class Character
+export class CharacterCard extends GameCard
 {
-    constructor(characterName, currentLocation)
+    constructor(name, currentLocation)
     {
-        this.characterName = characterName;
-        this.currentLocation = currentLocation;
+        super(currentLocation, 'CHARACTER');
+        this.name = name;
     }
 }

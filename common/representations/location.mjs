@@ -1,3 +1,5 @@
+import { GameCard } from "./gameCard.mjs";
+
 export const LocationConstants = {
     Room: {
         HALL: 'HALL',
@@ -31,5 +33,15 @@ export const LocationConstants = {
         BALLROOM_CONSERVATORY_HOME: 'BALLROOM_CONSERVATORY_HOME',
         CONSERVATORY_LIBRARY_HOME: 'CONSERVATORY_LIBRARY_HOME',
         LIBRARY_STUDY_HOME: 'LIBRARY_STUDY_HOME'
-    }
+    },
+    None: 'NONE'
 };
+
+export class LocationCard extends GameCard
+{
+    constructor(name, currentLocation)
+    {
+        super(currentLocation, 'LOCATION');
+        this.name = name;
+    }
+}
