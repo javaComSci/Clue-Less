@@ -1,8 +1,8 @@
 export class GameCard
 {
-    constructor(startingLocation, type)
+    constructor(name, type)
     {
-        this.currentLocation = startingLocation;
+        this.name = name;
         this.type = type;
     }
 }

@@ -1,18 +1,19 @@
-import { GameState } from '../representations/gameState.js';
 import { getIOInstance } from '../index.js';
+import { GameEngine } from '../engine/gameEngine.js';
+import { getPerUserRoomId } from './socketEmits.js';
 
 // Keep the games object as global to map the gameId to game instance.
 let games = {};
 
-export function initializeGameStart()
+export function initializeListeners()
 {
     getIOInstance().on('connection', (socket) => {
         console.log('A user connected.');
 
         // Id of game to join must be provided by client.
         // For now, the gameId is to be hard-coded by client as there is only single game instance.
-        socket.on('start', ({ gameId, player }, callback) => {
-            console.log(`Getting the game start request for game ${gameId}, player: ${JSON.stringify(player)}.`);
+        socket.on('start', ({ gameId, playerId }) => {
+            console.log(`Getting the game start request for game ${gameId}, player: ${playerId}.`);
 
             // Join game room.
             // This will be used for emitting information to all players in the game.
@@ -20,10 +21,10 @@ export function initializeGameStart()
     
             // Join room with just this player.
             // This will be used for emitting to just this player.
-            socket.join(player.playerId);
+            socket.join(getPerUserRoomId(gameId, playerId));
 
             if (!(gameId in games)){
-                console.log('Starting up timer for starting up the game.');
+                console.log('Starting up timer for game start.');
 
                 // Start up a timer to start the game in 1 min.
                 setTimeout(() => {
@@ -31,14 +32,17 @@ export function initializeGameStart()
                     games[gameId].startGame();
                   }, '10000');
                 
-                games[gameId] = new GameState(gameId);
+                games[gameId] = new GameEngine(gameId);
             }
-        
-            // Expecting a player object to be sent from client with the playerId.
-            // Rest of player info will be filled out by server.
-            games[gameId].addPlayer(player);
             
-            callback(player);
+            // Player with the id is added to the game.
+            games[gameId].addPlayer(playerId);
+        });
+
+
+        socket.on('move', ({ gameId, playerId, requestedUpdatedCharacterPiece }) => {
+            console.log(`Receiving move for ${gameId}, player: ${playerId}, ${JSON.stringify(requestedUpdatedCharacterPiece)}`);
+            games[gameId].processMove(playerId, requestedUpdatedCharacterPiece);
         });
     });
 }

@@ -1,4 +1,5 @@
-import { GameCard } from "./gameCard.mjs";
+import { GamePiece } from './gamePiece.mjs';
+import { GameCard } from './gameCard.mjs';
 
 export const WeaponConstants = {
     CANDLESTICK: 'CANDLESTICK',
@@ -9,11 +10,27 @@ export const WeaponConstants = {
     WRENCH: 'WRENCH'
 };
 
-export class WeaponCard extends GameCard
+export const CardWeapons = [
+    WeaponConstants.CANDLESTICK,
+    WeaponConstants.DRAGGER,
+    WeaponConstants.PIPE,
+    WeaponConstants.REVOLVER,
+    WeaponConstants.ROPE,
+    WeaponConstants.WRENCH
+];
+
+export class WeaponPiece extends GamePiece
 {
     constructor(name, currentLocation)
     {
-        super(currentLocation, 'WEAPON');
-        this.name = name;
+        super(name, currentLocation, 'WEAPON');
+    }
+}
+
+export class WeaponCard extends GameCard
+{
+    constructor(name)
+    {
+        super(name, 'WEAPON')
     }
 }

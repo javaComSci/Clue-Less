@@ -1,8 +1,7 @@
 export class Player
 {
-    constructor(playerId, character)
+    constructor(playerId)
     {
         this.playerId = playerId;
-        this.character = character;
     }
 }

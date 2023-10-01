@@ -1,7 +1,7 @@
 import express from 'express';
 import { createServer } from 'node:http';
 import { Server } from 'socket.io';
-import { initializeGameStart } from './interactions/gameStart.js';
+import { initializeListeners } from './interactions/socketListeners.js';
 
 const app = express();
 const server = createServer(app);
@@ -13,7 +13,7 @@ export var getIOInstance = function()
 };
 
 var io = new Server(server);
-initializeGameStart();
+initializeListeners();
 
 server.listen(3000, () => {
   	console.log('Server running at http://localhost:3000');

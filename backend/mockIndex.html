@@ -34,17 +34,38 @@
                 'start',
                 {
                     gameId: 'blah',
-                    player: {
-                        playerId: input.value
-                    }
-                },
-                (createdPlayer) => console.log(JSON.stringify(createdPlayer)));
+                    playerId: input.value
+                });
             input.value = '';
         }
     });
 
     socket.on('insufficientPlayerCount', function() {
         console.log("Insufficient number of players");
+    });
+
+    socket.on('playerStartInfo', function(player) {
+        console.log("The player start info");
+        console.log(player);
+    });
+
+    socket.on('gameState', function(obj) {
+        console.log("The game state");
+        console.log(obj);
+    });
+
+    socket.on('requestMove', function(obj) {
+        console.log("Asked to provide move");
+        console.log(obj);
+
+        socket.emit(
+          'move',
+          {
+              gameId: 'blah',
+              playerId: 'a',
+              requestedUpdatedCharacterPiece: { character: 'SCARLET', currentLocation: 'HALL' }
+          });
+        
     });
     </script>
   </body>
