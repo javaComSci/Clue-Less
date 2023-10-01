@@ -17,3 +17,5 @@ To start up the backend, run
 ```
 node index.js
 ```
+
+Interactions with the frontend are done with socket.io
