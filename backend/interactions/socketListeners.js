@@ -40,9 +40,20 @@ export function initializeListeners()
         });
 
 
-        socket.on('move', ({ gameId, playerId, requestedUpdatedCharacterPiece }) => {
-            console.log(`Receiving move for ${gameId}, player: ${playerId}, ${JSON.stringify(requestedUpdatedCharacterPiece)}`);
-            games[gameId].processMove(playerId, requestedUpdatedCharacterPiece);
+        socket.on('move', ({ gameId, playerId, newCharacterLocation }) => {
+            games[gameId].processMove(playerId, newCharacterLocation);
+        });
+
+        socket.on('suggestion', ({ gameId, playerId, suggestedCharacterName, suggestedWeaponName }) => {
+            games[gameId].processSuggestion(playerId, suggestedCharacterName, suggestedWeaponName);
+        });
+
+        socket.on('proof', ({ gameId, playerId, proofCard }) => {
+            games[gameId].processProof(playerId, proofCard);
+        });
+
+        socket.on('accuse', ({ gameId, playerId, accusingCharacter, accusingWeapon, accusingLocation }) => {
+            games[gameId].processAccusation(playerId, accusingCharacter, accusingWeapon, accusingLocation);
         });
     });
 }

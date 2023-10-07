@@ -26,14 +26,18 @@
 
     var form = document.getElementById('form');
     var input = document.getElementById('input');
+    var gameId = 'MockGameId';
+    var playerId;
+    var character;
 
     form.addEventListener('submit', function(e) {
         e.preventDefault();
         if (input.value) {
+          playerId = input.value;
             socket.emit(
                 'start',
                 {
-                    gameId: 'blah',
+                    gameId: gameId,
                     playerId: input.value
                 });
             input.value = '';
@@ -46,27 +50,60 @@
 
     socket.on('playerStartInfo', function(player) {
         console.log("The player start info");
+        character = player.character;
         console.log(player);
     });
 
-    socket.on('gameState', function(obj) {
+    socket.on('GAME_STATE', function(obj) {
         console.log("The game state");
         console.log(obj);
     });
 
-    socket.on('requestMove', function(obj) {
-        console.log("Asked to provide move");
-        console.log(obj);
-
+    socket.on('REQUEST_MOVE', function(obj) {
         socket.emit(
           'move',
           {
-              gameId: 'blah',
-              playerId: 'a',
-              requestedUpdatedCharacterPiece: { character: 'SCARLET', currentLocation: 'HALL' }
+              gameId: gameId,
+              playerId: playerId,
+              newCharacterLocation: obj.potentialMoves[0]
           });
-        
     });
+
+    socket.on('REQUEST_SUGGESTION', function(obj) {
+        console.log("Asked to provide suggestion");
+
+        socket.emit(
+          'suggestion',
+          {
+              gameId: gameId,
+              playerId: playerId,
+              suggestedCharacterName: 'MUSTARD',
+              suggestedWeaponName: 'CANDLESTICK'
+          });
+    });
+
+    socket.on('REQUEST_PROOF', function(obj) {
+        console.log("Asked to provide proof");
+
+        socket.emit(
+          'proof',
+          {
+              gameId: gameId,
+              playerId: playerId,
+              proofCard: 'MUSTARD'
+          });
+    });
+
+    socket.on('IS_PROOF_PROVIDED', function(obj) {
+        console.log("Is proof provided");
+        console.log(obj);
+    });
+
+    socket.on('PROOF_PROVIDED', function(obj) {
+        console.log("What proof provided");
+        console.log(obj);
+    });
+
     </script>
   </body>
 </html>
