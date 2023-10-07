@@ -194,7 +194,7 @@ export class GameEngine
 		else if (this.players[this.currentPlayerIndex].character.currentLocation in LocationConstants.Room)
 		{
 			// STOP GAME HERE FOR SKELETAL INCREMENT.
-			console.log('Current location is a room.');
+			console.log('Current location is a room, stopping game here for skeletal increment.');
 			return;
 		}
 		else if (this.players[this.currentPlayerIndex].character.currentLocation in LocationConstants.Hallway)
