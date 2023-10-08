@@ -19,13 +19,16 @@ server.listen(3000, () => {
   	console.log('Server running at http://localhost:3000');
 });
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 import path from 'path';
 import { fileURLToPath } from 'url';
 app.get('/', (req, res) => {
-	const __filename = fileURLToPath(import.meta.url);
-	const __dirname = path.dirname(__filename);
-	res.sendFile(__dirname + '/mockIndex.html');
+	res.sendFile(__dirname + '/frontend/html/index.html');
 });
+app.use('/js', express.static(__dirname + '/frontend/js'));
+app.use('/assets', express.static(__dirname + '/frontend/assets'));
 
 // Below is only for testing out initialization of GameState.
 // import { GameState } from './representations/gameState.js';
