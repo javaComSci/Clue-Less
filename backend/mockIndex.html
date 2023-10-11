@@ -16,7 +16,7 @@
     </style>
   </head>
   <body>
-    <ul reversed id="messages"></ul>
+    <ul id="messages"></ul>
     <form id="form" action="">
       <input id="input" autocomplete="off" /><button>Send</button>
     </form>
@@ -109,11 +109,13 @@
 
     socket.on('IS_PROOF_PROVIDED', function(obj) {
         console.log("Is proof provided");
+        console.log(obj);
         print_message("Is proof provided: " + JSON.stringify(obj));
     });
 
     socket.on('PROOF_PROVIDED', function(obj) {
         console.log("What proof provided");
+        console.log(obj);
         print_message("What proof provided: " + JSON.stringify(obj));
     });
 
