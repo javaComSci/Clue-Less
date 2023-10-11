@@ -1,8 +1,12 @@
-import { Map, Room, Hallway } from './gamemap.mjs';
+import { Map, Room, Hallway } from '/js/gamemap.mjs';
 
 export function initializeGame(app)
 {
 	createMap(app);
+}
+
+function createGameObjects(app)
+{
 }
 
 function createMap(app) {
@@ -15,81 +19,9 @@ function createMap(app) {
 	// create passageways
 	//const map = new Map(rooms, hallways);
 	//return map;
-// screen width
-	const Sw = app.renderer.view.width;
-	// screen height
-	const Sh = app.renderer.view.height;
-	// map buffer
-	const Mb = 25;
-	// map width
-	const Mw = Sw - 2 * Mb;
-	// map height
-	const Mh = Sh - 2 * Mb;
-	// room edge
-	const Re = Mh/5;
-	// hallway ( long side )
-	const Hl = Re;
-	// hallway ( short side )
-	const Hs = Re/3;
-
-	const room_coordinates = [
-		[ Mb, Mb ],
-		[ Mb, Mb + Re + Hl ],
-		[ Mb, Mb + 2 * ( Re + Hl ) ],
-		[ Mb + Re + Hl, Mb ],
-		[ Mb + Re + Hl, Mb + Re + Hl ],
-		[ Mb + Re + Hl, Mb + 2 * ( Re + Hl ) ],
-		[ Mb + 2 * ( Re + Hl ), Mb ],
-		[ Mb + 2 * ( Re + Hl ), Mb + Re + Hl ],
-		[ Mb + 2 * ( Re + Hl ), Mb + 2 * ( Re + Hl ) ]
-	];
-
-	const hallway_across_coordinates = [
-		[ Mb + Re, Mb + Re/3 ],
-		[ Mb + Re, Mb + Re/3 + Hl + Re ],
-		[ Mb + Re, Mb + Re/3 + 2 * ( Hl + Re ) ],
-		[ Mb + Re + Hl + Re, Mb + Re/3 ],
-		[ Mb + Re + Hl + Re, Mb + Re/3 + Hl + Re ],
-		[ Mb + Re + Hl + Re, Mb + Re/3 + 2 * ( Hl + Re ) ],
-	];
-
-	const hallway_down_coordinates = [
-		[ Mb + Re/3, Mb + Re ],
-		[ Mb + Re/3, Mb + Hl + ( 2 * Re ) ],
-		[ Mb + Re/3 + Hl + Re, Mb + Re ],
-		[ Mb + Re/3 + Hl + Re, Mb + Re + Hl + Re ],
-		[ Mb + Re/3 + 2 * ( Hl + Re ), Mb + Re ],
-		[ Mb + Re/3 + 2 * ( Hl + Re ), Mb + Re + Hl + Re ]
-	];
-
-	let room_rectangles = [];
-	room_coordinates.forEach((room) => {
-		const rectangle = new PIXI.Graphics();
-		rectangle.beginFill(0x66CCFF);
-		rectangle.drawRect(room[0],room[1],Re,Re);
-		rectangle.endFill();
-		app.stage.addChild(rectangle);
-		room_rectangles.push(rectangle);
-	});
-
-	let hallway_rectangles = [];
-	hallway_across_coordinates.forEach((hallway) => {
-		const rectangle = new PIXI.Graphics();
-		rectangle.beginFill(0x66CCFF);
-		rectangle.drawRect(hallway[0],hallway[1],Hl,Hs);
-		rectangle.endFill();
-		app.stage.addChild(rectangle);
-		hallway_rectangles.push(rectangle);
-	});
-
-	hallway_down_coordinates.forEach((hallway) => {
-		const rectangle = new PIXI.Graphics();
-		rectangle.beginFill(0x66CCFF);
-		rectangle.drawRect(hallway[0],hallway[1],Hs,Hl);
-		rectangle.endFill();
-		app.stage.addChild(rectangle);
-		hallway_rectangles.push(rectangle);
-	});
+	const map = new Map(app);
+	map.createRooms(app);
+	map.createHallways(app);
 }
 
 function createRoom(name) 
