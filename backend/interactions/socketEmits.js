@@ -1,4 +1,4 @@
-import { getIOInstance } from '../index.js';
+import { getIOInstance } from '../../index.js';
 
 export function getPerUserRoomId(gameId, playerId)
 {

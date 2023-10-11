@@ -1,4 +1,4 @@
-import { getIOInstance } from '../index.js';
+import { getIOInstance } from '../../index.js';
 import { GameEngine } from '../engine/gameEngine.js';
 import { getPerUserRoomId } from './socketEmits.js';
 
