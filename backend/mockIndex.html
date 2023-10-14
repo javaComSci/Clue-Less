@@ -120,7 +120,7 @@
     });
 
     socket.on('REQUEST_MOVE', function (obj) {
-      print_message("You have been requested to provide a move, so you are requesting move: " + obj.potentialMoves[0]);
+      print_message("You have been requested to provide a move, so you are providing move: " + obj.potentialMoves[0]);
       socket.emit(
         'move',
         {
