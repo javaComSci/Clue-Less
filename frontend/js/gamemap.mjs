@@ -1,11 +1,15 @@
-export class Map
+/*
+ * Abstract representation of the Clue-Less game map. Graphics libraries
+ * can inherit this and implement display functions.
+ */
+export class GameMap
 {
-    constructor(app)
+    constructor(height, width)
     {
-		// screen width
-		this.sw = app.renderer.view.width;
 		// screen height
-		this.sh = app.renderer.view.height;
+		this.sh = height;
+		// screen width
+		this.sw = width;
 		// map buffer
 		this.mb = 25;
 		// map width
@@ -18,90 +22,113 @@ export class Map
 		this.hl = this.re;
 		// hallway ( short side )
 		this.hs = this.re/3;
-		this.room_coordinates = [
-			[ this.mb, this.mb ],
-			[ this.mb, this.mb + this.re + this.hl ],
-			[ this.mb, this.mb + 2 * ( this.re + this.hl ) ],
-			[ this.mb + this.re + this.hl, this.mb ],
-			[ this.mb + this.re + this.hl, this.mb + this.re + this.hl ],
-			[ this.mb + this.re + this.hl, this.mb + 2 * ( this.re + this.hl ) ],
-			[ this.mb + 2 * ( this.re + this.hl ), this.mb ],
-			[ this.mb + 2 * ( this.re + this.hl ), this.mb + this.re + this.hl ],
-			[ this.mb + 2 * ( this.re + this.hl ), this.mb + 2 * ( this.re + this.hl ) ]
-		];
-		this.hallway_across_coordinates = [
-			[ this.mb + this.re, this.mb + this.re/3 ],
-			[ this.mb + this.re, this.mb + this.re/3 + this.hl + this.re ],
-			[ this.mb + this.re, this.mb + this.re/3 + 2 * ( this.hl + this.re ) ],
-			[ this.mb + this.re + this.hl + this.re, this.mb + this.re/3 ],
-			[ this.mb + this.re + this.hl + this.re, this.mb + this.re/3 + this.hl + this.re ],
-			[ this.mb + this.re + this.hl + this.re, this.mb + this.re/3 + 2 * ( this.hl + this.re ) ],
-		];
-		this.hallway_down_coordinates = [
-			[ this.mb + this.re/3, this.mb + this.re ],
-			[ this.mb + this.re/3, this.mb + this.hl + ( 2 * this.re ) ],
-			[ this.mb + this.re/3 + this.hl + this.re, this.mb + this.re ],
-			[ this.mb + this.re/3 + this.hl + this.re, this.mb + this.re + this.hl + this.re ],
-			[ this.mb + this.re/3 + 2 * ( this.hl + this.re ), this.mb + this.re ],
-			[ this.mb + this.re/3 + 2 * ( this.hl + this.re ), this.mb + this.re + this.hl + this.re ]
-		];
-		this.room_rectangles = [];
-		this.hallway_rectangles = [];
+		/* 
+		 * TODO: Find better way to represent coordinates than below
+		 */
+		this.room_coordinates = {
+			'STUDY': { 'x': this.mb, 'y': this.mb },
+			'LIBRARY': { 'x': this.mb, 'y': this.mb + this.re + this.hl },
+			'CONSERVATORY': { 'x': this.mb, 'y': this.mb + 2 * ( this.re + this.hl ) },
+			'HALL': { 'x': this.mb + this.re + this.hl, 'y': this.mb },
+			'BILLIARD ROOM': { 'x': this.mb + this.re + this.hl, 'y': this.mb + this.re + this.hl },
+			'BALLROOM': { 'x': this.mb + this.re + this.hl, 'y': this.mb + 2 * ( this.re + this.hl ) },
+			'LOUNGE': { 'x': this.mb + 2 * ( this.re + this.hl ), 'y': this.mb },
+			'DINNING ROOM': { 'x': this.mb + 2 * ( this.re + this.hl ), 'y': this.mb + this.re + this.hl },
+			'KITCHEN': { 'x': this.mb + 2 * ( this.re + this.hl ), 'y': this.mb + 2 * ( this.re + this.hl ) }
+		};
+		this.hallway_across_coordinates = {
+			'STUDY_HALL': { 'x': this.mb + this.re, 'y': this.mb + this.re/3 },
+			'LIBRARY_BILLIARDROOM': { 'x': this.mb + this.re, 'y': this.mb + this.re/3 + this.hl + this.re },
+			'CONSERVATORY_BALLROOM': { 'x': this.mb + this.re, 'y': this.mb + this.re/3 + 2 * ( this.hl + this.re ) },
+			'HALL_LOUNGE': { 'x': this.mb + this.re + this.hl + this.re, 'y': this.mb + this.re/3 },
+			'BILLIARDROOM_DINNINGROOM': { 'x': this.mb + this.re + this.hl + this.re, 'y': this.mb + this.re/3 + this.hl + this.re },
+			'BALLROOM_KITCHEN': { 'x': this.mb + this.re + this.hl + this.re, 'y': this.mb + this.re/3 + 2 * ( this.hl + this.re ) },
+		};
+		this.hallway_down_coordinates = {
+			'STUDY_LIBRARY': { 'x': this.mb + this.re/3, 'y': this.mb + this.re },
+			'LIBRARY_CONSERVATORY': { 'x': this.mb + this.re/3, 'y': this.mb + this.hl + ( 2 * this.re ) },
+			'HALL_BILLARDROOM': { 'x': this.mb + this.re/3 + this.hl + this.re, 'y': this.mb + this.re },
+			'BILLIARDROOM_BALLROOM': { 'x': this.mb + this.re/3 + this.hl + this.re, 'y': this.mb + this.re + this.hl + this.re },
+			'LOUNGE_DINNINGROOM': { 'x': this.mb + this.re/3 + 2 * ( this.hl + this.re ), 'y': this.mb + this.re },
+			'DINNINGROOM_KITCHEN': { 'x': this.mb + this.re/3 + 2 * ( this.hl + this.re ), 'y': this.mb + this.re + this.hl + this.re }
+		};
+		this.rooms = {};
+		this.hallways = {};
+		this.passageways = {};
     }
 
-	// creates rooms and displays them in the app
-	createRooms(app)
+	// creates rooms
+	createRooms()
 	{
-		this.room_coordinates.forEach((room) => {
-			const rectangle = new PIXI.Graphics();
-			rectangle.beginFill(0x66CCFF);
-			rectangle.drawRect(room[0],room[1],this.re,this.re);
-			rectangle.endFill();
-			app.stage.addChild(rectangle);
-			this.room_rectangles.push(rectangle);
-		});
+		// for each key, create room with coordinate
+		for(var room in this.room_coordinates) {
+			let x = this.room_coordinates[room]['x'];
+			let y = this.room_coordinates[room]['y'];
+			this.rooms[room] = new Room(room, x, y, this.re, this.re);
+		}
 	}
 	
 	// creates hallways and displays them in the app
-	createHallways(app)
+	createHallways()
 	{
-		this.hallway_across_coordinates.forEach((hallway) => {
-			const rectangle = new PIXI.Graphics();
-			rectangle.beginFill(0x66CCFF);
-			rectangle.drawRect(hallway[0],hallway[1],this.hl,this.hs);
-			rectangle.endFill();
-			app.stage.addChild(rectangle);
-			this.hallway_rectangles.push(rectangle);
-		});
-		this.hallway_down_coordinates.forEach((hallway) => {
-			const rectangle = new PIXI.Graphics();
-			rectangle.beginFill(0x66CCFF);
-			rectangle.drawRect(hallway[0],hallway[1],this.hs,this.hl);
-			rectangle.endFill();
-			app.stage.addChild(rectangle);
-			this.hallway_rectangles.push(rectangle);
-		});
 	}
 	// creates passageways and displays them in the app
-	createPassageways(passagewayList)
+	createPassageways()
+	{
+	}
+	// creates the map
+	createMap()
+	{
+		this.createRooms();
+	}
+	/*
+	 * Define in subclass
+	 */
+	displayRooms()
+	{
+	}
+	displayHallways()
+	{
+	}
+	displayPassageways()
 	{
 	}
 }
 
-export class Room
+class Space
 {
-	constructor(name, space)
+	constructor(x, y, length, width)
 	{
-		this.name = name;
-		this.space = space;
+		this.x = x;
+		this.y = y;
+		this.length = length;
+		this.width = width;
 	}
 }
 
-export class Hallway
+class Passageway extends Space
 {
-	constructor(name, space)
+	constructor(name, x, y, length, width)
 	{
+		super(x, y, length, width);
 		this.name = name;
-		this.space = space;
+	}
+}
+
+class Room extends Space
+{
+	constructor(name, x, y, length, width)
+	{
+		super(x, y, length, width);
+		this.name = name;
+	}
+}
+
+class Hallway extends Space
+{
+	constructor(name, x, y, length, width)
+	{
+		super(x, y, length, width);
+		this.name = name;
 	}
 }

@@ -20,6 +20,7 @@ server.listen(3000, () => {
 });
 
 app.use(express.static('frontend'));
+app.use('/common', express.static('./common'));
 /*
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);

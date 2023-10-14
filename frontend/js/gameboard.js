@@ -1,4 +1,5 @@
 import { initializeGame } from '/js/initialize.js';
+import { LocationCard } from '/common/representations/location.mjs';
 const app = new PIXI.Application({ height: 1200, width: 1200});
 document.body.appendChild(app.view);
 initializeGame(app);

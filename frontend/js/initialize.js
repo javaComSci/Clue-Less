@@ -1,4 +1,4 @@
-import { Map, Room, Hallway } from '/js/gamemap.mjs';
+import { PixiMap } from '/js/pixiview.js';
 
 export function initializeGame(app)
 {
@@ -17,25 +17,8 @@ function createMap(app) {
 	// each square is centered on a multiple of 1/3 of the length and width
 	// create hallways connecting squares
 	// create passageways
-	//const map = new Map(rooms, hallways);
+	//
+	const piximap = new PixiMap(app);
+	piximap.displayRooms();
 	//return map;
-	const map = new Map(app);
-	map.createRooms(app);
-	map.createHallways(app);
 }
-
-function createRoom(name) 
-{
-	/*const rectangle = new PIXI.Graphics();
-	rectangle.beginFill(0x66CCFF);
-	rectangle.drawRect(100,200,2000,2000);
-	rectangle.endFill();
-	app.stage.addChild(rectangle);*/
-
-}
-
-function createHallway()
-{
-
-}
-
