@@ -5,10 +5,10 @@ import { LocationConstants } from './location.mjs';
 export const CharacterConstants = {
     SCARLET: 'SCARLET',
     PLUM: 'PLUM',
-    WHITE: 'WHITE',
+    PEACOCK: 'PEACOCK',
     GREEN: 'GREEN',
-    MUSTARD: 'MUSTARD',
-    PEACOCK: 'PEACOCK'
+    WHITE: 'WHITE',
+    MUSTARD: 'MUSTARD'
 };
 
 export const CardCharacters = [

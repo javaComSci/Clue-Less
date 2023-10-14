@@ -4,6 +4,7 @@ import { LocationConstants, CardLocations, LocationCard } from '../../common/rep
 import { CardCharacters, CharacterConstants, CharacterPiece, CharacterCard } from  '../../common/representations/character.mjs';
 import { CardWeapons, WeaponPiece, WeaponCard } from '../../common/representations/weapon.mjs';
 import { emitGameCannotStart, emitPlayerStartInfo, emitGameState, emitRequestMove, emitRequestSuggestion, emitRequestProof, emitIsProofProvided, emitProofProvided } from '../interactions/socketEmits.js';
+import { Suggestion } from '../../common/representations/suggestion.mjs';
 
 export class GameEngine
 {
@@ -211,13 +212,22 @@ export class GameEngine
 	{
 		if (this.gameState == GameState.REQUESTED_MOVE && playerId == this.players[this.currentPlayerIndex].playerId)
 		{
-			console.log(`MOVE: character ${this.players[this.currentPlayerIndex].character.name} from ${this.players[this.currentPlayerIndex].character.currentLocation} to ${newCharacterLocation}`)
+			console.log(`MOVE: ${this.players[this.currentPlayerIndex].character.name} from ${this.players[this.currentPlayerIndex].character.currentLocation} to ${newCharacterLocation}`)
 			this.gameState = GameState.PROCESSING_MOVE;
 			this.movePiece(this.players[this.currentPlayerIndex].character, newCharacterLocation);
 			this.emitCurrentGameState();
 
 			this.gameState = GameState.PROCESSED_MOVE;
-			this.requestSuggestion();
+
+			if (newCharacterLocation in LocationConstants.Room)
+			{
+				this.requestSuggestion();
+			}
+			else
+			{
+				this.currentPlayerIndex = (this.currentPlayerIndex + 1) % this.getPlayerCount();
+				this.requestMove();
+			}
 		}
 		else 
 		{
@@ -236,14 +246,15 @@ export class GameEngine
 	{
 		if (this.gameState == GameState.REQUESTED_SUGGESTION && playerId == this.players[this.currentPlayerIndex].playerId)
 		{
-			console.log(`SUGGESTION: character ${suggestedCharacterName} to ${this.players[this.currentPlayerIndex].character.currentLocation}. Suggested weapon ${suggestedWeaponName}.`)
+			console.log(`SUGGESTION: ${suggestedCharacterName} to ${this.players[this.currentPlayerIndex].character.currentLocation} with ${suggestedWeaponName}.`)
 			this.gameState = GameState.PROCESSING_SUGGESTION;
 			this.movePiece(this.getCharacterPieceByCharacterName(suggestedCharacterName), this.players[this.currentPlayerIndex].character.currentLocation);
 			this.movePiece(this.getWeaponPieceByWeaponName(suggestedWeaponName), this.players[this.currentPlayerIndex].character.currentLocation);
+			let processedSuggestion = new Suggestion(this.players[this.currentPlayerIndex].character.currentLocation, suggestedCharacterName, suggestedWeaponName);
 			this.emitCurrentGameState();
 
 			this.gameState = GameState.PROCESSED_SUGGESTION;
-			this.requestProof();
+			this.requestProof(processedSuggestion);
 		}
 		else 
 		{
@@ -251,10 +262,10 @@ export class GameEngine
 		}
 	}
 
-	requestProof()
+	requestProof(processedSuggestion)
 	{
 		this.gameState = GameState.REQUESTING_PROOF;
-		emitRequestProof(this.gameId, this.players[(this.currentPlayerIndex + this.proofRequestingOffset) % this.getPlayerCount()]);
+		emitRequestProof(this.gameId, this.players[(this.currentPlayerIndex + this.proofRequestingOffset) % this.getPlayerCount()], processedSuggestion);
 		this.gameState = GameState.REQUESTED_PROOF;
 	}
 
