@@ -26,6 +26,7 @@
 
     var form = document.getElementById('form');
     var input = document.getElementById('input');
+	var messages = document.getElementById('messages');
     var gameId = 'MockGameId';
     var playerId;
     var character;
@@ -46,20 +47,27 @@
 
     socket.on('insufficientPlayerCount', function() {
         console.log("Insufficient number of players");
+        print_message("Waiting for more players...");
     });
 
-    socket.on('playerStartInfo', function(player) {
+    socket.on('PLAYER_START_INFO', function(player) {
         console.log("The player start info");
         character = player.character;
         console.log(player);
+        print_message("The player start name: " + character.name );
     });
 
     socket.on('GAME_STATE', function(obj) {
         console.log("The game state");
         console.log(obj);
+
+        print_message("New game state recieved!");
+        print_message("Characters: " + JSON.stringify(obj.characterPieces));
+        print_message("Weapons: " + JSON.stringify(obj.weaponPieces));
     });
 
     socket.on('REQUEST_MOVE', function(obj) {
+        print_message("Your requested move: " + obj.potentialMoves[0]);
         socket.emit(
           'move',
           {
@@ -71,38 +79,51 @@
 
     socket.on('REQUEST_SUGGESTION', function(obj) {
         console.log("Asked to provide suggestion");
-
-        socket.emit(
-          'suggestion',
+        let suggestion = 
           {
               gameId: gameId,
               playerId: playerId,
               suggestedCharacterName: 'MUSTARD',
               suggestedWeaponName: 'CANDLESTICK'
-          });
+          };
+
+        print_message("You provided suggestion: " + JSON.stringify(suggestion));
+        socket.emit(
+          'suggestion',
+          suggestion);
     });
 
     socket.on('REQUEST_PROOF', function(obj) {
         console.log("Asked to provide proof");
-
-        socket.emit(
-          'proof',
-          {
+        let proof = {
               gameId: gameId,
               playerId: playerId,
               proofCard: 'MUSTARD'
-          });
+        }
+        print_message("Proof you provided for your suggestion: " + JSON.stringify(proof));
+
+        socket.emit(
+          'proof',
+          proof);
     });
 
     socket.on('IS_PROOF_PROVIDED', function(obj) {
         console.log("Is proof provided");
         console.log(obj);
+        print_message("Is proof provided: " + JSON.stringify(obj));
     });
 
     socket.on('PROOF_PROVIDED', function(obj) {
         console.log("What proof provided");
         console.log(obj);
+        print_message("What proof provided: " + JSON.stringify(obj));
     });
+
+	function print_message(msg) {
+        let item = document.createElement('li');
+        item.textContent = msg;
+        messages.appendChild(item);
+	}
 
     </script>
   </body>
