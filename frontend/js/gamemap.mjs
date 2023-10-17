@@ -71,6 +71,19 @@ export class GameMap
 	// creates hallways and displays them in the app
 	createHallways()
 	{
+		// for each key, create hallway with long side horizontal
+		for(var hallway in this.hallway_across_coordinates) {
+			let x = this.hallway_across_coordinates[hallway]['x'];
+			let y = this.hallway_across_coordinates[hallway]['y'];
+			this.hallways[hallway] = new Hallway(hallway, x, y, this.hl, this.hs);
+		}
+
+		// for each key, create hallway with long side vertical
+		for(var hallway in this.hallway_down_coordinates) {
+			let x = this.hallway_down_coordinates[hallway]['x'];
+			let y = this.hallway_down_coordinates[hallway]['y'];
+			this.hallways[hallway] = new Hallway(hallway, x, y, this.hs, this.hl);
+		}
 	}
 	// creates passageways and displays them in the app
 	createPassageways()
@@ -80,6 +93,7 @@ export class GameMap
 	createMap()
 	{
 		this.createRooms();
+		this.createHallways();
 	}
 	/*
 	 * Define in subclass

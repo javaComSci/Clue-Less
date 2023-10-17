@@ -20,5 +20,6 @@ function createMap(app) {
 	//
 	const piximap = new PixiMap(app);
 	piximap.displayRooms();
+	piximap.displayHallways();
 	//return map;
 }
