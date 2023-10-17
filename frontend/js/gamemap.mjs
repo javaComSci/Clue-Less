@@ -1,3 +1,4 @@
+import { CharacterConstants } from '/common/representations/character.mjs';
 /*
  * Abstract representation of the Clue-Less game map. Graphics libraries
  * can inherit this and implement display functions.
@@ -22,6 +23,8 @@ export class GameMap
 		this.hl = this.re;
 		// hallway ( short side )
 		this.hs = this.re/3;
+		// character edge
+		this.ce = this.hs/2;
 		/* 
 		 * TODO: Find better way to represent coordinates than below
 		 */
@@ -54,7 +57,9 @@ export class GameMap
 		};
 		this.rooms = {};
 		this.hallways = {};
+		this.locations = {};
 		this.passageways = {};
+		this.characters = {};
     }
 
 	// creates rooms
@@ -64,7 +69,9 @@ export class GameMap
 		for(var room in this.room_coordinates) {
 			let x = this.room_coordinates[room]['x'];
 			let y = this.room_coordinates[room]['y'];
-			this.rooms[room] = new Room(room, x, y, this.re, this.re);
+			let roomNew = new Room(room, x, y, this.re, this.re);
+			this.rooms[room] = roomNew;
+			this.locations[room] = roomNew;
 		}
 	}
 	
@@ -75,25 +82,37 @@ export class GameMap
 		for(var hallway in this.hallway_across_coordinates) {
 			let x = this.hallway_across_coordinates[hallway]['x'];
 			let y = this.hallway_across_coordinates[hallway]['y'];
-			this.hallways[hallway] = new Hallway(hallway, x, y, this.hl, this.hs);
+			let hallwayNew = new Hallway(hallway, x, y, this.hl, this.hs);
+			this.hallways[hallway] = hallwayNew;
+			this.locations[hallway] = hallwayNew;
 		}
 
 		// for each key, create hallway with long side vertical
 		for(var hallway in this.hallway_down_coordinates) {
 			let x = this.hallway_down_coordinates[hallway]['x'];
 			let y = this.hallway_down_coordinates[hallway]['y'];
-			this.hallways[hallway] = new Hallway(hallway, x, y, this.hs, this.hl);
+			let hallwayNew = new Hallway(hallway, x, y, this.hs, this.hl);
+			this.hallways[hallway] = hallwayNew;
+			this.locations[hallway] = hallwayNew;
 		}
 	}
-	// creates passageways and displays them in the app
+	// creates passageways
 	createPassageways()
 	{
+	}
+	// creates characters
+	createCharacters()
+	{
+		for(var character in CharacterConstants) {
+			this.characters[character] = new Character(character, 0, 0, this.ce, this.ce );
+		}
 	}
 	// creates the map
 	createMap()
 	{
 		this.createRooms();
 		this.createHallways();
+		this.createCharacters();
 	}
 	/*
 	 * Define in subclass
@@ -107,6 +126,9 @@ export class GameMap
 	displayPassageways()
 	{
 	}
+	displayCharacters()
+	{
+	}
 }
 
 class Space
@@ -117,6 +139,7 @@ class Space
 		this.y = y;
 		this.length = length;
 		this.width = width;
+		this.element;
 	}
 }
 
@@ -135,6 +158,12 @@ class Room extends Space
 	{
 		super(x, y, length, width);
 		this.name = name;
+		this.playerLocationX = x + length/3;
+		this.playerLocationY = y + width/3;
+		/* be careful here, these are somewhat arbitrary. 
+		 * If player area size is too large, they may overlap */
+		this.playerSuggestLocationX = x + (2 * length/3);
+		this.playerSuggestLocationY = y + width/3;
 	}
 }
 
@@ -144,5 +173,16 @@ class Hallway extends Space
 	{
 		super(x, y, length, width);
 		this.name = name;
+		this.playerLocationX = x + length/3;
+		this.playerLocationY = y + width/3;
+	}
+}
+
+class Character extends Space
+{
+	constructor(name, x, y, length, width)
+	{
+		super(x, y, length, width);
+		this.name;
 	}
 }

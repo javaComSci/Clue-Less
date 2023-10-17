@@ -48,6 +48,22 @@ export class PixiMap extends GameMap
 			this.hallways[hallway].element = rectangle;
 		}
 	}
-	displayPlayers() {
+	displayCharacters(playerCharacters) {
+		if ( this.characterContainer != null )
+		{
+			// free the memory
+			this.characterContainer.destroy();
+		}
+		this.characterContainer = new PIXI.Graphics();
+		playerCharacters.forEach((character) => {
+			let charRep = this.characters[character.name];
+			let charX = this.locations[character.currentLocation].playerLocationX;
+			let charY = this.locations[character.currentLocation].playerLocationY;
+
+			this.characterContainer.beginFill(0xFBF8FB);
+			this.characterContainer.drawRect(charX,charY,this.ce,this.ce);
+			this.characterContainer.endFill();
+		});
+		this.app.stage.addChild(this.characterContainer);
 	}
 }
