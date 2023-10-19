@@ -59,3 +59,8 @@ export function emitProofProvided(gameId, currentPlayer, proofProviderPlayerId)
 {
     getIOInstance().to(getPerUserRoomId(gameId, currentPlayer.playerId)).emit('PROOF_PROVIDED', { proofProviderPlayerId: proofProviderPlayerId });
 }
+
+export function emitAccusationCorrect(gameId, winningPlayer, accusedCharacter, accusedWeapon, accusedLocation)
+{
+    getIOInstance().to(gameId).emit('ACCUSATION_CORRECT', { winningPlayer: winningPlayer.playerId, accusedCharacter: accusedCharacter, accusedWeapon: accusedWeapon, accusedLocation: accusedLocation });
+}

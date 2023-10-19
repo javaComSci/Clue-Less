@@ -3,7 +3,17 @@ import { Player } from '../../common/representations/player.mjs';
 import { LocationConstants, CardLocations, LocationCard } from '../../common/representations/location.mjs';
 import { CardCharacters, CharacterConstants, CharacterPiece, CharacterCard } from  '../../common/representations/character.mjs';
 import { CardWeapons, WeaponPiece, WeaponCard } from '../../common/representations/weapon.mjs';
-import { emitGameCannotStart, emitPlayerStartInfo, emitGameState, emitRequestMove, emitRequestSuggestion, emitRequestProof, emitIsProofProvided, emitProofProvided } from '../interactions/socketEmits.js';
+import {
+	emitGameCannotStart,
+	emitPlayerStartInfo,
+	emitGameState,
+	emitRequestMove,
+	emitRequestSuggestion,
+	emitRequestProof,
+	emitIsProofProvided,
+	emitProofProvided,
+	emitAccusationCorrect
+} from '../interactions/socketEmits.js';
 import { Suggestion } from '../../common/representations/suggestion.mjs';
 
 export class GameEngine
@@ -246,7 +256,7 @@ export class GameEngine
 	{
 		if (this.gameState == GameState.REQUESTED_SUGGESTION && playerId == this.players[this.currentPlayerIndex].playerId)
 		{
-			console.log(`SUGGESTION: ${suggestedCharacterName} to ${this.players[this.currentPlayerIndex].character.currentLocation} with ${suggestedWeaponName}.`)
+			console.log(`SUGGESTION: ${suggestedCharacterName} to ${this.players[this.currentPlayerIndex].character.currentLocation} with ${suggestedWeaponName}.`);
 			this.gameState = GameState.PROCESSING_SUGGESTION;
 			this.movePiece(this.getCharacterPieceByCharacterName(suggestedCharacterName), this.players[this.currentPlayerIndex].character.currentLocation);
 			this.movePiece(this.getWeaponPieceByWeaponName(suggestedWeaponName), this.players[this.currentPlayerIndex].character.currentLocation);
@@ -305,8 +315,13 @@ export class GameEngine
 		{
 			if (this.mysteryCards[0].name == accusingCharacter && this.mysteryCards[1].name == accusingWeapon && this.mysteryCards[2].name == accusingLocation)
 			{
-				console.log('ACCUSED CORRECTLY');
+				console.log(`ACCUSATION: ${accusingCharacter} in ${accusingLocation} with ${accusingWeapon}`);
+				emitAccusationCorrect(this.gameId, this.players[this.currentPlayerIndex], accusingCharacter, accusingWeapon, accusingLocation);
 			}
+		}
+		else
+		{
+			console.error(`Accusation has come from invalid player ${playerId}, so not processing the proof.`);
 		}
 	}
 

@@ -116,7 +116,7 @@
     });
 
     socket.on('REQUESTING_MOVE_BROADCAST', function (obj) {
-      print_message(`Player ${playerId}'s turn.`);
+      print_message(`It is now ${playerId}'s turn.`);
     });
 
     socket.on('REQUEST_MOVE', function (obj) {
@@ -180,6 +180,10 @@
 
     socket.on('PROOF_PROVIDED', function (obj) {
       print_message("Proof that was provided is: " + JSON.stringify(obj));
+    });
+
+    socket.on('ACCUSATION_CORRECT', function (obj) {
+      print_message(`Player ${obj.winningPlayer} has won. Solution to the mystery is ${obj.accusedCharacter} in ${obj.accusedLocation} with ${obj.accusedWeapon}.`);
     });
 
     function print_message(msg) {
