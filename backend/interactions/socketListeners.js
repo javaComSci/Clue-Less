@@ -28,7 +28,7 @@ export function initializeListeners()
 
                 // Start up a timer to start the game in 1 min.
                 setTimeout(() => {
-                    console.log('1 minute has elapsed. Starting game if possible.');
+                    console.log('Timer has elapsed. Starting game if possible.');
                     games[gameId].startGame();
                   }, '10000');
                 

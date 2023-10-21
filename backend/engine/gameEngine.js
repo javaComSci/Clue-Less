@@ -144,6 +144,7 @@ export class GameEngine
 
 			emitPlayerStartInfo(this.gameId, currPlayer);
 		}
+		console.log("");
 	}
 
 	startGame()
@@ -315,7 +316,6 @@ export class GameEngine
 		{
 			if (this.mysteryCards[0].name == accusingCharacter && this.mysteryCards[1].name == accusingWeapon && this.mysteryCards[2].name == accusingLocation)
 			{
-				console.log(`ACCUSATION: ${accusingCharacter} in ${accusingLocation} with ${accusingWeapon}`);
 				emitAccusationCorrect(this.gameId, this.players[this.currentPlayerIndex], accusingCharacter, accusingWeapon, accusingLocation);
 			}
 		}

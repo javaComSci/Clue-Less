@@ -67,7 +67,7 @@
   </form>
   <script src="/socket.io/socket.io.js"></script>
   <script>
-    var gatherInput = false; // TURN ON GATHER INPUT FOR ASKING INPUT FROM USER.
+    var gatherInput = true; // TURN ON GATHER INPUT FOR ASKING INPUT FROM USER.
     
     var socket = io();
     var state = 'START';
@@ -79,10 +79,52 @@
     var playerId;
     var character;
     let cards;
+    let moveToMake;
+    let suggestion;
+    let accusation;
+    let suggestionObj;
+    let proofToProvide;
 
     let stateColor = "#FFFFFF";
     let broadCastColor = "#efefef";
     let moveColor = "#efefef";
+
+    function move()
+    {
+      socket.emit(
+        'move',
+        {
+          gameId: gameId,
+          playerId: playerId,
+          newCharacterLocation: moveToMake
+        });
+    }
+
+    function suggestionFunc()
+    {
+      // SOLUTION: HALL, MUSTARD, WRENCH
+      if (playerId == "a")
+        {
+          // For player 1, it is hall, mustard, dragger. Player 2 gives proof.
+          socket.emit(
+            'suggestion',
+            suggestion);
+        }
+        else if (playerId == "b")
+        {
+          // For player 2, they accuse is hall, mustard, wrench. Game over.
+          socket.emit(
+            'accuse',
+            accusation);
+        }   
+    }
+
+    function proof()
+    {
+        socket.emit(
+          'proof',
+          proofToProvide);
+    }
 
     form.addEventListener('submit', function (e) {
       e.preventDefault();
@@ -97,35 +139,22 @@
               playerId: input.value
             });
         }
-        else if (state == 'MOVE')
-        {
-          let newCharacterLocation = input.value;
-          socket.emit(
-            'move',
-            {
-              gameId: gameId,
-              playerId: playerId,
-              newCharacterLocation: newCharacterLocation
-          });
-        }
-        else if (state == 'SUGGESTION')
-        {
-          let newSuggestion = input.value.split(",");
-
-          let suggestion =
-          {
-            gameId: gameId,
-            playerId: playerId,
-            suggestedCharacterName: newSuggestion[0],
-            suggestedWeaponName: newSuggestion[1]
-          };
-
-          socket.emit(
-            'suggestion',
-            suggestion);
-        }
-        
         input.value = '';
+      }
+
+      if (state == "MOVE")
+      {
+        move();
+      }
+
+      if (state == "SUGGESTION")
+      {
+        suggestionFunc();
+      }
+
+      if (state == "PROOF")
+      {
+        proof();
       }
 
       document.getElementById('input').style.visibility = 'hidden';
@@ -144,7 +173,7 @@
       character = player.character;
       cards = player.cards;
 
-      print_message("Character assigned to player: " + player.character.name, moveColor);
+      print_message(`Character assigned to player ${playerId}: ` + player.character.name, moveColor);
       print_message("Cards assigned to player: " + JSON.stringify(player.cards), moveColor);
     });
 
@@ -162,112 +191,92 @@
     });
 
     socket.on('REQUEST_MOVE', function (obj) {
+      moveToMake = obj.potentialMoves[0];
+      print_message("You have been requested to provide a move, so you will be providing move: " + moveToMake, moveColor);
+
       if (gatherInput)
       {
         state = 'MOVE';
-        document.getElementById('input').style.visibility = 'visible';
-        document.getElementById('GameButton').innerText = 'Provide your move';
+        document.getElementById('GameButton').innerText = 'Click to send your move';
         document.getElementById('GameButton').style.visibility = 'visible';
       }
       else
       {
-        var moveToMake = obj.potentialMoves[0];
-        print_message("You have been requested to provide a move, so you are providing move: " + moveToMake, moveColor);
-
-        socket.emit(
-          'move',
-          {
-            gameId: gameId,
-            playerId: playerId,
-            newCharacterLocation: obj.potentialMoves[0]
-          });
+        move();
       }
     });
 
     socket.on('REQUEST_SUGGESTION', function (obj) {
-      if (gatherInput)
+      if (playerId == "a")
       {
-        state = 'SUGGESTION';
-        document.getElementById('input').style.visibility = 'visible';
-        document.getElementById('GameButton').innerText = 'Provide your suggestion';
-        document.getElementById('GameButton').style.visibility = 'visible';
-      }
-      else
-      {
-        // SOLUTION: HALL, MUSTARD, WRENCH
-        if (playerId == "a")
-        {
-          // For player 1, it is hall, mustard, dragger. Player 2 gives proof.
-          let suggestion =
+        suggestion =
           {
             gameId: gameId,
             playerId: playerId,
             suggestedCharacterName: 'MUSTARD',
             suggestedWeaponName: 'DRAGGER'
           };
-
-          print_message("You have been requested to provide a suggestion, so you are providing suggestion:" + JSON.stringify(suggestion), moveColor);
-          socket.emit(
-            'suggestion',
-            suggestion);
-        }
-        else if (playerId == "b")
-        {
-          // For player 2, they accuse is hall, mustard, wrench. Game over.
-          let accusation =
-          {
+        print_message("You have been requested to provide a suggestion, so you are providing suggestion:" + JSON.stringify(suggestion), moveColor);
+      }
+      else if (playerId == "b")
+      {
+        accusation = {
             gameId: gameId,
             playerId: playerId,
             accusingCharacter: 'MUSTARD',
             accusingWeapon: 'WRENCH',
             accusingLocation: 'HALL'
           };
-
-          print_message("On your turn, you are making an accusation:" + JSON.stringify(accusation), "#E2A3C7");
-          socket.emit(
-            'accuse',
-            accusation);
-        }   
+        print_message("On your turn, you are making an accusation:" + JSON.stringify(accusation), moveColor);
       }
-    });
 
-    socket.on('REQUEST_PROOF', function (obj) {
       if (gatherInput)
       {
-        state = 'PROOF';
-        document.getElementById('input').style.visibility = 'visible';
-        document.getElementById('GameButton').innerText = 'Provide your suggestion';
+        state = 'SUGGESTION';
+        document.getElementById('GameButton').innerText = playerId == "a" ? 'Click to send your suggestion' : 'Click to send your accusation';
         document.getElementById('GameButton').style.visibility = 'visible';
       }
       else
       {
-        let chosenProofCard;
-        if (cards.map(a => a.name).includes(obj.suggestedCharacterName))
-        {
-          chosenProofCard = obj.suggestedCharacterName;
-        }
+        suggestionFunc();
+      }
+    });
 
-        if (cards.map(a => a.name).includes(obj.suggestedLocation))
-        {
-          chosenProofCard = obj.suggestedLocation;
-        }
+    socket.on('REQUEST_PROOF', function (obj) {
+      let chosenProofCard;
+      if (cards.map(a => a.name).includes(obj.suggestedCharacterName))
+      {
+        chosenProofCard = obj.suggestedCharacterName;
+      }
 
-        if (cards.map(a => a.name).includes(obj.suggestedWeaponName))
-        {
-          chosenProofCard = obj.suggestedWeaponName;
-        }
+      if (cards.map(a => a.name).includes(obj.suggestedLocation))
+      {
+        chosenProofCard = obj.suggestedLocation;
+      }
 
-        let proof = {
-          gameId: gameId,
-          playerId: playerId,
-          proofCard: chosenProofCard
-        }
-        print_message("You have been asked to provide proof for suggstion [" + `${obj.suggestedCharacterName}, ${obj.suggestedWeaponName}, ${obj.suggestedLocation}` + "], so you are providing proof: " + JSON.stringify(proof), moveColor);
+      if (cards.map(a => a.name).includes(obj.suggestedWeaponName))
+      {
+        chosenProofCard = obj.suggestedWeaponName;
+      }
 
-        socket.emit(
-          'proof',
-          proof);
-        }
+      proofToProvide = {
+        gameId: gameId,
+        playerId: playerId,
+        proofCard: chosenProofCard
+      };
+
+      print_message("You have been asked to provide proof for suggstion [" + `${obj.suggestedCharacterName}, ${obj.suggestedWeaponName}, ${obj.suggestedLocation}` + "], so you will be providing proof: " + JSON.stringify(proofToProvide), moveColor);
+
+      if (gatherInput)
+      {
+        state = 'PROOF';
+        document.getElementById('GameButton').innerText = 'Click to send your proof';
+        document.getElementById('GameButton').style.visibility = 'visible';
+      }
+      else
+      {
+        proof();
+      }
     });
 
     socket.on('IS_PROOF_PROVIDED', function (obj) {

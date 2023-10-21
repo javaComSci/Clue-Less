@@ -62,6 +62,6 @@ export function emitProofProvided(gameId, currentPlayer, proofProviderPlayerId)
 
 export function emitAccusationCorrect(gameId, winningPlayer, accusedCharacter, accusedWeapon, accusedLocation)
 {
-    logToConsole(`ACCUSATION IS CORRECT. PLAYER ${winningPlayer.playerId} WON. GAME OVER!`);
+    console.log(`ACCUSATION: ${accusedCharacter} in ${accusedLocation} with ${accusedWeapon} is correct. PLAYER ${winningPlayer.playerId} WON! GAME OVER!`);
     getIOInstance().to(gameId).emit('ACCUSATION_CORRECT', { winningPlayer: winningPlayer.playerId, accusedCharacter: accusedCharacter, accusedWeapon: accusedWeapon, accusedLocation: accusedLocation });
 }
