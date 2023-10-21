@@ -100,8 +100,8 @@ export class GameEngine
 	allocateCards()
 	{
 		// Set aside mystery cards before distributing cards.
-		let characterMysteryCardIndex = this.chooseMysteryCardIndexFromSelection(this.totalCharacterCards);
-		let weaponMysteryCardIndex = this.chooseMysteryCardIndexFromSelection(this.totalWeaponCards);
+		let characterMysteryCardIndex = this.totalWeaponCards.length - 1;
+		let weaponMysteryCardIndex = this.totalWeaponCards.length - 1;
 		let locationMysteryCardIndex = this.chooseMysteryCardIndexFromSelection(this.totalLocationCards);
 
 		this.mysteryCards = [
