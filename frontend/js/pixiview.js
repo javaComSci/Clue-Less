@@ -1,3 +1,6 @@
+/*
+ * Graphical implementation of a GameMap using PIXIJS
+ */
 import { GameMap } from '/js/gamemap.mjs';
 
 export class PixiMap extends GameMap
@@ -51,7 +54,7 @@ export class PixiMap extends GameMap
 	displayCharacters(playerCharacters) {
 		if ( this.characterContainer != null )
 		{
-			// free the memory
+			// free the memory!
 			this.characterContainer.destroy();
 		}
 		this.characterContainer = new PIXI.Graphics();

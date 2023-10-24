@@ -1,8 +1,13 @@
-import { initializeGame } from '/js/initialize.js';
-import { LocationCard } from '/common/representations/location.mjs';
+/*
+ * Interface ( facade ) between the user and the UI
+ */
+import { initializeGame } from '/js/uiBoundary.js';
 const app = new PIXI.Application({ height: 1200, width: 1200});
 document.body.appendChild(app.view);
 initializeGame(app);
+
+/*
+ * non-implemented code saved for future reference
 /*
 app.renderer.view.style.position = "absolute";
 app.renderer.view.style.display = "block";
