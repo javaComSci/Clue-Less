@@ -1,72 +1,303 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>Socket.IO chat</title>
-    <style>
-      body { margin: 0; padding-bottom: 3rem; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+<head>
+  <title>Clue-Less</title>
+  <style>
+    body {
+      margin: 0;
+      padding-bottom: 3rem;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
 
-      #form { background: rgba(0, 0, 0, 0.15); padding: 0.25rem; position: fixed; bottom: 0; left: 0; right: 0; display: flex; height: 3rem; box-sizing: border-box; backdrop-filter: blur(10px); }
-      #input { border: none; padding: 0 1rem; flex-grow: 1; border-radius: 2rem; margin: 0.25rem; }
-      #input:focus { outline: none; }
-      #form > button { background: #333; border: none; padding: 0 1rem; margin: 0.25rem; border-radius: 3px; outline: none; color: #fff; }
+    #form {
+      background: rgba(0, 0, 0, 0.15);
+      padding: 0.25rem;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      height: 3rem;
+      box-sizing: border-box;
+      backdrop-filter: blur(10px);
+    }
 
-      #messages { list-style-type: none; margin: 0; padding: 0; }
-      #messages > li { padding: 0.5rem 1rem; }
-      #messages > li:nth-child(odd) { background: #efefef; }
-    </style>
-  </head>
-  <body>
-    <ul id="messages"></ul>
-    <form id="form" action="">
-      <input id="input" autocomplete="off" /><button>Send</button>
-    </form>
-    <script src="/socket.io/socket.io.js"></script>
-    <script>
+    #input {
+      border: none;
+      padding: 0 1rem;
+      flex-grow: 1;
+      border-radius: 2rem;
+      margin: 0.25rem;
+    }
+
+    #input:focus {
+      outline: none;
+    }
+
+    #form>button {
+      background: #333;
+      border: none;
+      padding: 0 1rem;
+      margin: 0.25rem;
+      border-radius: 3px;
+      outline: none;
+      color: #fff;
+    }
+
+    #messages {
+      list-style-type: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    #messages>li {
+      padding: 0.5rem 1rem;
+    }
+
+    #messages>li:nth-child(odd) {
+      background: #efefef;
+    }
+  </style>
+</head>
+
+<body>
+  <ul id="messages"></ul>
+  <form id="form" action="">
+    <input id="input" autocomplete="off" /><button id="GameButton">Enter Name to Join Game</button>
+  </form>
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    var gatherInput = true; // TURN ON GATHER INPUT FOR ASKING INPUT FROM USER.
+    
     var socket = io();
+    var state = 'START';
 
     var form = document.getElementById('form');
     var input = document.getElementById('input');
+    var messages = document.getElementById('messages');
+    var gameId = 'MockGameId';
+    var playerId;
+    var character;
+    let cards;
+    let moveToMake;
+    let suggestion;
+    let accusation;
+    let suggestionObj;
+    let proofToProvide;
 
-    form.addEventListener('submit', function(e) {
-        e.preventDefault();
-        if (input.value) {
-            socket.emit(
-                'start',
-                {
-                    gameId: 'blah',
-                    playerId: input.value
-                });
-            input.value = '';
+    let stateColor = "#FFFFFF";
+    let broadCastColor = "#efefef";
+    let moveColor = "#efefef";
+
+    function move()
+    {
+      socket.emit(
+        'move',
+        {
+          gameId: gameId,
+          playerId: playerId,
+          newCharacterLocation: moveToMake
+        });
+    }
+
+    function suggestionFunc()
+    {
+      // SOLUTION: HALL, MUSTARD, WRENCH
+      if (playerId == "a")
+        {
+          // For player 1, it is hall, mustard, dragger. Player 2 gives proof.
+          socket.emit(
+            'suggestion',
+            suggestion);
         }
-    });
+        else if (playerId == "b")
+        {
+          // For player 2, they accuse is hall, mustard, wrench. Game over.
+          socket.emit(
+            'accuse',
+            accusation);
+        }   
+    }
 
-    socket.on('insufficientPlayerCount', function() {
-        console.log("Insufficient number of players");
-    });
-
-    socket.on('playerStartInfo', function(player) {
-        console.log("The player start info");
-        console.log(player);
-    });
-
-    socket.on('gameState', function(obj) {
-        console.log("The game state");
-        console.log(obj);
-    });
-
-    socket.on('requestMove', function(obj) {
-        console.log("Asked to provide move");
-        console.log(obj);
-
+    function proof()
+    {
         socket.emit(
-          'move',
-          {
-              gameId: 'blah',
-              playerId: 'a',
-              requestedUpdatedCharacterPiece: { character: 'SCARLET', currentLocation: 'HALL' }
-          });
-        
+          'proof',
+          proofToProvide);
+    }
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      if (input.value) {
+        if (state == 'START')
+        {
+          playerId = input.value;
+          socket.emit(
+            'start',
+            {
+              gameId: gameId,
+              playerId: input.value
+            });
+        }
+        input.value = '';
+      }
+
+      if (state == "MOVE")
+      {
+        move();
+      }
+
+      if (state == "SUGGESTION")
+      {
+        suggestionFunc();
+      }
+
+      if (state == "PROOF")
+      {
+        proof();
+      }
+
+      document.getElementById('input').style.visibility = 'hidden';
+      document.getElementById('GameButton').innerText = 'None';
+      document.getElementById('GameButton').style.visibility = 'hidden';
     });
-    </script>
-  </body>
+
+    socket.on('insufficientPlayerCount', function () {
+      console.log("Insufficient number of players");
+      print_message("Waiting for more players...");
+    });
+
+    socket.on('PLAYER_START_INFO', function (player) {
+      console.log("Player start info:");
+      console.log(player);
+      character = player.character;
+      cards = player.cards;
+
+      print_message(`Character assigned to player ${playerId}: ` + player.character.name, moveColor);
+      print_message("Cards assigned to player: " + JSON.stringify(player.cards), moveColor);
+    });
+
+    socket.on('GAME_STATE', function (obj) {
+      console.log("Game state:");
+      console.log(obj);
+
+      print_message("New game state recieved from server:", stateColor);
+      print_message("Characters: " + JSON.stringify(obj.characterPieces), stateColor);
+      print_message("Weapons: " + JSON.stringify(obj.weaponPieces), stateColor);
+    });
+
+    socket.on('REQUESTING_MOVE_BROADCAST', function (obj) {
+      print_message(`It is now ${obj.playerId}'s turn.`, broadCastColor);
+    });
+
+    socket.on('REQUEST_MOVE', function (obj) {
+      moveToMake = obj.potentialMoves[0];
+      print_message("You have been requested to provide a move, so you will be providing move: " + moveToMake, moveColor);
+
+      if (gatherInput)
+      {
+        state = 'MOVE';
+        document.getElementById('GameButton').innerText = 'Click to send your move';
+        document.getElementById('GameButton').style.visibility = 'visible';
+      }
+      else
+      {
+        move();
+      }
+    });
+
+    socket.on('REQUEST_SUGGESTION', function (obj) {
+      if (playerId == "a")
+      {
+        suggestion =
+          {
+            gameId: gameId,
+            playerId: playerId,
+            suggestedCharacterName: 'MUSTARD',
+            suggestedWeaponName: 'DRAGGER'
+          };
+        print_message("You have been requested to provide a suggestion, so you are providing suggestion:" + JSON.stringify(suggestion), moveColor);
+      }
+      else if (playerId == "b")
+      {
+        accusation = {
+            gameId: gameId,
+            playerId: playerId,
+            accusingCharacter: 'MUSTARD',
+            accusingWeapon: 'WRENCH',
+            accusingLocation: 'HALL'
+          };
+        print_message("On your turn, you are making an accusation:" + JSON.stringify(accusation), moveColor);
+      }
+
+      if (gatherInput)
+      {
+        state = 'SUGGESTION';
+        document.getElementById('GameButton').innerText = playerId == "a" ? 'Click to send your suggestion' : 'Click to send your accusation';
+        document.getElementById('GameButton').style.visibility = 'visible';
+      }
+      else
+      {
+        suggestionFunc();
+      }
+    });
+
+    socket.on('REQUEST_PROOF', function (obj) {
+      let chosenProofCard;
+      if (cards.map(a => a.name).includes(obj.suggestedCharacterName))
+      {
+        chosenProofCard = obj.suggestedCharacterName;
+      }
+
+      if (cards.map(a => a.name).includes(obj.suggestedLocation))
+      {
+        chosenProofCard = obj.suggestedLocation;
+      }
+
+      if (cards.map(a => a.name).includes(obj.suggestedWeaponName))
+      {
+        chosenProofCard = obj.suggestedWeaponName;
+      }
+
+      proofToProvide = {
+        gameId: gameId,
+        playerId: playerId,
+        proofCard: chosenProofCard
+      };
+
+      print_message("You have been asked to provide proof for suggstion [" + `${obj.suggestedCharacterName}, ${obj.suggestedWeaponName}, ${obj.suggestedLocation}` + "], so you will be providing proof: " + JSON.stringify(proofToProvide), moveColor);
+
+      if (gatherInput)
+      {
+        state = 'PROOF';
+        document.getElementById('GameButton').innerText = 'Click to send your proof';
+        document.getElementById('GameButton').style.visibility = 'visible';
+      }
+      else
+      {
+        proof();
+      }
+    });
+
+    socket.on('IS_PROOF_PROVIDED', function (obj) {
+      print_message("Information regarding proof being provided for prior suggestion: " + JSON.stringify(obj), moveColor);
+    });
+
+    socket.on('PROOF_PROVIDED', function (obj) {
+      print_message("Proof that was provided is: " + JSON.stringify(obj), broadCastColor);
+    });
+
+    socket.on('ACCUSATION_CORRECT', function (obj) {
+      print_message(`Player ${obj.winningPlayer} has won. Solution to the mystery is ${obj.accusedCharacter} in ${obj.accusedLocation} with ${obj.accusedWeapon}.`, broadCastColor);
+    });
+
+    function print_message(msg, color) {
+      let item = document.createElement('li');
+      item.style.background = color;
+      item.textContent = msg;
+      messages.appendChild(item);
+      window.scrollTo(0, document.body.scrollHeight);
+    }
+  </script>
+</body>
 </html>

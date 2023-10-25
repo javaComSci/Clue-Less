@@ -3,7 +3,18 @@ import { Player } from '../../common/representations/player.mjs';
 import { LocationConstants, CardLocations, LocationCard } from '../../common/representations/location.mjs';
 import { CardCharacters, CharacterConstants, CharacterPiece, CharacterCard } from  '../../common/representations/character.mjs';
 import { CardWeapons, WeaponPiece, WeaponCard } from '../../common/representations/weapon.mjs';
-import { emitGameCannotStart, emitPlayerStartInfo, emitGameState, emitRequestMove } from '../interactions/socketEmits.js';
+import {
+	emitGameCannotStart,
+	emitPlayerStartInfo,
+	emitGameState,
+	emitRequestMove,
+	emitRequestSuggestion,
+	emitRequestProof,
+	emitIsProofProvided,
+	emitProofProvided,
+	emitAccusationCorrect
+} from '../interactions/socketEmits.js';
+import { Suggestion } from '../../common/representations/suggestion.mjs';
 
 export class GameEngine
 {
@@ -25,6 +36,7 @@ export class GameEngine
 
 		this.players = [];
 		this.currentPlayerIndex = 0;
+		this.proofRequestingOffset = 1;
 
 		this.gameState = GameState.INITIATING;
 	}
@@ -88,8 +100,8 @@ export class GameEngine
 	allocateCards()
 	{
 		// Set aside mystery cards before distributing cards.
-		let characterMysteryCardIndex = this.chooseMysteryCardIndexFromSelection(this.totalCharacterCards);
-		let weaponMysteryCardIndex = this.chooseMysteryCardIndexFromSelection(this.totalWeaponCards);
+		let characterMysteryCardIndex = this.totalWeaponCards.length - 1;
+		let weaponMysteryCardIndex = this.totalWeaponCards.length - 1;
 		let locationMysteryCardIndex = this.chooseMysteryCardIndexFromSelection(this.totalLocationCards);
 
 		this.mysteryCards = [
@@ -108,8 +120,6 @@ export class GameEngine
 		availableLocationCards.splice(locationMysteryCardIndex, 1);
 
 		this.userFacingCards = availableCharacterCards.concat(availableWeaponCards).concat(availableLocationCards);
-		console.log('\nUser facing cards:');
-		console.log(this.userFacingCards);
 	}
 
 	setupPlayers()
@@ -121,6 +131,7 @@ export class GameEngine
 		for (let i = 0; i < this.getPlayerCount(); i++)
 		{
 			// Player will refer to one of the character pieces.
+			// Character piece stores the location.
 			let currPlayer = this.players[i];
 			currPlayer.character = this.totalCharacterPieces[i];
 
@@ -133,6 +144,7 @@ export class GameEngine
 
 			emitPlayerStartInfo(this.gameId, currPlayer);
 		}
+		console.log("");
 	}
 
 	startGame()
@@ -145,8 +157,7 @@ export class GameEngine
 		else
 		{
 			this.setupPlayers();
-			emitGameState(this.gameId, this.totalCharacterPieces, this.totalWeaponPieces);
-			this.gameOn = true;
+			this.emitCurrentGameState();
 
 			// Everything has been setup and initialized, so start the game sequence.
 			this.requestMove();
@@ -158,10 +169,28 @@ export class GameEngine
 	- Emit request for current player move
 	- STATE = REQUESTED_MOVE
 	- Listen on player move being sent from frontend
-	- State = PROCESSING_MOVE
-	- Process the move sent from frontend
+	- STATE = PROCESSING_MOVE
+	- Process the move sent from frontend by updating game state
+	- Notify all users of new game state
 	- STATE = PROCESSED_MOVE
-	- TODO: SUGGESTIONS/ACCUSATIONS
+	- STATE = REQUESTING_SUGGESTION
+	- Emit request for current player suggestion
+	- STATE = REQUESTED_SUGGESTION
+	- Listen on player suggestion begin sent from frontend
+	- STATE = PROCESSING_SUGGESTION
+	- Process the suggestion made from frontend by updating game state
+	- Notify all users of new game state
+	- STATE = PROCESSED_SUGGESTION
+	- STATE = REQUESTING_PROOF
+	- Emit request for next player proof
+	- STATE = REQUESTED_PROOF
+	- Listen on next player providing proof from frontend
+	- STATE = PROCESSING_PROOF
+	- If proof not empty, emit proof to current player.
+	- If proof empty, then loop back to REQUESTING_PROOF and ask next player for proof.
+	- STATE = PROCESSED_PROOF
+	- Loop back to STATE = REQUESTING_MOVE
+	- TODO: ACCUSATIONS (next increment)
 	*/
 
 	requestMove()
@@ -174,20 +203,147 @@ export class GameEngine
 			// First move for player's character must be to the hallway.
 			potentialMoves.push(this.players[this.currentPlayerIndex].character.currentLocation.slice(0, -5));
 		}
+		else if (this.players[this.currentPlayerIndex].character.currentLocation in LocationConstants.Room)
+		{
+			// STOP GAME HERE FOR SKELETAL INCREMENT.
+			console.log('Current location is a room, stopping game here for skeletal increment.');
+			return;
+		}
+		else if (this.players[this.currentPlayerIndex].character.currentLocation in LocationConstants.Hallway)
+		{
+			let adjRooms = this.players[this.currentPlayerIndex].character.currentLocation.split("_");
+			potentialMoves = potentialMoves.concat(adjRooms);
+		}
 		
 		emitRequestMove(this.gameId, this.players[this.currentPlayerIndex], potentialMoves);
 		this.gameState = GameState.REQUESTED_MOVE;
 	}
 
-	processMove(playerId, requestedUpdatedCharacterPiece)
+	processMove(playerId, newCharacterLocation)
 	{
 		if (this.gameState == GameState.REQUESTED_MOVE && playerId == this.players[this.currentPlayerIndex].playerId)
 		{
+			console.log(`MOVE: ${this.players[this.currentPlayerIndex].character.name} from ${this.players[this.currentPlayerIndex].character.currentLocation} to ${newCharacterLocation}`)
 			this.gameState = GameState.PROCESSING_MOVE;
-			this.players[this.currentPlayerIndex].character.location = requestedUpdatedCharacterPiece.location;
-			emitGameState(this.gameId, this.totalCharacterPieces, this.totalWeaponPieces);		
+			this.movePiece(this.players[this.currentPlayerIndex].character, newCharacterLocation);
+			this.emitCurrentGameState();
+
 			this.gameState = GameState.PROCESSED_MOVE;
+
+			if (newCharacterLocation in LocationConstants.Room)
+			{
+				this.requestSuggestion();
+			}
+			else
+			{
+				this.currentPlayerIndex = (this.currentPlayerIndex + 1) % this.getPlayerCount();
+				this.requestMove();
+			}
 		}
+		else 
+		{
+			console.error(`Move has come from invalid player ${playerId}, so not processing the move.`);
+		}
+	}
+
+	requestSuggestion()
+	{
+		this.gameState = GameState.REQUESTING_SUGGESTION;
+		emitRequestSuggestion(this.gameId, this.players[this.currentPlayerIndex]);
+		this.gameState = GameState.REQUESTED_SUGGESTION;
+	}
+
+	processSuggestion(playerId, suggestedCharacterName, suggestedWeaponName)
+	{
+		if (this.gameState == GameState.REQUESTED_SUGGESTION && playerId == this.players[this.currentPlayerIndex].playerId)
+		{
+			console.log(`SUGGESTION: ${suggestedCharacterName} to ${this.players[this.currentPlayerIndex].character.currentLocation} with ${suggestedWeaponName}.`);
+			this.gameState = GameState.PROCESSING_SUGGESTION;
+			this.movePiece(this.getCharacterPieceByCharacterName(suggestedCharacterName), this.players[this.currentPlayerIndex].character.currentLocation);
+			this.movePiece(this.getWeaponPieceByWeaponName(suggestedWeaponName), this.players[this.currentPlayerIndex].character.currentLocation);
+			let processedSuggestion = new Suggestion(this.players[this.currentPlayerIndex].character.currentLocation, suggestedCharacterName, suggestedWeaponName);
+			this.emitCurrentGameState();
+
+			this.gameState = GameState.PROCESSED_SUGGESTION;
+			this.requestProof(processedSuggestion);
+		}
+		else 
+		{
+			console.error(`Suggestion has come from invalid player ${playerId}, so not processing the suggestion.`);
+		}
+	}
+
+	requestProof(processedSuggestion)
+	{
+		this.gameState = GameState.REQUESTING_PROOF;
+		emitRequestProof(this.gameId, this.players[(this.currentPlayerIndex + this.proofRequestingOffset) % this.getPlayerCount()], processedSuggestion);
+		this.gameState = GameState.REQUESTED_PROOF;
+	}
+
+	processProof(proofProvidingPlayerId, proofCard)
+	{
+		if (this.gameState == GameState.REQUESTED_PROOF && proofProvidingPlayerId == this.players[(this.currentPlayerIndex + this.proofRequestingOffset) % this.getPlayerCount()].playerId)
+		{
+			this.gameState = GameState.PROCESSING_PROOF;
+
+			emitIsProofProvided(this.gameId, proofCard !== undefined, proofProvidingPlayerId);
+			emitProofProvided(this.gameId, this.players[this.currentPlayerIndex], proofCard);
+
+			if (proofCard == undefined)
+			{
+				// Move onto next player or gathering proof.
+				this.proofRequestingOffset += 1;
+				if ((this.currentPlayerIndex + this.proofRequestingOffset) % this.getPlayerCount() != this.currentPlayerIndex)
+				{
+					this.requestProof();
+					return;
+				}
+			}
+
+			this.currentPlayerIndex = (this.currentPlayerIndex + 1) % this.getPlayerCount();
+			this.gameState = GameState.PROCESSED_PROOF;
+			this.requestMove();
+		}
+		else 
+		{
+			console.error(`Proof has come from invalid player ${playerId}, so not processing the proof.`);
+		}
+	}
+
+	processAccusation(playerId, accusingCharacter, accusingWeapon, accusingLocation)
+	{
+		if (playerId == this.players[this.currentPlayerIndex].playerId)
+		{
+			if (this.mysteryCards[0].name == accusingCharacter && this.mysteryCards[1].name == accusingWeapon && this.mysteryCards[2].name == accusingLocation)
+			{
+				emitAccusationCorrect(this.gameId, this.players[this.currentPlayerIndex], accusingCharacter, accusingWeapon, accusingLocation);
+			}
+		}
+		else
+		{
+			console.error(`Accusation has come from invalid player ${playerId}, so not processing the proof.`);
+		}
+	}
+
+	emitCurrentGameState()
+	{
+		emitGameState(this.gameId, this.totalCharacterPieces, this.totalWeaponPieces);		
+	}
+
+	movePiece(gamePiece, newLocation)
+	{
+		gamePiece.priorLocation = gamePiece.currentLocation;
+		gamePiece.currentLocation = newLocation;
+	}
+
+	getCharacterPieceByCharacterName(characterName)
+	{
+		return this.totalCharacterPieces.find(characterPiece => characterPiece.name == characterName);
+	}
+
+	getWeaponPieceByWeaponName(weaponName)
+	{
+		return this.totalWeaponPieces.find(weaponPiece => weaponPiece.name == weaponName);
 	}
 
 	printGameState()
