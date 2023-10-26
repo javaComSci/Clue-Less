@@ -1,31 +1,21 @@
 /*
  * Interface ( facade ) between the user and the UI
  */
-import { UIState } from '/js/uiState.js';
-
-export class ClientUI
+import { io } from "https://cdn.socket.io/4.4.1/socket.io.esm.min.js";
+import { UIAction } from "/js/uiAction.js";
+export class UIClient
 {
 	constructor()
 	{
-		this.app = new PIXI.Application({ height: 1200, width: 1200});
-		this.ui = new UIState(this.app);
+		this.socket = io();
+		this.action = new UIAction();
+		//initializeListeners();
 	}
-	/*
-	 * Methods to be defined
-	 */
-	move()
-	{
-	}
-	suggestion()
-	{
-	}
-	accusation()
-	{
-	}
-	gameend()
+	initializeListeners()
 	{
 	}
 }
+
 
 /*
  * non-implemented code saved for future reference

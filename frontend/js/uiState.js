@@ -5,13 +5,14 @@ import { PixiMap } from '/js/pixiview.js';
 
 export class UIState
 {
-	constructor(app)
+	constructor()
 	{
-		document.body.appendChild(app.view);
-		this.initializeGame(app);
+		this.app = new PIXI.Application({ height: 1200, width: 1200});
+		document.body.appendChild(this.app.view);
+		this.initializeGame();
 	}
-	initializeGame(app)
+	initializeGame()
 	{
-		this.piximap = new PixiMap(app);
+		this.piximap = new PixiMap(this.app);
 	}
 }
