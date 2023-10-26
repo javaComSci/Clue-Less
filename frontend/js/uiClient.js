@@ -2,14 +2,19 @@
  * Interface ( facade ) between the user and the UI. Communicates actions to UI in accordance with game engine.
  */
 //import { io } from "https://cdn.socket.io/4.4.1/socket.io.esm.min.js";
+import { EngineSend } from "/js/engineSend.js";
 import { UIAction } from "/js/uiAction.js";
 export class UIClient
 {
 	constructor()
 	{
 		//this.socket = io();
+		this.socket = '';
 		this.action = new UIAction();
-		//initializeListeners();
+		this.engine = new EngineSend(this.socket);
+		/*
+		 * Listens for events from game engine
+		 */
 		this.socketRecvMessages = {
 			'insufficientPlayerCount' 	: this.msgInsufficientPlayerCount,
 			'PLAYER_START_INFO' 		: this.msgPlayerStartInfo,
@@ -22,6 +27,14 @@ export class UIClient
 			'PROOF_PROVIDED'			: this.msgProofProvided,
 			'ACCUSATION_CORRECT'		: this.msgAccusationCorrect
 		}
+		/*
+		 * TODO: Listens for events from user
+		 */
+		/*
+		this.domListeners = {
+			'room' : this.clickRoom
+		}
+		*/
 		this.initializeListeners();
 
 	}
@@ -31,7 +44,16 @@ export class UIClient
 		{
 			this.socketRecvMessages[msg]();
 		}
+		/* TODO
+		for( var element in domListeners )
+		{
+			document.getElementById(element).onClick = domListeners[element];
+		}
+		*/
 	}
+	/*
+	 * STUBS
+	 */
 	msgInsufficientPlayerCount()
 	{
 	}
