@@ -1,7 +1,7 @@
 /*
  * Interface ( facade ) between the user and the UI
  */
-import { initializeGame } from '/js/uiBoundary.js';
+import { initializeGame } from '/js/uiState.js';
 const app = new PIXI.Application({ height: 1200, width: 1200});
 document.body.appendChild(app.view);
 initializeGame(app);
