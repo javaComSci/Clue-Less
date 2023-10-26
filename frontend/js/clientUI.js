@@ -1,10 +1,31 @@
 /*
  * Interface ( facade ) between the user and the UI
  */
-import { initializeGame } from '/js/uiState.js';
-const app = new PIXI.Application({ height: 1200, width: 1200});
-document.body.appendChild(app.view);
-initializeGame(app);
+import { UIState } from '/js/uiState.js';
+
+export class ClientUI
+{
+	constructor()
+	{
+		this.app = new PIXI.Application({ height: 1200, width: 1200});
+		this.ui = new UIState(this.app);
+	}
+	/*
+	 * Methods to be defined
+	 */
+	move()
+	{
+	}
+	suggestion()
+	{
+	}
+	accusation()
+	{
+	}
+	gameend()
+	{
+	}
+}
 
 /*
  * non-implemented code saved for future reference

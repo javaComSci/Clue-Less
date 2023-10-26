@@ -10,6 +10,12 @@ export class PixiMap extends GameMap
 		super(app.renderer.view.height, app.renderer.view.width);
 		this.app = app;
 		super.createMap();
+		this.displayMap();
+	}
+	displayMap()
+	{
+		this.displayRooms();
+		this.displayHallways();
 	}
 
 	// TODO: Create a parent container that holds the rooms on the pixiMap
