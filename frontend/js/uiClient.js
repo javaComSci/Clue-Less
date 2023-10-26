@@ -1,17 +1,65 @@
 /*
- * Interface ( facade ) between the user and the UI
+ * Interface ( facade ) between the user and the UI. Communicates actions to UI in accordance with game engine.
  */
-import { io } from "https://cdn.socket.io/4.4.1/socket.io.esm.min.js";
+//import { io } from "https://cdn.socket.io/4.4.1/socket.io.esm.min.js";
 import { UIAction } from "/js/uiAction.js";
 export class UIClient
 {
 	constructor()
 	{
-		this.socket = io();
+		//this.socket = io();
 		this.action = new UIAction();
 		//initializeListeners();
+		this.socketRecvMessages = {
+			'insufficientPlayerCount' 	: this.msgInsufficientPlayerCount,
+			'PLAYER_START_INFO' 		: this.msgPlayerStartInfo,
+			'GAME_STATE' 				: this.msgGameState,
+			'REQUESTING_MOVE_BROADCAST' : this.msgRequestingMoveBroadcast,
+			'REQUEST_MOVE'				: this.msgRequestingMove,
+			'REQUEST_SUGGESTION'		: this.msgRequestSuggestion,
+			'REQUEST_PROOF'				: this.msgRequestProof,
+			'IS_PROOF_PROVIDED'			: this.msgIsProofProvided,
+			'PROOF_PROVIDED'			: this.msgProofProvided,
+			'ACCUSATION_CORRECT'		: this.msgAccusationCorrect
+		}
+		this.initializeListeners();
+
 	}
 	initializeListeners()
+	{
+		for( var msg in this.socketRecvMessages )
+		{
+			this.socketRecvMessages[msg]();
+		}
+	}
+	msgInsufficientPlayerCount()
+	{
+	}
+	msgPlayerStartInfo()
+	{
+	}
+	msgGameState()
+	{
+	}
+	msgRequestingMoveBroadcast()
+	{
+	}
+	msgRequestingMove()
+	{
+	}
+	msgRequestSuggestion()
+	{
+	}
+	msgRequestProof()
+	{
+	}
+	msgIsProofProvided()
+	{
+	}
+	msgProofProvided()
+	{
+	}
+	msgAccusationCorrect()
 	{
 	}
 }
