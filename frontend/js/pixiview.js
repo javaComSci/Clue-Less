@@ -38,6 +38,8 @@ export class PixiMap extends GameMap
 			rectangle.beginFill(0x66CCFF);
 			rectangle.drawRect(this.rooms[room].x,this.rooms[room].y,this.rooms[room].length,this.rooms[room].width);
 			rectangle.endFill();
+			rectangle.eventMode = 'static';
+			rectangle.on('pointerup', (event) => { window.client.testme(); } );
 			this.app.stage.addChild(rectangle);
 			this.rooms[room].element = rectangle;
 			const roomName = new PIXI.Text(room, { fontSize: 24, fill: 0xFBF8FB });

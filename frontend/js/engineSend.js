@@ -1,5 +1,5 @@
 /*
- * Interfaces between the UI and the GameEngine
+ * Interfaces between the UI and the Game Engine
  */
 export class EngineSend {
 	constructor(socket) {

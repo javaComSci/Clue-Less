@@ -3,7 +3,7 @@
  */
 import { UIState } from '/js/uiState.js';
 
-export class UIAction
+export class UIManager
 {
 	constructor()
 	{
