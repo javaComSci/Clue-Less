@@ -3,6 +3,9 @@
 	</head>
 	<body>
 		<script src="https://pixijs.download/release/pixi.js"></script>
-		<script type="module" src="/js/client.js"></script>
+		<script type="module">
+			import { UIClient } from '/js/uiClient.js';
+			window.client = new UIClient();
+		</script>
 	</body>
 </html>
