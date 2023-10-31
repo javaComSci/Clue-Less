@@ -9,6 +9,7 @@ export class UIClient
 	{
 		this.uiManager = new UIManager();
 		this.msgEngine = new EngineComm();
+		this.gameId = '1';
 	}
 	testme()
 	{

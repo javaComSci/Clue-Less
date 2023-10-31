@@ -1,8 +1,9 @@
-import { CharacterConstants } from '/common/representations/character.mjs';
 /*
  * Abstract representation of the Clue-Less game map. Graphics libraries
  * can inherit this and implement display functions.
  */
+import { CharacterConstants } from '/common/representations/character.mjs';
+import { Character,Room,Hallway,Passageway,Weapon } from '/js/spaces.js';
 export class GameMap
 {
     constructor(height, width)
@@ -128,61 +129,5 @@ export class GameMap
 	}
 	displayCharacters()
 	{
-	}
-}
-
-class Space
-{
-	constructor(x, y, length, width)
-	{
-		this.x = x;
-		this.y = y;
-		this.length = length;
-		this.width = width;
-		this.element;
-	}
-}
-
-class Passageway extends Space
-{
-	constructor(name, x, y, length, width)
-	{
-		super(x, y, length, width);
-		this.name = name;
-	}
-}
-
-class Room extends Space
-{
-	constructor(name, x, y, length, width)
-	{
-		super(x, y, length, width);
-		this.name = name;
-		this.playerLocationX = x + length/3;
-		this.playerLocationY = y + width/3;
-		/* be careful here, these are somewhat arbitrary. 
-		 * If player area size is too large, they may overlap */
-		this.playerSuggestLocationX = x + (2 * length/3);
-		this.playerSuggestLocationY = y + width/3;
-	}
-}
-
-class Hallway extends Space
-{
-	constructor(name, x, y, length, width)
-	{
-		super(x, y, length, width);
-		this.name = name;
-		this.playerLocationX = x + length/3;
-		this.playerLocationY = y + width/3;
-	}
-}
-
-class Character extends Space
-{
-	constructor(name, x, y, length, width)
-	{
-		super(x, y, length, width);
-		this.name;
 	}
 }

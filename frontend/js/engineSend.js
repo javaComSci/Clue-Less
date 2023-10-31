@@ -38,8 +38,7 @@ export class EngineSend {
 	msgProof(data)
 	{
 	}
-	msgStart(data)
+	msgGameState(data)
 	{
 	}
-
 }

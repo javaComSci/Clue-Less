@@ -2,12 +2,27 @@
  * Graphical implementation of a GameMap using PIXIJS
  */
 import { GameMap } from '/js/gamemap.mjs';
+import { GameHud } from '/js/gamehud.js';
+
+export class PixiHud
+{
+	constructor(app)
+	{
+		this.app = app;
+		this.displayHud();
+	}
+	displayHud()
+	{
+		this.displayCards();
+		this.displayButtons();
+	}
+}
 
 export class PixiMap extends GameMap
 {
 	constructor(app)
 	{
-		super(app.renderer.view.height, app.renderer.view.width);
+		super(app.renderer.view.height-400, app.renderer.view.width);
 		this.app = app;
 		super.createMap();
 		this.displayMap();
