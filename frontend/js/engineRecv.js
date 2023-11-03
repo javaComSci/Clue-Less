@@ -9,16 +9,16 @@ export class EngineRecv
 		 */
 		this.socket = socket;
 		this.socketRecvMessages = {
-			'insufficientPlayerCount' 	: this.msgInsufficientPlayerCount,
-			'PLAYER_START_INFO' 		: this.msgPlayerStartInfo,
-			'GAME_STATE' 				: this.msgGameState,
-			'REQUESTING_MOVE_BROADCAST' : this.msgRequestingMoveBroadcast,
-			'REQUEST_MOVE'				: this.msgRequestingMove,
-			'REQUEST_SUGGESTION'		: this.msgRequestSuggestion,
-			'REQUEST_PROOF'				: this.msgRequestProof,
-			'IS_PROOF_PROVIDED'			: this.msgIsProofProvided,
-			'PROOF_PROVIDED'			: this.msgProofProvided,
-			'ACCUSATION_CORRECT'		: this.msgAccusationCorrect
+			'insufficientPlayerCount' 	: this.msgInsufficientPlayerCount.bind(this),
+			'PLAYER_START_INFO' 		: this.msgPlayerStartInfo.bind(this),
+			'GAME_STATE' 				: this.msgGameState.bind(this),
+			'REQUESTING_MOVE_BROADCAST' : this.msgRequestingMoveBroadcast.bind(this),
+			'REQUEST_MOVE'				: this.msgRequestingMove.bind(this),
+			'REQUEST_SUGGESTION'		: this.msgRequestSuggestion.bind(this),
+			'REQUEST_PROOF'				: this.msgRequestProof.bind(this),
+			'IS_PROOF_PROVIDED'			: this.msgIsProofProvided.bind(this),
+			'PROOF_PROVIDED'			: this.msgProofProvided.bind(this),
+			'ACCUSATION_CORRECT'		: this.msgAccusationCorrect.bind(this)
 		}
 		this.initializeListeners();
 	}
@@ -40,6 +40,9 @@ export class EngineRecv
 	}
 	msgGameState()
 	{
+		this.socket.on('GAME_STATE', function (obj) {
+			window.client.testme(obj);
+		});
 	}
 	msgRequestingMoveBroadcast()
 	{

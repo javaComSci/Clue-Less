@@ -5,11 +5,11 @@ export class EngineSend {
 	constructor(socket) {
 		this.socket = socket;
 		this.socketSendMessages = {
-			'move' 			: this.msgMove,
-			'suggestion' 	: this.msgSuggestion,
-			'accuse'		: this.msgAccuse,
-			'proof'			: this.msgProof,
-			'start'			: this.msgStart
+			'move' 			: this.msgMove.bind(this),
+			'suggestion' 	: this.msgSuggestion.bind(this),
+			'accuse'		: this.msgAccuse.bind(this),
+			'proof'			: this.msgProof.bind(this),
+			'start'			: this.msgStart.bind(this)
 		}
 	}
 	msg(action, data)
@@ -21,7 +21,7 @@ export class EngineSend {
 	 */
 	push(msg, data)
 	{
-		this.socket.emit(msg, data)
+		this.socket.emit(msg, data);
 	}
 	/*
 	 * Stubs. Perform logic on event and then push data to backend
@@ -38,7 +38,8 @@ export class EngineSend {
 	msgProof(data)
 	{
 	}
-	msgGameState(data)
+	msgStart(data)
 	{
+		this.push('start', data);
 	}
 }

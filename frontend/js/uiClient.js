@@ -10,10 +10,12 @@ export class UIClient
 		this.uiManager = new UIManager();
 		this.msgEngine = new EngineComm();
 		this.gameId = '1';
+		this.playerId = crypto.randomUUID();
+		this.msgEngine.send('start', {'playerId': this.playerId, 'gameId': this.gameId } );
 	}
-	testme()
+	testme(data)
 	{
-		console.log('user interaction!');
+		console.log(data);
 	}
 
 }
