@@ -75,6 +75,16 @@ export class PixiHud extends GameHud
 		this.alertContainer.beginFill(0xFEE6B4);
 		this.alertContainer.drawRect(this.alertAreaStartX,this.alertAreaStartY,this.alertAreaWidth,this.alertAreaHeight);
 		this.alertContainer.endFill();
+		this.alerts.forEach((alertInfo) => {
+			let pixiAlert = new PIXI.Graphics();
+			pixiAlert.eventMode = 'static';
+			pixiAlert.on('pointerup', (event) => { window.client.testme(alertInfo.content); } );
+			pixiAlert.beginFill(0xFBF8FB);
+			pixiAlert.drawRect(0,0,alertInfo.width,alertInfo.length);
+			pixiAlert.endFill();
+			pixiAlert.position.set(alertInfo.x,alertInfo.y);
+			this.alertContainer.addChild(pixiAlert);
+		});
 		this.app.stage.addChild(this.alertContainer);
 	}
 }

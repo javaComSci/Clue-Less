@@ -1,7 +1,7 @@
 /*
  * Abstract Representation of a GameHud ( Heads-up-Display )
  */
-import { Button,Card } from '/js/spaces.js';
+import { Button,Card,Alert } from '/js/spaces.js';
 export class GameHud
 {
 	constructor(mapHeight, mapWidth, screenHeight, screenWidth, state)
@@ -28,24 +28,27 @@ export class GameHud
 		this.cardMarginSFactor = .25;
 		this.cardGapSFactor = .10;
 
+		this.alertMarginSFactor = .25;
+
 		this.state = {
 			'buttons': [ {'name':'Suggestion','content':'Suggestion'},
 				{'name':'Accusation','content':'Accusation'} ],
 			'cards': [ {'name':'Candle','content':'Candle', 'type': 'weapon'},
 				{'name':'Candle','content':'Candle', 'type': 'weapon'},
 				{'name':'Candle','content':'Candle', 'type': 'weapon'},
-				{'name':'Candle','content':'Candle', 'type': 'weapon'}
-			]
+				{'name':'Candle','content':'Candle', 'type': 'weapon'}],
+			'alerts': [ {'name':'pending','content':'Waiting on 2 more players'}]
 		};
 		this.buttons = [];
 		this.cards = [];
+		this.alerts = [];
 		this.createHud(this.state);
 	}
 	createHud(state)
 	{
 		this.createCards(state['cards']);
 		this.createButtons(state['buttons']);
-		this.createAlerts();
+		this.createAlerts(state['alerts']);
 	}
 	createCards(state)
 	{
@@ -60,7 +63,6 @@ export class GameHud
 			cardStartY += cardHeight + (this.cardAreaHeight * this.cardGapSFactor);
 			this.cards.push(card);
 		});
-		console.log(this.cards);
 	}
 	createButtons(state)
 	{
@@ -75,10 +77,18 @@ export class GameHud
 			buttonStartX += buttonWidth + (this.buttonAreaWidth * this.buttonGapSFactor);
 			this.buttons.push(button);
 		});
-		console.log(this.buttons);
 	}
-	createAlerts()
+	createAlerts(state)
 	{
+		let alertHeight = this.alertAreaHeight - 2 * ( this.alertMarginSFactor * this.alertAreaHeight );
+		let alertWidth = this.alertAreaWidth - 2 * ( this.alertMarginSFactor * this.alertAreaWidth );
+		let alertStartX = (this.alertMarginSFactor * this.alertAreaWidth) + this.alertAreaStartX;
+		let alertStartY = (this.alertMarginSFactor * this.alertAreaHeight) + this.alertAreaStartY;
+		state.forEach((a) => {
+			let alertInfo = new Alert(a['name'],a['content'],alertStartX,alertStartY,alertHeight,alertWidth);
+			alertStartX += alertWidth + (this.alertAreaWidth * this.alertGapSFactor);
+			this.alerts.push(alertInfo);
+		});
 	}
 }
 

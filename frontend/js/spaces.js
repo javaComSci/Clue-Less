@@ -83,7 +83,7 @@ export class Button extends Space
 		this.content = content;
 	}
 }
-export class Alerts extends Space
+export class Alert extends Space
 {
 	constructor(name, content, x, y, length, width)
 	{
