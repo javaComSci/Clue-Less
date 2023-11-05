@@ -4,10 +4,11 @@
 import { GameMap } from '/js/gamemap.mjs';
 import { GameHud } from '/js/gamehud.js';
 
-export class PixiHud
+export class PixiHud extends GameHud
 {
-	constructor(app)
+	constructor(app, mapHeight, mapWidth)
 	{
+		super(mapHeight, mapWidth, app.renderer.view.height, app.renderer.view.width);
 		this.app = app;
 		this.displayHud();
 	}
@@ -15,14 +16,54 @@ export class PixiHud
 	{
 		this.displayCards();
 		this.displayButtons();
+		this.displayAlerts();
+	}
+	displayCards()
+	{
+		if ( this.cardContainer != null )
+		{
+			// free the memory!
+			this.cardContainer.destroy();
+		}
+		this.cardContainer = new PIXI.Graphics();
+		this.cardContainer.beginFill(0xFCFEB4);
+		this.cardContainer.drawRect(this.cardAreaStartX,this.cardAreaStartY,this.cardAreaWidth,this.cardAreaHeight);
+		this.cardContainer.endFill();
+		this.app.stage.addChild(this.cardContainer);
+	}
+	displayButtons()
+	{
+		if ( this.buttonContainer != null )
+		{
+			// free the memory!
+			this.buttonContainer.destroy();
+		}
+		this.buttonContainer = new PIXI.Graphics();
+		this.buttonContainer.beginFill(0xCAFEB4);
+		this.buttonContainer.drawRect(this.buttonAreaStartX,this.buttonAreaStartY,this.buttonAreaWidth,this.buttonAreaHeight);
+		this.buttonContainer.endFill();
+		this.app.stage.addChild(this.buttonContainer);
+	}
+	displayAlerts()
+	{
+		if ( this.alertContainer != null )
+		{
+			// free the memory!
+			this.alertContainer.destroy();
+		}
+		this.alertContainer = new PIXI.Graphics();
+		this.alertContainer.beginFill(0xFEE6B4);
+		this.alertContainer.drawRect(this.alertAreaStartX,this.alertAreaStartY,this.alertAreaWidth,this.alertAreaHeight);
+		this.alertContainer.endFill();
+		this.app.stage.addChild(this.alertContainer);
 	}
 }
 
 export class PixiMap extends GameMap
 {
-	constructor(app)
+	constructor(app, height, width)
 	{
-		super(app.renderer.view.height-400, app.renderer.view.width);
+		super(height, width);
 		this.app = app;
 		super.createMap();
 		this.displayMap();

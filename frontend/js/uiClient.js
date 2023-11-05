@@ -12,6 +12,11 @@ export class UIClient
 		this.gameId = '1';
 		this.playerId = crypto.randomUUID();
 		this.msgEngine.send('start', {'playerId': this.playerId, 'gameId': this.gameId } );
+		this.playerInfo;
+	}
+	setPlayerInfo(info)
+	{
+		this.playerInfo = playerInfo;
 	}
 	testme(data)
 	{
