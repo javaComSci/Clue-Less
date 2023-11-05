@@ -43,16 +43,16 @@ export class GameMap
 		this.hallway_across_coordinates = {
 			'STUDY_HALL': { 'x': this.mb + this.re, 'y': this.mb + this.re/3 },
 			'LIBRARY_BILLIARDROOM': { 'x': this.mb + this.re, 'y': this.mb + this.re/3 + this.hl + this.re },
-			'CONSERVATORY_BALLROOM': { 'x': this.mb + this.re, 'y': this.mb + this.re/3 + 2 * ( this.hl + this.re ) },
+			'BALLROOM_CONSERVATORY': { 'x': this.mb + this.re, 'y': this.mb + this.re/3 + 2 * ( this.hl + this.re ) },
 			'HALL_LOUNGE': { 'x': this.mb + this.re + this.hl + this.re, 'y': this.mb + this.re/3 },
-			'BILLIARDROOM_DININGROOM': { 'x': this.mb + this.re + this.hl + this.re, 'y': this.mb + this.re/3 + this.hl + this.re },
-			'BALLROOM_KITCHEN': { 'x': this.mb + this.re + this.hl + this.re, 'y': this.mb + this.re/3 + 2 * ( this.hl + this.re ) },
+			'DININGROOM_BILLIARDROOM': { 'x': this.mb + this.re + this.hl + this.re, 'y': this.mb + this.re/3 + this.hl + this.re },
+			'KITCHEN_BALLROOM': { 'x': this.mb + this.re + this.hl + this.re, 'y': this.mb + this.re/3 + 2 * ( this.hl + this.re ) },
 		};
 		this.hallway_down_coordinates = {
-			'STUDY_LIBRARY': { 'x': this.mb + this.re/3, 'y': this.mb + this.re },
-			'LIBRARY_CONSERVATORY': { 'x': this.mb + this.re/3, 'y': this.mb + this.hl + ( 2 * this.re ) },
+			'LIBRARY_STUDY': { 'x': this.mb + this.re/3, 'y': this.mb + this.re },
+			'CONSERVATORY_LIBRARY': { 'x': this.mb + this.re/3, 'y': this.mb + this.hl + ( 2 * this.re ) },
 			'HALL_BILLARDROOM': { 'x': this.mb + this.re/3 + this.hl + this.re, 'y': this.mb + this.re },
-			'BILLIARDROOM_BALLROOM': { 'x': this.mb + this.re/3 + this.hl + this.re, 'y': this.mb + this.re + this.hl + this.re },
+			'BALLROOM_BILLARDROOM': { 'x': this.mb + this.re/3 + this.hl + this.re, 'y': this.mb + this.re + this.hl + this.re },
 			'LOUNGE_DININGROOM': { 'x': this.mb + this.re/3 + 2 * ( this.hl + this.re ), 'y': this.mb + this.re },
 			'DININGROOM_KITCHEN': { 'x': this.mb + this.re/3 + 2 * ( this.hl + this.re ), 'y': this.mb + this.re + this.hl + this.re }
 		};
@@ -86,6 +86,8 @@ export class GameMap
 			let hallwayNew = new Hallway(hallway, x, y, this.hl, this.hs);
 			this.hallways[hallway] = hallwayNew;
 			this.locations[hallway] = hallwayNew;
+			this.hallways[hallway + '_HOME'] = hallwayNew;
+			this.locations[hallway + '_HOME'] = hallwayNew;
 		}
 
 		// for each key, create hallway with long side vertical
@@ -95,6 +97,8 @@ export class GameMap
 			let hallwayNew = new Hallway(hallway, x, y, this.hs, this.hl);
 			this.hallways[hallway] = hallwayNew;
 			this.locations[hallway] = hallwayNew;
+			this.hallways[hallway + '_HOME'] = hallwayNew;
+			this.locations[hallway + '_HOME'] = hallwayNew;
 		}
 	}
 	// creates passageways

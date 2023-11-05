@@ -97,6 +97,7 @@ export class PixiMap extends GameMap
 		this.app = app;
 		super.createMap();
 		this.displayMap();
+		console.log(this.locations);
 	}
 	displayMap()
 	{
@@ -153,13 +154,18 @@ export class PixiMap extends GameMap
 		}
 		this.characterContainer = new PIXI.Graphics();
 		playerCharacters.forEach((character) => {
-			let charRep = this.characters[character.name];
-			let charX = this.locations[character.currentLocation].playerLocationX;
-			let charY = this.locations[character.currentLocation].playerLocationY;
+			let charRep = this.characters[character['name']];
+			let charX = this.locations[character['currentLocation']].playerLocationX;
+			let charY = this.locations[character['currentLocation']].playerLocationY;
 
-			this.characterContainer.beginFill(0xFBF8FB);
-			this.characterContainer.drawRect(charX,charY,this.ce,this.ce);
-			this.characterContainer.endFill();
+			let pixiCharacter = new PIXI.Graphics();
+			pixiCharacter.eventMode = 'static';
+			pixiCharacter.on('pointerup', (event) => { window.client.testme(character.name); } );
+			pixiCharacter.beginFill(0xFBF8FB);
+			pixiCharacter.drawRect(0,0,this.ce,this.ce);
+			pixiCharacter.endFill();
+			pixiCharacter.position.set(charX,charY);
+			this.characterContainer.addChild(pixiCharacter);
 		});
 		this.app.stage.addChild(this.characterContainer);
 	}

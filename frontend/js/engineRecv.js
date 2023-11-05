@@ -44,7 +44,7 @@ export class EngineRecv
 	msgGameState()
 	{
 		this.socket.on('GAME_STATE', function (obj) {
-			window.client.testme(obj);
+			window.client.updateGameState(obj);
 		});
 	}
 	msgRequestingMoveBroadcast()

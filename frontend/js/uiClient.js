@@ -23,5 +23,10 @@ export class UIClient
 	{
 		console.log(data);
 	}
+	updateGameState(state)
+	{
+		this.uiManager.updateGameState(state);
+		//console.log(state);
+	}
 
 }

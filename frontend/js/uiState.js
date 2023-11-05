@@ -1,8 +1,7 @@
 /*
  * Updates the UI
  */
-import { PixiMap } from '/js/pixiview.js';
-import { PixiHud } from '/js/pixiview.js';
+import { PixiMap,PixiHud } from '/js/pixiview.js';
 
 export class UIState
 {
@@ -26,11 +25,13 @@ export class UIState
 		this.piximap = new PixiMap(this.app, this.mapHeight, this.mapWidth);
 		this.pixihud = new PixiHud(this.app, this.mapHeight, this.mapWidth);
 	}
-	updateHud(state)
+	updateHudState(state)
 	{
 		state['buttons'] = this.buttons;
 	}
-	updateMap(state)
+	updateMapState(state)
 	{
+		console.log(state['characterPieces']);
+		this.piximap.displayCharacters(state['characterPieces']);
 	}
 }
