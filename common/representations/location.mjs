@@ -37,6 +37,16 @@ export const LocationConstants = {
     None: 'NONE'
 };
 
+export const DiagonalRooms = {
+    STUDY: 'KITCHEN',
+    KITCHEN: 'STUDY',
+    LOUNGE: 'CONSERVATORY',
+    CONSERVATORY: 'LOUNGE'
+};
+
+export const STAY = 'STAY';
+export const CANNOTMOVE = 'CANNOTMOVE';
+
 export const CardLocations = [
     LocationConstants.Room.HALL,
     LocationConstants.Room.LOUNGE,

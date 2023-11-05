@@ -1,6 +1,6 @@
 import { GameState } from './gameState.js';
 import { Player } from '../../common/representations/player.mjs';
-import { LocationConstants, CardLocations, LocationCard } from '../../common/representations/location.mjs';
+import { LocationConstants, CardLocations, LocationCard, DiagonalRooms, STAY, CANNOTMOVE } from '../../common/representations/location.mjs';
 import { CardCharacters, CharacterConstants, CharacterPiece, CharacterCard } from  '../../common/representations/character.mjs';
 import { CardWeapons, WeaponPiece, WeaponCard } from '../../common/representations/weapon.mjs';
 import {
@@ -50,7 +50,13 @@ export class GameEngine
 		var green = new CharacterPiece(CharacterConstants.GREEN, LocationConstants.Start.BALLROOM_CONSERVATORY_HOME);
 		var white = new CharacterPiece(CharacterConstants.WHITE, LocationConstants.Start.KITCHEN_BALLROOM_HOME);
 		var mustard = new CharacterPiece(CharacterConstants.MUSTARD, LocationConstants.Start.LOUNGE_DININGROOM_HOME);
-		return [scarlet, plum, peacock, green, white, mustard];
+		
+		// Shuffle the characters randomly so that when characters become assigned to players, there is random assignment.
+		// Scarlet is always assigned to the first player joining the game though.
+		var characters = [plum, peacock, green, white, mustard];
+		this.shuffleInPlace(characters);
+		characters.splice(0, 0, scarlet);
+		return characters;
 	}
 
 	initializeWeaponPieces()
@@ -91,17 +97,21 @@ export class GameEngine
 		this.players.push(new Player(playerId));
 	}
 
+	shuffleInPlace(arr)
+	{
+		arr.sort((a, b) => 0.5 - Math.random());
+	}
+
 	chooseMysteryCardIndexFromSelection(cards)
 	{
-		// Hardcoded mystery cards for initial increments.
-		return 0;
+		return Math.floor(cards.length * Math.random());
 	}
 
 	allocateCards()
 	{
 		// Set aside mystery cards before distributing cards.
-		let characterMysteryCardIndex = this.totalWeaponCards.length - 1;
-		let weaponMysteryCardIndex = this.totalWeaponCards.length - 1;
+		let characterMysteryCardIndex = this.chooseMysteryCardIndexFromSelection(this.totalCharacterCards)
+		let weaponMysteryCardIndex = this.chooseMysteryCardIndexFromSelection(this.totalWeaponCards);
 		let locationMysteryCardIndex = this.chooseMysteryCardIndexFromSelection(this.totalLocationCards);
 
 		this.mysteryCards = [
@@ -119,7 +129,11 @@ export class GameEngine
 		let availableLocationCards = JSON.parse(JSON.stringify(this.totalLocationCards));
 		availableLocationCards.splice(locationMysteryCardIndex, 1);
 
+		// Shuffle the remaining cards among players.
 		this.userFacingCards = availableCharacterCards.concat(availableWeaponCards).concat(availableLocationCards);
+		console.log('\nTotal user facing cards:');
+		console.log(this.userFacingCards);
+		this.shuffleInPlace(this.userFacingCards);
 	}
 
 	setupPlayers()
@@ -149,8 +163,7 @@ export class GameEngine
 
 	startGame()
 	{
-		// For initial increment, player count for game will be 3.
-		if (this.getPlayerCount() != 3)
+		if (this.getPlayerCount() < 3)
 		{
 			emitGameCannotStart(this.gameId);
 		}
@@ -193,6 +206,52 @@ export class GameEngine
 	- TODO: ACCUSATIONS (next increment)
 	*/
 
+	getAvailableHallwaysForMoving(roomLocation)
+	{
+		// Get the hallways adjacent to the room.
+		let adjacentHallways = [];
+		for (let hallway in LocationConstants.Hallway)
+		{
+			let connectingRooms = hallway.split("_");
+			if (roomLocation == connectingRooms[0] || roomLocation == connectingRooms[1])
+			{
+				adjacentHallways.push(hallway);
+			}
+		}
+
+		// For the hallways that are adjacent, check if any character already is there.
+		let potentialHallways = [];
+		for (let adjacentHallway of adjacentHallways)
+		{
+			if (this.totalCharacterPieces.map(piece => piece.currentLocation).indexOf(adjacentHallway) === -1)
+			{
+				potentialHallways.push(adjacentHallway);
+			}
+		}
+
+		return potentialHallways;
+	}
+
+	getAvailableDiagonalRoomsForMoving(roomLocation)
+	{
+		if (roomLocation in DiagonalRooms)
+		{
+			return [DiagonalRooms[roomLocation]];
+		}
+
+		return [];
+	}
+
+	getStayMove(character)
+	{
+		if (character.priorPieceMover != this.players[this.currentPlayerIndex].playerId)
+		{
+			return [STAY];
+		}
+
+		return [];
+	}
+
 	requestMove()
 	{
 		this.gameState = GameState.REQUESTING_MOVE;
@@ -205,9 +264,20 @@ export class GameEngine
 		}
 		else if (this.players[this.currentPlayerIndex].character.currentLocation in LocationConstants.Room)
 		{
-			// STOP GAME HERE FOR SKELETAL INCREMENT.
-			console.log('Current location is a room, stopping game here for skeletal increment.');
-			return;
+			// Can move to adjacent hallways if no character is already there.
+			potentialMoves = potentialMoves.concat(this.getAvailableHallwaysForMoving(this.players[this.currentPlayerIndex].character.currentLocation));
+
+			// Can move to diagonal rooms through secret passageway.
+			potentialMoves = potentialMoves.concat(this.getAvailableDiagonalRoomsForMoving(this.players[this.currentPlayerIndex].character.currentLocation));
+
+			// Don't move at all because was moved to place by another player.
+			potentialMoves = potentialMoves.concat(this.getStayMove(this.players[this.currentPlayerIndex].character));
+			
+			// If in room blocked in all hallways with no way to move, then tell UI CANNOTMOVE.
+			if (potentialMoves.length == 0)
+			{
+				potentialMoves = [CANNOTMOVE];
+			}
 		}
 		else if (this.players[this.currentPlayerIndex].character.currentLocation in LocationConstants.Hallway)
 		{
@@ -225,12 +295,20 @@ export class GameEngine
 		{
 			console.log(`MOVE: ${this.players[this.currentPlayerIndex].character.name} from ${this.players[this.currentPlayerIndex].character.currentLocation} to ${newCharacterLocation}`)
 			this.gameState = GameState.PROCESSING_MOVE;
-			this.movePiece(this.players[this.currentPlayerIndex].character, newCharacterLocation);
+
+			if (newCharacterLocation != STAY && newCharacterLocation != CANNOTMOVE)
+			{
+				this.movePiece(this.players[this.currentPlayerIndex].character, newCharacterLocation);
+			}
 			this.emitCurrentGameState();
 
 			this.gameState = GameState.PROCESSED_MOVE;
 
-			if (newCharacterLocation in LocationConstants.Room)
+			if (newCharacterLocation in LocationConstants.Room && newCharacterLocation != CANNOTMOVE)
+			{
+				this.requestSuggestion();
+			}
+			else if (newCharacterLocation == STAY)
 			{
 				this.requestSuggestion();
 			}
@@ -265,7 +343,8 @@ export class GameEngine
 			this.emitCurrentGameState();
 
 			this.gameState = GameState.PROCESSED_SUGGESTION;
-			this.requestProof(processedSuggestion);
+			this.processingSuggestion = processedSuggestion;
+			this.requestProof(this.processingSuggestion);
 		}
 		else 
 		{
@@ -273,10 +352,10 @@ export class GameEngine
 		}
 	}
 
-	requestProof(processedSuggestion)
+	requestProof()
 	{
 		this.gameState = GameState.REQUESTING_PROOF;
-		emitRequestProof(this.gameId, this.players[(this.currentPlayerIndex + this.proofRequestingOffset) % this.getPlayerCount()], processedSuggestion);
+		emitRequestProof(this.gameId, this.players[(this.currentPlayerIndex + this.proofRequestingOffset) % this.getPlayerCount()], this.processingSuggestion);
 		this.gameState = GameState.REQUESTED_PROOF;
 	}
 
@@ -295,11 +374,13 @@ export class GameEngine
 				this.proofRequestingOffset += 1;
 				if ((this.currentPlayerIndex + this.proofRequestingOffset) % this.getPlayerCount() != this.currentPlayerIndex)
 				{
-					this.requestProof();
+					this.requestProof(this.processingSuggestion);
 					return;
 				}
 			}
 
+			this.processingSuggestion = undefined;
+			this.proofRequestingOffset = 1;
 			this.currentPlayerIndex = (this.currentPlayerIndex + 1) % this.getPlayerCount();
 			this.gameState = GameState.PROCESSED_PROOF;
 			this.requestMove();
@@ -332,6 +413,7 @@ export class GameEngine
 
 	movePiece(gamePiece, newLocation)
 	{
+		gamePiece.priorPieceMover = this.players[this.currentPlayerIndex].playerId;
 		gamePiece.priorLocation = gamePiece.currentLocation;
 		gamePiece.currentLocation = newLocation;
 	}

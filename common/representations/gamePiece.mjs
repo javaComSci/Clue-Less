@@ -5,5 +5,6 @@ export class GamePiece
         this.name = name;
         this.currentLocation = startingLocation;
         this.type = type;
+        this.priorPieceMover = undefined;
     }
 }
