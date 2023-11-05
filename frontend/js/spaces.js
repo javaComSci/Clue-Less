@@ -12,10 +12,11 @@ class Space
 
 export class Passageway extends Space
 {
-	constructor(name, x, y, length, width)
+	constructor(name, destination, x, y, length, width)
 	{
 		super(x, y, length, width);
 		this.name = name;
+		this.destination = destination;
 	}
 }
 

@@ -26,6 +26,8 @@ export class GameMap
 		this.hs = this.re/3;
 		// character edge
 		this.ce = this.hs/2;
+		// passageway edge
+		this.pe = this.hs/2;
 		/*
 		 * TODO: Find better way to represent coordinates than below
 		 */
@@ -70,6 +72,20 @@ export class GameMap
 			'LIBRARY_STUDY_HOME': {'x': this.hallway_down_coordinates['LIBRARY_STUDY'].x - this.ce,
 									'y': this.hallway_down_coordinates['LIBRARY_STUDY'].y + this.hl/2}
 		};
+		this.passageway_coordinates = {
+			'STUDY': {'x': this.room_coordinates['STUDY'].x + this.re - this.pe,
+						'y': this.room_coordinates['STUDY'].y + this.re - this.pe,
+						'dest': 'KITCHEN'},
+			'KITCHEN': {'x': this.room_coordinates['KITCHEN'].x + this.re - this.pe,
+						'y': this.room_coordinates['KITCHEN'].y + this.re - this.pe,
+						'dest': 'STUDY'},
+			'LOUNGE': {'x': this.room_coordinates['LOUNGE'].x + this.re - this.pe,
+						'y': this.room_coordinates['LOUNGE'].y + this.re - this.pe,
+						'dest': 'CONSERVATORY'},
+			'CONSERVATORY': {'x': this.room_coordinates['CONSERVATORY'].x + this.re - this.pe,
+						'y': this.room_coordinates['CONSERVATORY'].y + this.re - this.pe,
+						'dest': 'LOUNGE'}
+		}
 		this.rooms = {};
 		this.hallways = {};
 		this.starts = {};
@@ -126,6 +142,14 @@ export class GameMap
 	// creates passageways
 	createPassageways()
 	{
+		for(var passageway in this.passageway_coordinates) {
+			let x = this.passageway_coordinates[passageway]['x'];
+			let y = this.passageway_coordinates[passageway]['y'];
+			let dest = this.passageway_coordinates[passageway]['dest'];
+			let passagewayNew = new Passageway(passageway, dest, x, y, this.pe, this.pe);
+			this.passageways[passageway] = passagewayNew;
+			this.locations[passageway + '_PASS'] = passagewayNew;
+		}
 	}
 	// creates characters
 	createCharacters()
@@ -141,6 +165,7 @@ export class GameMap
 		this.createHallways();
 		this.createCharacters();
 		this.createStarts();
+		this.createPassageways();
 	}
 	/*
 	 * Define in subclass

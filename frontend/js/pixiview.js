@@ -97,12 +97,12 @@ export class PixiMap extends GameMap
 		this.app = app;
 		super.createMap();
 		this.displayMap();
-		console.log(this.locations);
 	}
 	displayMap()
 	{
 		this.displayRooms();
 		this.displayHallways();
+		this.displayPassageways();
 	}
 
 	// TODO: Create a parent container that holds the rooms on the pixiMap
@@ -168,5 +168,25 @@ export class PixiMap extends GameMap
 			this.characterContainer.addChild(pixiCharacter);
 		});
 		this.app.stage.addChild(this.characterContainer);
+	}
+	displayPassageways() {
+		if ( this.passagewayContainer != null )
+		{
+			// free the memory!
+			this.passagewayContainer.destroy();
+		}
+		this.passagewayContainer = new PIXI.Graphics();
+		for(var passageway in this.passageways) {
+			let pixiPassageway = new PIXI.Graphics();
+			let passagewayObj = this.passageways[passageway];
+			pixiPassageway.eventMode = 'static';
+			pixiPassageway.on('pointerup', (event) => { window.client.testme(passagewayObj.name); } );
+			pixiPassageway.beginFill(0x1203FD);
+			pixiPassageway.drawRect(0,0,this.pe,this.pe);
+			pixiPassageway.endFill();
+			pixiPassageway.position.set(passagewayObj.x,passagewayObj.y);
+			this.passagewayContainer.addChild(pixiPassageway);
+		}
+		this.app.stage.addChild(this.passagewayContainer);
 	}
 }
