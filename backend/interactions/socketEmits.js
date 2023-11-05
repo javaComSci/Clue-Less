@@ -33,7 +33,7 @@ export function emitGameState(gameId, characterPieces, weaponPieces)
 
 export function emitRequestMove(gameId, currentPlayer, potentialMoves)
 {
-    logToConsole(`REQUEST: GAME MOVE from player ${currentPlayer.playerId}`);
+    logToConsole(`REQUEST: GAME MOVE from player ${currentPlayer.playerId}. Available moves: ${potentialMoves}.`);
     getIOInstance().to(gameId).emit('REQUESTING_MOVE_BROADCAST', { playerId: currentPlayer.playerId });
     getIOInstance().to(getPerUserRoomId(gameId, currentPlayer.playerId)).emit('REQUEST_MOVE', { potentialMoves: potentialMoves });
 }
