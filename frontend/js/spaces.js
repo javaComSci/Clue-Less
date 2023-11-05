@@ -63,6 +63,17 @@ export class Weapon extends Space
 	}
 }
 
+export class Start extends Space
+{
+	constructor(name, x, y, length, width)
+	{
+		super(x, y, length, width);
+		this.name = name;
+		this.playerLocationX = x;
+		this.playerLocationY = y;
+	}
+}
+
 export class Card extends Space
 {
 	constructor(name, content, type, x, y, length, width)

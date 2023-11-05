@@ -3,7 +3,7 @@
  * can inherit this and implement display functions.
  */
 import { CharacterConstants } from '/common/representations/character.mjs';
-import { Character,Room,Hallway,Passageway,Weapon } from '/js/spaces.js';
+import { Character,Room,Hallway,Passageway,Weapon,Start } from '/js/spaces.js';
 export class GameMap
 {
     constructor(height, width)
@@ -56,8 +56,23 @@ export class GameMap
 			'LOUNGE_DININGROOM': { 'x': this.mb + this.re/3 + 2 * ( this.hl + this.re ), 'y': this.mb + this.re },
 			'DININGROOM_KITCHEN': { 'x': this.mb + this.re/3 + 2 * ( this.hl + this.re ), 'y': this.mb + this.re + this.hl + this.re }
 		};
+		this.starts_coordinates = {
+			'HALL_LOUNGE_HOME': { 'x': this.hallway_across_coordinates['HALL_LOUNGE'].x + this.hl/2,
+									'y': this.hallway_across_coordinates['HALL_LOUNGE'].y - this.ce },
+			'LOUNGE_DININGROOM_HOME': {'x': this.hallway_down_coordinates['LOUNGE_DININGROOM'].x + this.hs,
+										'y': this.hallway_down_coordinates['LOUNGE_DININGROOM'].y + this.hl/2},
+			'KITCHEN_BALLROOM_HOME': {'x': this.hallway_across_coordinates['KITCHEN_BALLROOM'].x + this.hl/2,
+										'y': this.hallway_across_coordinates['KITCHEN_BALLROOM'].y + this.hs },
+			'BALLROOM_CONSERVATORY_HOME': {'x': this.hallway_across_coordinates['BALLROOM_CONSERVATORY'].x + this.hl/2,
+											'y': this.hallway_across_coordinates['BALLROOM_CONSERVATORY'].y + this.hs },
+			'CONSERVATORY_LIBRARY_HOME': {'x': this.hallway_down_coordinates['CONSERVATORY_LIBRARY'].x - this.ce,
+											'y': this.hallway_down_coordinates['CONSERVATORY_LIBRARY'].y + this.hl/2},
+			'LIBRARY_STUDY_HOME': {'x': this.hallway_down_coordinates['LIBRARY_STUDY'].x - this.ce,
+									'y': this.hallway_down_coordinates['LIBRARY_STUDY'].y + this.hl/2}
+		};
 		this.rooms = {};
 		this.hallways = {};
+		this.starts = {};
 		this.locations = {};
 		this.passageways = {};
 		this.characters = {};
@@ -86,8 +101,6 @@ export class GameMap
 			let hallwayNew = new Hallway(hallway, x, y, this.hl, this.hs);
 			this.hallways[hallway] = hallwayNew;
 			this.locations[hallway] = hallwayNew;
-			this.hallways[hallway + '_HOME'] = hallwayNew;
-			this.locations[hallway + '_HOME'] = hallwayNew;
 		}
 
 		// for each key, create hallway with long side vertical
@@ -97,8 +110,17 @@ export class GameMap
 			let hallwayNew = new Hallway(hallway, x, y, this.hs, this.hl);
 			this.hallways[hallway] = hallwayNew;
 			this.locations[hallway] = hallwayNew;
-			this.hallways[hallway + '_HOME'] = hallwayNew;
-			this.locations[hallway + '_HOME'] = hallwayNew;
+		}
+	}
+	createStarts()
+	{
+		// for each key, create start position with coordinate
+		for(var start in this.starts_coordinates) {
+			let x = this.starts_coordinates[start]['x'];
+			let y = this.starts_coordinates[start]['y'];
+			let startNew = new Start(start, x, y, 0, 0);
+			this.starts[start] = startNew;
+			this.locations[start] = startNew;
 		}
 	}
 	// creates passageways
@@ -118,6 +140,7 @@ export class GameMap
 		this.createRooms();
 		this.createHallways();
 		this.createCharacters();
+		this.createStarts();
 	}
 	/*
 	 * Define in subclass
