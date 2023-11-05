@@ -14,9 +14,10 @@ export class UIClient
 		this.msgEngine.send('start', {'playerId': this.playerId, 'gameId': this.gameId } );
 		this.playerInfo;
 	}
-	setPlayerInfo(info)
+	setPlayerInfo(playerInfo)
 	{
 		this.playerInfo = playerInfo;
+		console.log(this.playerInfo);
 	}
 	testme(data)
 	{

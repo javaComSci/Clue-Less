@@ -37,6 +37,9 @@ export class EngineRecv
 	}
 	msgPlayerStartInfo()
 	{
+		this.socket.on('PLAYER_START_INFO', function (obj) {
+			window.client.setPlayerInfo(obj);
+		});
 	}
 	msgGameState()
 	{
