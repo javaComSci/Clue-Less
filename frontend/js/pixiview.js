@@ -29,6 +29,16 @@ export class PixiHud extends GameHud
 		this.cardContainer.beginFill(0xFCFEB4);
 		this.cardContainer.drawRect(this.cardAreaStartX,this.cardAreaStartY,this.cardAreaWidth,this.cardAreaHeight);
 		this.cardContainer.endFill();
+		this.cards.forEach((card) => {
+			let pixiCard = new PIXI.Graphics();
+			pixiCard.eventMode = 'static';
+			pixiCard.on('pointerup', (event) => { window.client.testme(card.name); } );
+			pixiCard.beginFill(0xFBF8FB);
+			pixiCard.drawRect(0,0,card.width,card.length);
+			pixiCard.endFill();
+			pixiCard.position.set(card.x,card.y);
+			this.cardContainer.addChild(pixiCard);
+		});
 		this.app.stage.addChild(this.cardContainer);
 	}
 	displayButtons()

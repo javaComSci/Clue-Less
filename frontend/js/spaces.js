@@ -65,7 +65,7 @@ export class Weapon extends Space
 
 export class Card extends Space
 {
-	constructor(name, type, content, x, y, length, width)
+	constructor(name, content, type, x, y, length, width)
 	{
 		super(x, y, length, width);
 		this.name = name;

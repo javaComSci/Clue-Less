@@ -25,25 +25,42 @@ export class GameHud
 		this.buttonMarginSFactor = .25;
 		this.buttonGapSFactor = .125;
 
+		this.cardMarginSFactor = .25;
+		this.cardGapSFactor = .10;
+
 		this.state = {
 			'buttons': [ {'name':'Suggestion','content':'Suggestion'},
-				{'name':'Accusation','content':'Accusation'} ]
+				{'name':'Accusation','content':'Accusation'} ],
+			'cards': [ {'name':'Candle','content':'Candle', 'type': 'weapon'},
+				{'name':'Candle','content':'Candle', 'type': 'weapon'},
+				{'name':'Candle','content':'Candle', 'type': 'weapon'},
+				{'name':'Candle','content':'Candle', 'type': 'weapon'}
+			]
 		};
 		this.buttons = [];
+		this.cards = [];
 		this.createHud(this.state);
 	}
 	createHud(state)
 	{
-		this.createCards();
+		this.createCards(state['cards']);
 		this.createButtons(state['buttons']);
 		this.createAlerts();
 	}
-	createCards()
+	createCards(state)
 	{
-		/*
-		state.forEach((card) => {
+		let cardWidth = this.cardAreaWidth - 2 * ( this.cardMarginSFactor * this.cardAreaWidth );
+		let cardGapCount = state.length - 1;
+		let cardGapTotalHeight = ( this.cardAreaHeight * this.cardGapSFactor ) * cardGapCount;
+		let cardHeight = ((this.cardAreaHeight - 2 * ( this.cardMarginSFactor * this.cardAreaHeight )) - cardGapTotalHeight )/state.length;
+		let cardStartX = (this.cardMarginSFactor * this.cardAreaWidth) + this.cardAreaStartX;
+		let cardStartY = (this.cardMarginSFactor * this.cardAreaHeight) + this.cardAreaStartY;
+		state.forEach((c) => {
+			let card = new Card(c['name'],c['content'],c['type'],cardStartX,cardStartY,cardHeight,cardWidth);
+			cardStartY += cardHeight + (this.cardAreaHeight * this.cardGapSFactor);
+			this.cards.push(card);
 		});
-		*/
+		console.log(this.cards);
 	}
 	createButtons(state)
 	{
