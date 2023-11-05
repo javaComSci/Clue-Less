@@ -163,8 +163,7 @@ export class GameEngine
 
 	startGame()
 	{
-		// For initial increment, player count for game will be 3.
-		if (this.getPlayerCount() != 3)
+		if (this.getPlayerCount() < 3)
 		{
 			emitGameCannotStart(this.gameId);
 		}
@@ -274,6 +273,11 @@ export class GameEngine
 			// Don't move at all because was moved to place by another player.
 			potentialMoves = potentialMoves.concat(this.getStayMove(this.players[this.currentPlayerIndex].character));
 			
+			// If in room blocked in all hallways with no way to move, then tell UI CANNOTMOVE.
+			if (potentialMoves.length == 0)
+			{
+				potentialMoves = [CANNOTMOVE];
+			}
 		}
 		else if (this.players[this.currentPlayerIndex].character.currentLocation in LocationConstants.Hallway)
 		{
