@@ -42,6 +42,16 @@ export class PixiHud extends GameHud
 		this.buttonContainer.beginFill(0xCAFEB4);
 		this.buttonContainer.drawRect(this.buttonAreaStartX,this.buttonAreaStartY,this.buttonAreaWidth,this.buttonAreaHeight);
 		this.buttonContainer.endFill();
+		this.buttons.forEach((button) => {
+			let pixiButton = new PIXI.Graphics();
+			pixiButton.eventMode = 'static';
+			pixiButton.on('pointerup', (event) => { window.client.testme(button.name); } );
+			pixiButton.beginFill(0xFBF8FB);
+			pixiButton.drawRect(0,0,button.width,button.length);
+			pixiButton.endFill();
+			pixiButton.position.set(button.x,button.y);
+			this.buttonContainer.addChild(pixiButton);
+		});
 		this.app.stage.addChild(this.buttonContainer);
 	}
 	displayAlerts()

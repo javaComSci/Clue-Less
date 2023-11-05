@@ -4,7 +4,7 @@
 import { Button,Card } from '/js/spaces.js';
 export class GameHud
 {
-	constructor(mapHeight, mapWidth, screenHeight, screenWidth)
+	constructor(mapHeight, mapWidth, screenHeight, screenWidth, state)
 	{
 		/*
 		 * Define areas for the hud
@@ -21,12 +21,21 @@ export class GameHud
 		this.cardAreaStartY = this.alertAreaHeight;
 		this.cardAreaHeight = 3 * screenHeight/4;
 		this.cardAreaWidth = screenWidth - mapWidth;
-		this.createHud();
+
+		this.buttonMarginSFactor = .25;
+		this.buttonGapSFactor = .125;
+
+		this.state = {
+			'buttons': [ {'name':'Suggestion','content':'Suggestion'},
+				{'name':'Accusation','content':'Accusation'} ]
+		};
+		this.buttons = [];
+		this.createHud(this.state);
 	}
-	createHud()
+	createHud(state)
 	{
 		this.createCards();
-		this.createButtons();
+		this.createButtons(state['buttons']);
 		this.createAlerts();
 	}
 	createCards()
@@ -36,8 +45,20 @@ export class GameHud
 		});
 		*/
 	}
-	createButtons()
+	createButtons(state)
 	{
+		let buttonHeight = this.buttonAreaHeight - 2 * ( this.buttonMarginSFactor * this.buttonAreaHeight );
+		let buttonGapCount = state.length - 1;
+		let buttonGapTotalWidth = ( this.buttonAreaWidth * this.buttonGapSFactor ) * buttonGapCount;
+		let buttonWidth = ((this.buttonAreaWidth - 2 * ( this.buttonMarginSFactor * this.buttonAreaWidth )) - buttonGapTotalWidth )/state.length;
+		let buttonStartX = (this.buttonMarginSFactor * this.buttonAreaWidth) + this.buttonAreaStartX;
+		let buttonStartY = (this.buttonMarginSFactor * this.buttonAreaHeight) + this.buttonAreaStartY;
+		state.forEach((b) => {
+			let button = new Button(b['name'],b['content'],buttonStartX,buttonStartY,buttonHeight,buttonWidth);
+			buttonStartX += buttonWidth + (this.buttonAreaWidth * this.buttonGapSFactor);
+			this.buttons.push(button);
+		});
+		console.log(this.buttons);
 	}
 	createAlerts()
 	{
