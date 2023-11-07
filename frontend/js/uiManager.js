@@ -14,7 +14,7 @@ export class UIManager
 	 */
 	updateGameState(state)
 	{
-		//this.ui.updateHudState();
+		this.ui.updateHudState(state);
 		this.ui.updateMapState(state);
 	}
 	move()

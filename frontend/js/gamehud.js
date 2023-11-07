@@ -26,23 +26,14 @@ export class GameHud
 		this.buttonGapSFactor = .125;
 
 		this.cardMarginSFactor = .10;
-		this.cardGapSFactor = .10;
+		this.cardGapSFactor = .05;
 
 		this.alertMarginSFactor = .25;
 
-		this.state = {
-			'buttons': [ {'name':'Suggestion','content':'Suggestion'},
-				{'name':'Accusation','content':'Accusation'} ],
-			'cards': [ {'name':'Candle','content':'Candle', 'type': 'weapon'},
-				{'name':'Candle','content':'Candle', 'type': 'weapon'},
-				{'name':'Candle','content':'Candle', 'type': 'weapon'},
-				{'name':'Candle','content':'Candle', 'type': 'weapon'}],
-			'alerts': [ {'name':'pending','content':'Waiting on 2 more players'}]
-		};
 		this.buttons = [];
 		this.cards = [];
 		this.alerts = [];
-		this.createHud(this.state);
+		this.createHud(state);
 	}
 	createHud(state)
 	{
@@ -59,7 +50,7 @@ export class GameHud
 		let cardStartX = (this.cardMarginSFactor * this.cardAreaWidth) + this.cardAreaStartX;
 		let cardStartY = (this.cardMarginSFactor * this.cardAreaHeight) + this.cardAreaStartY;
 		state.forEach((c) => {
-			let card = new Card(c['name'],c['content'],c['type'],cardStartX,cardStartY,cardHeight,cardWidth);
+			let card = new Card(c['name'],c['name'],c['type'],cardStartX,cardStartY,cardHeight,cardWidth);
 			cardStartY += cardHeight + (this.cardAreaHeight * this.cardGapSFactor);
 			this.cards.push(card);
 		});

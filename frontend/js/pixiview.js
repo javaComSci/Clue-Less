@@ -6,9 +6,9 @@ import { GameHud } from '/js/gamehud.js';
 
 export class PixiHud extends GameHud
 {
-	constructor(app, mapHeight, mapWidth)
+	constructor(app, mapHeight, mapWidth, state)
 	{
-		super(mapHeight, mapWidth, app.renderer.view.height, app.renderer.view.width);
+		super(mapHeight, mapWidth, app.renderer.view.height, app.renderer.view.width, state);
 		this.app = app;
 		this.displayHud();
 	}
@@ -47,7 +47,7 @@ export class PixiHud extends GameHud
 			pixiCard.endFill();
 			let text = new PIXI.Text(
 				'Type:' + card.type + '\n' + 'Name:' + card.name, {
-					fontSize: 40,
+					fontSize: 30,
 					fill: 0x000000
 				}
 			);

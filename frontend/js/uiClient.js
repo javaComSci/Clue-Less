@@ -25,8 +25,8 @@ export class UIClient
 	}
 	updateGameState(state)
 	{
+		state['cards'] = this.playerInfo['cards'];
 		this.uiManager.updateGameState(state);
-		//console.log(state);
 	}
 
 }
