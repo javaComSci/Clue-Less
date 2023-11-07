@@ -25,7 +25,7 @@ export class GameHud
 		this.buttonMarginSFactor = .25;
 		this.buttonGapSFactor = .125;
 
-		this.cardMarginSFactor = .25;
+		this.cardMarginSFactor = .10;
 		this.cardGapSFactor = .10;
 
 		this.alertMarginSFactor = .25;

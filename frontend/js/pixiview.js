@@ -29,6 +29,15 @@ export class PixiHud extends GameHud
 		this.cardContainer.beginFill(0xFCFEB4);
 		this.cardContainer.drawRect(this.cardAreaStartX,this.cardAreaStartY,this.cardAreaWidth,this.cardAreaHeight);
 		this.cardContainer.endFill();
+		let hudAreaText = new PIXI.Text(
+				'Cards', {
+				fontSize: 60,
+				fill: 0x000000
+			}
+		);
+		hudAreaText.x = this.cardAreaStartX + this.cardAreaWidth/2 - hudAreaText.width/2;
+		hudAreaText.y = this.cardAreaStartY;
+		this.cardContainer.addChild(hudAreaText);
 		this.cards.forEach((card) => {
 			let pixiCard = new PIXI.Graphics();
 			pixiCard.eventMode = 'static';
@@ -36,6 +45,15 @@ export class PixiHud extends GameHud
 			pixiCard.beginFill(0xFBF8FB);
 			pixiCard.drawRect(0,0,card.width,card.length);
 			pixiCard.endFill();
+			let text = new PIXI.Text(
+				'Type:' + card.type + '\n' + 'Name:' + card.name, {
+					fontSize: 40,
+					fill: 0x000000
+				}
+			);
+			text.x = 0;
+			text.y = 0;
+			pixiCard.addChild(text);
 			pixiCard.position.set(card.x,card.y);
 			this.cardContainer.addChild(pixiCard);
 		});
@@ -52,6 +70,15 @@ export class PixiHud extends GameHud
 		this.buttonContainer.beginFill(0xCAFEB4);
 		this.buttonContainer.drawRect(this.buttonAreaStartX,this.buttonAreaStartY,this.buttonAreaWidth,this.buttonAreaHeight);
 		this.buttonContainer.endFill();
+		let hudAreaText = new PIXI.Text(
+				'Actions', {
+				fontSize: 60,
+				fill: 0x000000
+			}
+		);
+		hudAreaText.x = this.buttonAreaStartX + this.buttonAreaWidth/2 - hudAreaText.width/2;
+		hudAreaText.y = this.buttonAreaStartY;
+		this.buttonContainer.addChild(hudAreaText);
 		this.buttons.forEach((button) => {
 			let pixiButton = new PIXI.Graphics();
 			pixiButton.eventMode = 'static';
@@ -62,7 +89,7 @@ export class PixiHud extends GameHud
 			let text = new PIXI.Text(
 				button.content, {
 					fontSize: 40,
-					fill: 0x66CCFF
+					fill: 0x000000
 				}
 			);
 			text.x = button.length/2 - text.width/2;
