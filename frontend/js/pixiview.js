@@ -59,6 +59,15 @@ export class PixiHud extends GameHud
 			pixiButton.beginFill(0xFBF8FB);
 			pixiButton.drawRect(0,0,button.width,button.length);
 			pixiButton.endFill();
+			let text = new PIXI.Text(
+				button.content, {
+					fontSize: 40,
+					fill: 0x66CCFF
+				}
+			);
+			text.x = button.length/2 - text.width/2;
+			text.y = button.width/2 - text.height/2;
+			pixiButton.addChild(text);
 			pixiButton.position.set(button.x,button.y);
 			this.buttonContainer.addChild(pixiButton);
 		});
