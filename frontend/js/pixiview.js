@@ -42,7 +42,7 @@ export class PixiHud extends GameHud
 		this.weapons.forEach((weapon) => {
 			let pixiWeapon = new PIXI.Graphics();
 			pixiWeapon.eventMode = 'static';
-			pixiWeapon.on('pointerup', (event) => { window.client.testme(weapon.name); } );
+			pixiWeapon.on('pointerup', (event) => { window.client.selectWeapon(weapon.name); } );
 			pixiWeapon.beginFill(0xFBF8FB);
 			pixiWeapon.drawRect(0,0,weapon.width,weapon.length);
 			pixiWeapon.endFill();
@@ -250,7 +250,7 @@ export class PixiMap extends GameMap
 
 			let pixiCharacter = new PIXI.Graphics();
 			pixiCharacter.eventMode = 'static';
-			pixiCharacter.on('pointerup', (event) => { window.client.testme(character.name); } );
+			pixiCharacter.on('pointerup', (event) => { window.client.selectPlayer(character.name); } );
 			pixiCharacter.beginFill(0xFBF8FB);
 			pixiCharacter.drawRect(0,0,this.ce,this.ce);
 			pixiCharacter.endFill();

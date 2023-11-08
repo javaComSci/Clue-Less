@@ -33,6 +33,7 @@ export class EngineSend {
 	}
 	msgSuggestion(data)
 	{
+		this.push('suggestion', data);
 	}
 	msgAccuse(data)
 	{

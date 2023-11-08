@@ -36,14 +36,17 @@ export class UIClient
 			'move': []
 		};
 	}
+	updateGameState(state)
+	{
+		console.log('Update Game State!: ' + state);
+		state['cards'] = this.playerInfo['cards'];
+		this.uiManager.updateGameState(state);
+	}
+
 	setPlayerInfo(playerInfo)
 	{
 		this.playerInfo = playerInfo;
 		console.log(this.playerInfo);
-	}
-	testme(data)
-	{
-		console.log(data);
 	}
 	promptPlayer(ask)
 	{
@@ -58,6 +61,67 @@ export class UIClient
 	setPlayerTurn(playerInfo)
 	{
 		console.log('Player\'s Turn: ' + playerInfo.playerId);
+	}
+	selectPlayer(character)
+	{
+		// if suggestion is active
+		if(this.actionLock['suggestion'] == 1)
+		{
+			// define it
+			this.actionData['suggestion']['character'] = character;
+			// if no other details needed for suggestion
+			if(this.actionData['suggestion']['weapon'] != '')
+			{
+				// send suggestion to backend
+				this.msgEngine.send('suggestion', {
+					'playerId':this.playerId,
+					'gameId':this.gameId,
+					'suggestedCharacterName':this.actionData['suggestion']['character'],
+					'suggestedWeaponName':this.actionData['suggestion']['weapon']});
+				// reset suggestion information
+				this.actionData['suggestion'] = {'character':'','weapon':''};
+			}
+			// otherwise, prompt for more details
+			else
+			{
+				this.promptPlayer('SUGGESTION_NEED_WEAPON');
+			}
+		}
+		else
+		{
+			console.log('Clicked on Character: ' + character);
+		}
+	}
+	selectWeapon(weapon)
+	{
+		// if suggestion is active
+		if(this.actionLock['suggestion'] == 1)
+		{
+			// define it
+			this.actionData['suggestion']['weapon'] = weapon;
+			// if no other details needed for suggestion
+			if(this.actionData['suggestion']['character'] != '')
+			{
+				// send suggestion to backend
+				this.msgEngine.send('suggestion', {
+					'playerId':this.playerId,
+					'gameId':this.gameId,
+					'suggestedCharacterName':this.actionData['suggestion']['character'],
+					'suggestedWeaponName':this.actionData['suggestion']['weapon']});
+				// reset suggestion information
+				this.actionData['suggestion'] = {'character':'','weapon':''};
+			}
+			// otherwise, prompt for more details
+			else
+			{
+				this.promptPlayer('SUGGESTION_NEED_CHARACTER');
+			}
+		}
+		else
+		{
+			console.log('Clicked on Weapon: ' + weapon);
+		}
+
 	}
 	selectButton(button)
 	{
@@ -76,7 +140,6 @@ export class UIClient
 			{
 				this.promptPlayer('SUGGESTION_RUNNING');
 			}
-			//this.msgEngine.send('suggestion', {'playerId':this.playerId,'gameId':this.gameId,'suggestedCharacterName':character,'suggestedWeaponName':weapon});
 		}
 	}
 	selectArea(area)
@@ -92,10 +155,6 @@ export class UIClient
 		{
 			console.log('Player selected: ' + area);
 		}
-	}
-	setSuggestionLock()
-	{
-		this.actionLock['suggestion'] = 1;
 	}
 	enableSuggestion()
 	{
@@ -116,11 +175,12 @@ export class UIClient
 		this.enableEndTurn();
 		console.log(moves);
 	}
-	updateGameState(state)
+	setSuggestionLock()
 	{
-		console.log('Update Game State!: ' + state);
-		state['cards'] = this.playerInfo['cards'];
-		this.uiManager.updateGameState(state);
+		this.actionLock['suggestion'] = 1;
 	}
-
+	testme(data)
+	{
+		console.log(data);
+	}
 }
