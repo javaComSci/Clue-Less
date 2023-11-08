@@ -44,14 +44,21 @@ export function emitRequestSuggestion(gameId, currentPlayer)
     getIOInstance().to(getPerUserRoomId(gameId, currentPlayer.playerId)).emit('REQUEST_SUGGESTION');
 }
 
+export function emitSuggestionWasProvided(gameId, currentPlayer)
+{
+    getIOInstance().to(getPerUserRoomId(gameId, currentPlayer.playerId)).emit('SUGGESTION_PROVIDED');
+}
+
 export function emitRequestProof(gameId, proofRequestedPlayer, proofSuggestion)
 {
-    logToConsole(`REQUEST: PROOF from player ${proofRequestedPlayer.playerId}`)
+    logToConsole(`REQUEST: PROOF from player ${proofRequestedPlayer.playerId}`);
+    getIOInstance().to(gameId).emit('REQUESTING_PROOF_BROADCAST', { playerId: proofRequestedPlayer.playerId });
     getIOInstance().to(getPerUserRoomId(gameId, proofRequestedPlayer.playerId)).emit('REQUEST_PROOF', proofSuggestion);
 }
 
 export function emitIsProofProvided(gameId, isProofProvided, proofProviderPlayerId)
 {
+    logToConsole(`BROADCAST: PROOF was provided by player ${proofProviderPlayerId}`)
     getIOInstance().to(gameId).emit('IS_PROOF_PROVIDED', { isProofProvided: isProofProvided, proofProviderPlayerId: proofProviderPlayerId });
 }
 
@@ -60,8 +67,25 @@ export function emitProofProvided(gameId, currentPlayer, proofProviderPlayerId)
     getIOInstance().to(getPerUserRoomId(gameId, currentPlayer.playerId)).emit('PROOF_PROVIDED', { proofProviderPlayerId: proofProviderPlayerId });
 }
 
+export function emitRequestPlayerTurnCompleteConfirmation(gameId, currentPlayer)
+{
+    logToConsole(`REQUEST: TURN COMPLETION CONFIRMATION from player ${currentPlayer.playerId}`);
+    getIOInstance().to(getPerUserRoomId(gameId, currentPlayer.playerId)).emit('REQUEST_TURN_COMPLETE_CONFIRM');
+}
+
 export function emitAccusationCorrect(gameId, winningPlayer, accusedCharacter, accusedWeapon, accusedLocation)
 {
     console.log(`ACCUSATION: ${accusedCharacter} in ${accusedLocation} with ${accusedWeapon} is correct. PLAYER ${winningPlayer.playerId} WON! GAME OVER!`);
     getIOInstance().to(gameId).emit('ACCUSATION_CORRECT', { winningPlayer: winningPlayer.playerId, accusedCharacter: accusedCharacter, accusedWeapon: accusedWeapon, accusedLocation: accusedLocation });
+}
+
+export function emitAccusationIncorrect(gameId, currentPlayer, accusedCharacter, accusedWeapon, accusedLocation, correctCharacter, correctWeapon, correctLocation, isGameOver)
+{
+    console.log(`ACCUSATION: ${accusedCharacter} in ${accusedLocation} with ${accusedWeapon} is incorrect. Player ${currentPlayer.playerId} can no longer make any moves`);
+    if (isGameOver)
+    {
+        console.log(`GAME IS OVER. NO ONE WON.`);
+    }
+    getIOInstance().to(getPerUserRoomId(gameId, currentPlayer.playerId)).emit('ACCUSATION_SOLUTION', { correctCharacter: correctCharacter, correctWeapon: correctWeapon, correctLocation: correctLocation });
+    getIOInstance().to(gameId).emit('ACCUSATION_INCORRECT', { accusingPlayer: currentPlayer.playerId, accusedCharacter: accusedCharacter, accusedWeapon: accusedWeapon, accusedLocation: accusedLocation, isGameOver: isGameOver });
 }

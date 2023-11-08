@@ -135,8 +135,6 @@
             accusation);
       }
 
-      
-
       input.value = '';
     }
 
@@ -145,6 +143,15 @@
       socket.emit(
         'proof',
         proofToProvide);
+    }
+
+    if (state == "COMPLETE")
+    {
+      socket.emit('turncomplete',
+        {
+          gameId: gameId,
+          playerId: playerId
+        });
     }
 
       // document.getElementById('input').style.visibility = 'hidden';
@@ -230,8 +237,19 @@
       print_message("Information regarding proof being provided for prior suggestion: " + JSON.stringify(obj), moveColor);
     });
 
+    socket.on('SUGGESTION_PROVIDED', function (obj) {
+      print_message("Suggestion was provided: " + JSON.stringify(obj.playerId), broadCastColor);
+    });
+
     socket.on('PROOF_PROVIDED', function (obj) {
       print_message("Proof that was provided is: " + JSON.stringify(obj), broadCastColor);
+    });
+
+    socket.on('REQUEST_TURN_COMPLETE_CONFIRM', function (obj) {
+      print_message("You are asked to confirm that your turn is complete.", moveColor);
+      state = 'COMPLETE';
+      document.getElementById('GameButton').innerText = "Click to complete your turn"
+      document.getElementById('GameButton').style.visibility = 'visible';
     });
 
     socket.on('ACCUSATION_CORRECT', function (obj) {

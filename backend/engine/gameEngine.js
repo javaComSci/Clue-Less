@@ -1,35 +1,83 @@
 import { GameState } from './gameState.js';
 import { Player } from '../../common/representations/player.mjs';
-import { LocationConstants, CardLocations, LocationCard, DiagonalRooms, STAY, CANNOTMOVE } from '../../common/representations/location.mjs';
-import { CardCharacters, CharacterConstants, CharacterPiece, CharacterCard } from  '../../common/representations/character.mjs';
-import { CardWeapons, WeaponPiece, WeaponCard } from '../../common/representations/weapon.mjs';
+import { LocationConstants, getAvailableHallwaysForMoving, getAvailableDiagonalRoomsForMoving, getStayMove, STAY, CANNOTMOVE } from '../../common/representations/location.mjs';
 import {
 	emitGameCannotStart,
 	emitPlayerStartInfo,
 	emitGameState,
 	emitRequestMove,
 	emitRequestSuggestion,
+	emitSuggestionWasProvided,
 	emitRequestProof,
 	emitIsProofProvided,
 	emitProofProvided,
-	emitAccusationCorrect
+	emitRequestPlayerTurnCompleteConfirmation,
+	emitAccusationCorrect,
+	emitAccusationIncorrect
 } from '../interactions/socketEmits.js';
 import { Suggestion } from '../../common/representations/suggestion.mjs';
+import { GameCard } from '../../common/representations/gameCard.mjs';
+import {
+	shuffleInPlace,
+	createWeaponPieces,
+	createCharacterPieces,
+	createCharacterCards,
+	createWeaponCards,
+	createLocationCards,
+	getCharacterPieceByCharacterName,
+	getWeaponPieceByWeaponName
+} from './helper.js';
 
-export class GameEngine
-{
-    constructor(gameId)
-	{
+export class GameEngine {
+	/* Overall sequence for player turn:
+	- STATE = REQUESTING_MOVE
+	- Emit REQUESTING_MOVE_BROADCAST
+	- Emit REQUEST_MOVE
+	- STATE = REQUESTED_MOVE
+	- Listen on move
+	- STATE = PROCESSING_MOVE
+	- Emit GAME_STATE
+	- STATE = PROCESSED_MOVE
+
+	// PLAYER CAN SUGGEST:
+	- STATE = REQUESTING_SUGGESTION
+	- Emit REQUEST_SUGGESTION
+	- STATE = REQUESTED_SUGGESTION
+	- Listen on suggest
+	- STATE = PROCESSING_SUGGESTION
+	- Emit GAME_STATE
+	- STATE = PROCESSED_SUGGESTION
+	- STATE = REQUESTING_PROOF
+	- Emit REQUESTING_PROOF_BROADCAST
+	- Emit REQUEST_PROOF
+	- STATE = REQUESTED_PROOF
+	- Listen on proof
+	- STATE = PROCESSING_PROOF
+	- Emit IS_PROOF_PROVIDED
+	- Emit PROOF_PROVIDED
+	- If proof not provided and there are remaining players: STATE = REQUESTED_PROOF and loop back
+	- Else: emit REQUEST_TURN_COMPLETE_CONFIRM
+
+	// PLAYER CANNOT SUGGEST:
+	- emit REQUEST_TURN_COMPLETE_CONFIRM
+
+	// Player decides to accuse (can be done if state = REQUESTING_MOVE, REQUESTING_SUGGESTION)
+	- STATE = PROCESSED_ACCUSATION
+	- If correct, emit ACCUSATION_CORRECT
+	- Else, emit ACCUSATION_INCORRECT and REQUEST_TURN_COMPLETE_CONFIRM
+	*/
+
+	constructor(gameId) {
 		this.gameId = gameId;
 
 		// Pieces are objects that have locations. Location properties of these pieces will be changed throughout the game.
-		this.totalCharacterPieces = this.initializeCharacterPieces();
-		this.totalWeaponPieces = this.initializeWeaponPieces();
+		this.totalCharacterPieces = createCharacterPieces();
+		this.totalWeaponPieces = createWeaponPieces();
 
 		// Cards are objects that can be set aside for mystery cards and also distributed across players. Cards do not hold locations.
-		this.totalCharacterCards = this.initializeCharacterCards();
-		this.totalWeaponCards = this.initializeWeaponCards();
-		this.totalLocationCards = this.initializeLocationCards();
+		this.totalCharacterCards = createCharacterCards();
+		this.totalWeaponCards = createWeaponCards();
+		this.totalLocationCards = createLocationCards();
 
 		this.mysteryCards = [];
 		this.userFacingCards = [];
@@ -38,81 +86,26 @@ export class GameEngine
 		this.currentPlayerIndex = 0;
 		this.proofRequestingOffset = 1;
 
-		this.gameState = GameState.INITIATING;
+		this.setGameState(GameState.INITIATING);
 	}
 
-	initializeCharacterPieces()
-	{
-		// Provide starting locations on initialization of character cards.
-		var scarlet = new CharacterPiece(CharacterConstants.SCARLET, LocationConstants.Start.HALL_LOUNGE_HOME);
-		var plum = new CharacterPiece(CharacterConstants.PLUM, LocationConstants.Start.LIBRARY_STUDY_HOME);
-		var peacock = new CharacterPiece(CharacterConstants.PEACOCK, LocationConstants.Start.CONSERVATORY_LIBRARY_HOME);
-		var green = new CharacterPiece(CharacterConstants.GREEN, LocationConstants.Start.BALLROOM_CONSERVATORY_HOME);
-		var white = new CharacterPiece(CharacterConstants.WHITE, LocationConstants.Start.KITCHEN_BALLROOM_HOME);
-		var mustard = new CharacterPiece(CharacterConstants.MUSTARD, LocationConstants.Start.LOUNGE_DININGROOM_HOME);
-		
-		// Shuffle the characters randomly so that when characters become assigned to players, there is random assignment.
-		// Scarlet is always assigned to the first player joining the game though.
-		var characters = [plum, peacock, green, white, mustard];
-		this.shuffleInPlace(characters);
-		characters.splice(0, 0, scarlet);
-		return characters;
-	}
-
-	initializeWeaponPieces()
-	{
-		let weaponPieces = [];
-		CardWeapons.forEach(weaponConstant => weaponPieces.push(new WeaponPiece(weaponConstant, LocationConstants.None)));
-		return weaponPieces;
-	}
-
-	initializeCharacterCards()
-	{
-		let characterCards = [];
-		CardCharacters.forEach(characterConstant => characterCards.push(new CharacterCard(characterConstant)));
-		return characterCards;
-	}
-
-	initializeWeaponCards()
-	{
-		let weaponCards = [];
-		CardWeapons.forEach(weaponConstant => weaponCards.push(new WeaponCard(weaponConstant)));
-		return weaponCards;
-	}
-
-	initializeLocationCards()
-	{
-		let locationCards = [];
-		CardLocations.forEach(locationConstant => locationCards.push(new LocationCard(locationConstant)));
-		return locationCards;
-	}
-
-	getPlayerCount()
-	{
+	getPlayerCount() {
 		return this.players.length;
 	}
 
-	addPlayer(playerId)
-	{
+	addPlayer(playerId) {
 		this.players.push(new Player(playerId));
 	}
 
-	shuffleInPlace(arr)
-	{
-		arr.sort((a, b) => 0.5 - Math.random());
+	getCurrentPlayer() {
+		return this.players[this.currentPlayerIndex];
 	}
 
-	chooseMysteryCardIndexFromSelection(cards)
-	{
-		return Math.floor(cards.length * Math.random());
-	}
-
-	allocateCards()
-	{
+	allocateCards() {
 		// Set aside mystery cards before distributing cards.
-		let characterMysteryCardIndex = this.chooseMysteryCardIndexFromSelection(this.totalCharacterCards)
-		let weaponMysteryCardIndex = this.chooseMysteryCardIndexFromSelection(this.totalWeaponCards);
-		let locationMysteryCardIndex = this.chooseMysteryCardIndexFromSelection(this.totalLocationCards);
+		let characterMysteryCardIndex = GameCard.chooseMysteryCardIndexFromSelection(this.totalCharacterCards)
+		let weaponMysteryCardIndex = GameCard.chooseMysteryCardIndexFromSelection(this.totalWeaponCards);
+		let locationMysteryCardIndex = GameCard.chooseMysteryCardIndexFromSelection(this.totalLocationCards);
 
 		this.mysteryCards = [
 			this.totalCharacterCards[characterMysteryCardIndex],
@@ -133,19 +126,14 @@ export class GameEngine
 		this.userFacingCards = availableCharacterCards.concat(availableWeaponCards).concat(availableLocationCards);
 		console.log('\nTotal user facing cards:');
 		console.log(this.userFacingCards);
-		this.shuffleInPlace(this.userFacingCards);
+		shuffleInPlace(this.userFacingCards);
 	}
 
-	setupPlayers()
-	{
-		// Allocate the mystery cards and available cards for player distribution.
+	setupPlayers() {
 		this.allocateCards();
 
 		let generalCardCount = Math.floor(this.userFacingCards.length / this.getPlayerCount());
-		for (let i = 0; i < this.getPlayerCount(); i++)
-		{
-			// Player will refer to one of the character pieces.
-			// Character piece stores the location.
+		for (let i = 0; i < this.getPlayerCount(); i++) {
 			let currPlayer = this.players[i];
 			currPlayer.character = this.totalCharacterPieces[i];
 
@@ -161,14 +149,11 @@ export class GameEngine
 		console.log("");
 	}
 
-	startGame()
-	{
-		if (this.getPlayerCount() < 3)
-		{
+	startGame() {
+		if (this.getPlayerCount() < 3) {
 			emitGameCannotStart(this.gameId);
 		}
-		else
-		{
+		else {
 			this.setupPlayers();
 			this.emitCurrentGameState();
 
@@ -177,203 +162,137 @@ export class GameEngine
 		}
 	}
 
-	/* Overall sequence for player turn:
-	- STATE = REQUESTING_MOVE
-	- Emit request for current player move
-	- STATE = REQUESTED_MOVE
-	- Listen on player move being sent from frontend
-	- STATE = PROCESSING_MOVE
-	- Process the move sent from frontend by updating game state
-	- Notify all users of new game state
-	- STATE = PROCESSED_MOVE
-	- STATE = REQUESTING_SUGGESTION
-	- Emit request for current player suggestion
-	- STATE = REQUESTED_SUGGESTION
-	- Listen on player suggestion begin sent from frontend
-	- STATE = PROCESSING_SUGGESTION
-	- Process the suggestion made from frontend by updating game state
-	- Notify all users of new game state
-	- STATE = PROCESSED_SUGGESTION
-	- STATE = REQUESTING_PROOF
-	- Emit request for next player proof
-	- STATE = REQUESTED_PROOF
-	- Listen on next player providing proof from frontend
-	- STATE = PROCESSING_PROOF
-	- If proof not empty, emit proof to current player.
-	- If proof empty, then loop back to REQUESTING_PROOF and ask next player for proof.
-	- STATE = PROCESSED_PROOF
-	- Loop back to STATE = REQUESTING_MOVE
-	- TODO: ACCUSATIONS (next increment)
-	*/
-
-	getAvailableHallwaysForMoving(roomLocation)
+	requestTurnCompletion()
 	{
-		// Get the hallways adjacent to the room.
-		let adjacentHallways = [];
-		for (let hallway in LocationConstants.Hallway)
-		{
-			let connectingRooms = hallway.split("_");
-			if (roomLocation == connectingRooms[0] || roomLocation == connectingRooms[1])
+		emitRequestPlayerTurnCompleteConfirmation(this.gameId, this.getCurrentPlayer());
+	}
+
+	proessTurnCompletion(playerId)
+	{
+		// A turn can said to be completed after move, before providing suggestion, after proof processed, or after accusation processed.
+		if ((this.gameState == GameState.PROCESSED_MOVE || this.gameState == GameState.REQUESTED_SUGGESTION || this.gameState == GameState.PROCESSED_PROOF || this.gameState == GameState.PROCESSED_ACCUSATION) 
+			&& this.getCurrentPlayer().playerId == playerId) {
+			
+			for (let i = 1; i < this.getPlayerCount(); i++)
 			{
-				adjacentHallways.push(hallway);
+				let consideringPlayerIndex = (this.currentPlayerIndex + i) % this.getPlayerCount();
+				if (this.players[consideringPlayerIndex].canPlay) {
+					this.currentPlayerIndex = consideringPlayerIndex;
+					break;
+				}
 			}
-		}
 
-		// For the hallways that are adjacent, check if any character already is there.
-		let potentialHallways = [];
-		for (let adjacentHallway of adjacentHallways)
-		{
-			if (this.totalCharacterPieces.map(piece => piece.currentLocation).indexOf(adjacentHallway) === -1)
-			{
-				potentialHallways.push(adjacentHallway);
-			}
+			this.requestMove();
 		}
-
-		return potentialHallways;
+		else {
+			console.error(`Turn completion has come from invalid player ${playerId} or during invalid state of ${this.gameState}, so not processing the turn completion.`);
+		}
 	}
 
-	getAvailableDiagonalRoomsForMoving(roomLocation)
-	{
-		if (roomLocation in DiagonalRooms)
-		{
-			return [DiagonalRooms[roomLocation]];
-		}
+	requestMove() {
+		this.setGameState(GameState.REQUESTING_MOVE);
 
-		return [];
-	}
-
-	getStayMove(character)
-	{
-		if (character.priorPieceMover != this.players[this.currentPlayerIndex].playerId)
-		{
-			return [STAY];
-		}
-
-		return [];
-	}
-
-	requestMove()
-	{
-		this.gameState = GameState.REQUESTING_MOVE;
-		
 		let potentialMoves = [];
-		if (this.players[this.currentPlayerIndex].character.priorLocation == LocationConstants.None)
-		{
+		if (this.getCurrentPlayer().character.priorLocation == LocationConstants.None) {
 			// First move for player's character must be to the hallway.
-			potentialMoves.push(this.players[this.currentPlayerIndex].character.currentLocation.slice(0, -5));
+			potentialMoves.push(this.getCurrentPlayer().character.currentLocation.slice(0, -5));
 		}
-		else if (this.players[this.currentPlayerIndex].character.currentLocation in LocationConstants.Room)
-		{
+		else if (this.getCurrentPlayer().character.currentLocation in LocationConstants.Room) {
 			// Can move to adjacent hallways if no character is already there.
-			potentialMoves = potentialMoves.concat(this.getAvailableHallwaysForMoving(this.players[this.currentPlayerIndex].character.currentLocation));
+			potentialMoves = potentialMoves.concat(getAvailableHallwaysForMoving(this.getCurrentPlayer().character.currentLocation, this.totalCharacterPieces));
 
 			// Can move to diagonal rooms through secret passageway.
-			potentialMoves = potentialMoves.concat(this.getAvailableDiagonalRoomsForMoving(this.players[this.currentPlayerIndex].character.currentLocation));
+			potentialMoves = potentialMoves.concat(getAvailableDiagonalRoomsForMoving(this.getCurrentPlayer().character.currentLocation));
 
 			// Don't move at all because was moved to place by another player.
-			potentialMoves = potentialMoves.concat(this.getStayMove(this.players[this.currentPlayerIndex].character));
-			
+			potentialMoves = potentialMoves.concat(getStayMove(this.getCurrentPlayer().character, this.getCurrentPlayer().playerId));
+
 			// If in room blocked in all hallways with no way to move, then tell UI CANNOTMOVE.
-			if (potentialMoves.length == 0)
-			{
+			if (potentialMoves.length == 0) {
 				potentialMoves = [CANNOTMOVE];
 			}
 		}
-		else if (this.players[this.currentPlayerIndex].character.currentLocation in LocationConstants.Hallway)
-		{
-			let adjRooms = this.players[this.currentPlayerIndex].character.currentLocation.split("_");
+		else if (this.getCurrentPlayer().character.currentLocation in LocationConstants.Hallway) {
+			let adjRooms = this.getCurrentPlayer().character.currentLocation.split("_");
 			potentialMoves = potentialMoves.concat(adjRooms);
 		}
-		
-		emitRequestMove(this.gameId, this.players[this.currentPlayerIndex], potentialMoves);
-		this.gameState = GameState.REQUESTED_MOVE;
+
+		emitRequestMove(this.gameId, this.getCurrentPlayer(), potentialMoves);
+		this.setGameState(GameState.REQUESTED_MOVE);
 	}
 
-	processMove(playerId, newCharacterLocation)
-	{
-		if (this.gameState == GameState.REQUESTED_MOVE && playerId == this.players[this.currentPlayerIndex].playerId)
-		{
-			console.log(`MOVE: ${this.players[this.currentPlayerIndex].character.name} from ${this.players[this.currentPlayerIndex].character.currentLocation} to ${newCharacterLocation}`)
-			this.gameState = GameState.PROCESSING_MOVE;
+	processMove(playerId, newCharacterLocation) {
+		if (this.gameState == GameState.REQUESTED_MOVE && playerId == this.getCurrentPlayer().playerId) {
+			console.log(`MOVE: ${this.getCurrentPlayer().character.name} from ${this.getCurrentPlayer().character.currentLocation} to ${newCharacterLocation}.`)
+			this.setGameState(GameState.PROCESSING_MOVE);
 
-			if (newCharacterLocation != STAY && newCharacterLocation != CANNOTMOVE)
-			{
-				this.movePiece(this.players[this.currentPlayerIndex].character, newCharacterLocation);
+			if (newCharacterLocation != STAY && newCharacterLocation != CANNOTMOVE) {
+				this.getCurrentPlayer().character.movePiece(newCharacterLocation, playerId);
 			}
+
 			this.emitCurrentGameState();
+			this.setGameState(GameState.PROCESSED_MOVE);
 
-			this.gameState = GameState.PROCESSED_MOVE;
-
-			if (newCharacterLocation in LocationConstants.Room && newCharacterLocation != CANNOTMOVE)
-			{
+			if (newCharacterLocation in LocationConstants.Room && newCharacterLocation != CANNOTMOVE) {
 				this.requestSuggestion();
 			}
-			else if (newCharacterLocation == STAY)
-			{
+			else if (newCharacterLocation == STAY) {
 				this.requestSuggestion();
 			}
-			else
-			{
-				this.currentPlayerIndex = (this.currentPlayerIndex + 1) % this.getPlayerCount();
-				this.requestMove();
+			else {
+				this.requestTurnCompletion();
 			}
 		}
-		else 
-		{
-			console.error(`Move has come from invalid player ${playerId}, so not processing the move.`);
+		else {
+			console.error(`Move has come from invalid player ${playerId} or during invalid state of ${this.gameState}, so not processing the move.`);
 		}
 	}
 
-	requestSuggestion()
-	{
-		this.gameState = GameState.REQUESTING_SUGGESTION;
-		emitRequestSuggestion(this.gameId, this.players[this.currentPlayerIndex]);
-		this.gameState = GameState.REQUESTED_SUGGESTION;
+	requestSuggestion() {
+		this.setGameState(GameState.REQUESTING_SUGGESTION);
+		emitRequestSuggestion(this.gameId, this.getCurrentPlayer());
+		this.setGameState(GameState.REQUESTED_SUGGESTION);
 	}
 
-	processSuggestion(playerId, suggestedCharacterName, suggestedWeaponName)
-	{
-		if (this.gameState == GameState.REQUESTED_SUGGESTION && playerId == this.players[this.currentPlayerIndex].playerId)
-		{
-			console.log(`SUGGESTION: ${suggestedCharacterName} to ${this.players[this.currentPlayerIndex].character.currentLocation} with ${suggestedWeaponName}.`);
-			this.gameState = GameState.PROCESSING_SUGGESTION;
-			this.movePiece(this.getCharacterPieceByCharacterName(suggestedCharacterName), this.players[this.currentPlayerIndex].character.currentLocation);
-			this.movePiece(this.getWeaponPieceByWeaponName(suggestedWeaponName), this.players[this.currentPlayerIndex].character.currentLocation);
-			let processedSuggestion = new Suggestion(this.players[this.currentPlayerIndex].character.currentLocation, suggestedCharacterName, suggestedWeaponName);
+	processSuggestion(playerId, suggestedCharacterName, suggestedWeaponName) {
+		if (this.gameState == GameState.REQUESTED_SUGGESTION && playerId == this.getCurrentPlayer().playerId) {
+			console.log(`SUGGESTION: ${suggestedCharacterName} to ${this.getCurrentPlayer().character.currentLocation} with ${suggestedWeaponName}.`);
+			this.setGameState(GameState.PROCESSING_SUGGESTION);
+
+			emitSuggestionWasProvided(this.gameId, this.getCurrentPlayer());
+			getCharacterPieceByCharacterName(this.totalCharacterPieces, suggestedCharacterName).movePiece(this.getCurrentPlayer().character.currentLocation, this.getCurrentPlayer().playerId);
+			getWeaponPieceByWeaponName(this.totalWeaponPieces, suggestedWeaponName).movePiece(this.getCurrentPlayer().character.currentLocation, this.getCurrentPlayer().playerId);
+
+			let suggestion = new Suggestion(this.getCurrentPlayer().character.currentLocation, suggestedCharacterName, suggestedWeaponName);
 			this.emitCurrentGameState();
 
-			this.gameState = GameState.PROCESSED_SUGGESTION;
-			this.processingSuggestion = processedSuggestion;
-			this.requestProof(this.processingSuggestion);
+			this.setGameState(GameState.PROCESSED_SUGGESTION);
+			this.processingSuggestion = suggestion;
+			this.requestProof();
 		}
-		else 
-		{
-			console.error(`Suggestion has come from invalid player ${playerId}, so not processing the suggestion.`);
+		else {
+			console.error(`Suggestion has come from invalid player ${playerId} or during invalid state of ${this.gameState}, so not processing the suggestion.`);
 		}
 	}
 
-	requestProof()
-	{
-		this.gameState = GameState.REQUESTING_PROOF;
+	requestProof() {
+		this.setGameState(GameState.REQUESTING_PROOF);
 		emitRequestProof(this.gameId, this.players[(this.currentPlayerIndex + this.proofRequestingOffset) % this.getPlayerCount()], this.processingSuggestion);
-		this.gameState = GameState.REQUESTED_PROOF;
+		this.setGameState(GameState.REQUESTED_PROOF);
 	}
 
-	processProof(proofProvidingPlayerId, proofCard)
-	{
-		if (this.gameState == GameState.REQUESTED_PROOF && proofProvidingPlayerId == this.players[(this.currentPlayerIndex + this.proofRequestingOffset) % this.getPlayerCount()].playerId)
-		{
-			this.gameState = GameState.PROCESSING_PROOF;
+	processProof(proofProvidingPlayerId, proofCard) {
+		if (this.gameState == GameState.REQUESTED_PROOF && proofProvidingPlayerId == this.players[(this.currentPlayerIndex + this.proofRequestingOffset) % this.getPlayerCount()].playerId) {
+			console.log(`PROOF: ${proofCard} provided by player ${proofProvidingPlayerId}.`);
+			this.setGameState(GameState.PROCESSING_PROOF);
 
 			emitIsProofProvided(this.gameId, proofCard !== undefined, proofProvidingPlayerId);
-			emitProofProvided(this.gameId, this.players[this.currentPlayerIndex], proofCard);
+			emitProofProvided(this.gameId, this.getCurrentPlayer(), proofCard);
 
-			if (proofCard == undefined)
-			{
+			if (proofCard == undefined) {
 				// Move onto next player or gathering proof.
 				this.proofRequestingOffset += 1;
-				if ((this.currentPlayerIndex + this.proofRequestingOffset) % this.getPlayerCount() != this.currentPlayerIndex)
-				{
+				if ((this.currentPlayerIndex + this.proofRequestingOffset) % this.getPlayerCount() != this.currentPlayerIndex) {
 					this.requestProof(this.processingSuggestion);
 					return;
 				}
@@ -381,55 +300,51 @@ export class GameEngine
 
 			this.processingSuggestion = undefined;
 			this.proofRequestingOffset = 1;
-			this.currentPlayerIndex = (this.currentPlayerIndex + 1) % this.getPlayerCount();
-			this.gameState = GameState.PROCESSED_PROOF;
-			this.requestMove();
+			this.setGameState(GameState.PROCESSED_PROOF);
+
+			this.requestTurnCompletion();
 		}
-		else 
-		{
-			console.error(`Proof has come from invalid player ${playerId}, so not processing the proof.`);
+		else {
+			console.error(`Proof has come from invalid player ${proofProvidingPlayerId} or during invalid state of ${this.gameState}, so not processing the proof.`);
 		}
 	}
 
-	processAccusation(playerId, accusingCharacter, accusingWeapon, accusingLocation)
-	{
-		if (playerId == this.players[this.currentPlayerIndex].playerId)
-		{
-			if (this.mysteryCards[0].name == accusingCharacter && this.mysteryCards[1].name == accusingWeapon && this.mysteryCards[2].name == accusingLocation)
-			{
-				emitAccusationCorrect(this.gameId, this.players[this.currentPlayerIndex], accusingCharacter, accusingWeapon, accusingLocation);
+	processAccusation(playerId, accusingCharacter, accusingWeapon, accusingLocation) {
+		// Player can accuse before moving character, after moving character, before requesting suggestion, or after processing proof.
+		if ((this.gameState == GameState.REQUESTED_MOVE || this.gameState == GameState.PROCESSED_MOVE || this.gameState == GameState.REQUESTED_SUGGESTION || this.gameState == GameState.PROCESSED_PROOF)
+			&& playerId == this.getCurrentPlayer().playerId) {
+			if (this.mysteryCards[0].name == accusingCharacter && this.mysteryCards[1].name == accusingWeapon && this.mysteryCards[2].name == accusingLocation) {
+				emitAccusationCorrect(this.gameId, this.getCurrentPlayer(), accusingCharacter, accusingWeapon, accusingLocation);
+				this.setGameState(GameState.GAME_OVER);
+			}
+			else {
+				// Mark the player as no longer able to play in the game.
+				this.getCurrentPlayer().canPlay = false;
+
+				if (this.players.findIndex(player => player.canPlay) === -1) {
+					// All players had made incorrect accusations, so game over.
+					emitAccusationIncorrect(this.gameId, this.getCurrentPlayer(), accusingCharacter, accusingWeapon, accusingLocation, this.mysteryCards[0], this.mysteryCards[1], this.mysteryCards[2], true);
+					this.setGameState(GameState.GAME_OVER);
+				}
+				else {
+					emitAccusationIncorrect(this.gameId, this.getCurrentPlayer(), accusingCharacter, accusingWeapon, accusingLocation, this.mysteryCards[0], this.mysteryCards[1], this.mysteryCards[2], false);
+					this.setGameState(GameState.PROCESSED_ACCUSATION);
+					this.requestTurnCompletion();
+				}
 			}
 		}
-		else
-		{
-			console.error(`Accusation has come from invalid player ${playerId}, so not processing the proof.`);
+		else {
+			console.error(`Accusation has come from invalid player ${playerId} or during invalid state of ${playerId}, so not processing the accusation.`);
 		}
 	}
 
-	emitCurrentGameState()
-	{
-		emitGameState(this.gameId, this.totalCharacterPieces, this.totalWeaponPieces);		
+	emitCurrentGameState() {
+		emitGameState(this.gameId, this.totalCharacterPieces, this.totalWeaponPieces);
 	}
 
-	movePiece(gamePiece, newLocation)
+	setGameState(gameState)
 	{
-		gamePiece.priorPieceMover = this.players[this.currentPlayerIndex].playerId;
-		gamePiece.priorLocation = gamePiece.currentLocation;
-		gamePiece.currentLocation = newLocation;
-	}
-
-	getCharacterPieceByCharacterName(characterName)
-	{
-		return this.totalCharacterPieces.find(characterPiece => characterPiece.name == characterName);
-	}
-
-	getWeaponPieceByWeaponName(weaponName)
-	{
-		return this.totalWeaponPieces.find(weaponPiece => weaponPiece.name == weaponName);
-	}
-
-	printGameState()
-	{
-		console.log(JSON.stringify(this, null, 4));
+		// console.log(`GAME STATE: ${gameState}`);
+		this.gameState = gameState;
 	}
 }
