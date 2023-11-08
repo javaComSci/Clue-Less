@@ -40,6 +40,7 @@ export class EngineSend {
 	}
 	msgProof(data)
 	{
+		this.push('proof', data);
 	}
 	msgStart(data)
 	{

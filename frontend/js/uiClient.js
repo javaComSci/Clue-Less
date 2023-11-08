@@ -25,12 +25,15 @@ export class UIClient
 			}
 		};
 		this.actionLock = {
-			'suggestion':0,
-			'accusation':0
+			'suggestion':0, 	// doing suggestion
+			'accusation':0, 	// doing accusation
+			'proof_select':0, 	// selecting proof
+			'proof_pending':0	// waiting to receive proof
 		};
 		this.actionValid = {
-			'end_turn': 0,
-			'suggestion': 0
+			'end_turn': 0,		// can end turn
+			'suggestion': 0,	// can start a suggestion
+			'pass':0			// can pass turn
 		};
 		this.validationInfo = {
 			'move': []
@@ -62,29 +65,58 @@ export class UIClient
 	{
 		console.log('Player\'s Turn: ' + playerInfo.playerId);
 	}
+	selectCard(cardName, cardType)
+	{
+		if ((this.actionValid['pass'] == 1) && (this.actionLock['proof_select'] == 1))
+		{
+
+			// message backend
+			this.msgEngine.send('proof', {
+				'playerId':this.playerId,
+				'gameId':this.gameId,
+				'proofCard':cardName});
+			// reset valid
+			this.actionValid['pass'] = 0;
+			// reset lock
+			this.actionLock['proof_select'] = 0;
+		}
+		else
+		{
+			console.log('Selected card: ' + cardName);
+		}
+	}
 	selectPlayer(character)
 	{
 		// if suggestion is active
 		if(this.actionLock['suggestion'] == 1)
 		{
-			// define it
-			this.actionData['suggestion']['character'] = character;
-			// if no other details needed for suggestion
-			if(this.actionData['suggestion']['weapon'] != '')
+			// if player has not submitted suggestion and is waiting for proof
+			if(this.actionLock['proof_pending'] != 1)
 			{
-				// send suggestion to backend
-				this.msgEngine.send('suggestion', {
-					'playerId':this.playerId,
-					'gameId':this.gameId,
-					'suggestedCharacterName':this.actionData['suggestion']['character'],
-					'suggestedWeaponName':this.actionData['suggestion']['weapon']});
-				// reset suggestion information
-				this.actionData['suggestion'] = {'character':'','weapon':''};
+				// define it
+				this.actionData['suggestion']['character'] = character;
+				// if no other details needed for suggestion
+				if(this.actionData['suggestion']['weapon'] != '')
+				{
+					// send suggestion to backend
+					this.msgEngine.send('suggestion', {
+						'playerId':this.playerId,
+						'gameId':this.gameId,
+						'suggestedCharacterName':this.actionData['suggestion']['character'],
+						'suggestedWeaponName':this.actionData['suggestion']['weapon']});
+					// reset suggestion information
+					this.actionData['suggestion'] = {'character':'','weapon':''};
+					this.actionLock['proof_pending'] = 1;
+				}
+				// otherwise, prompt for more details
+				else
+				{
+					this.promptPlayer('SUGGESTION_NEED_WEAPON');
+				}
 			}
-			// otherwise, prompt for more details
 			else
 			{
-				this.promptPlayer('SUGGESTION_NEED_WEAPON');
+				console.log('waiting for proof!');
 			}
 		}
 		else
@@ -97,24 +129,33 @@ export class UIClient
 		// if suggestion is active
 		if(this.actionLock['suggestion'] == 1)
 		{
-			// define it
-			this.actionData['suggestion']['weapon'] = weapon;
-			// if no other details needed for suggestion
-			if(this.actionData['suggestion']['character'] != '')
+			// if player has not submitted suggestion and is waiting for proof
+			if(this.actionLock['proof_pending'] != 1)
 			{
-				// send suggestion to backend
-				this.msgEngine.send('suggestion', {
-					'playerId':this.playerId,
-					'gameId':this.gameId,
-					'suggestedCharacterName':this.actionData['suggestion']['character'],
-					'suggestedWeaponName':this.actionData['suggestion']['weapon']});
-				// reset suggestion information
-				this.actionData['suggestion'] = {'character':'','weapon':''};
+				// define it
+				this.actionData['suggestion']['weapon'] = weapon;
+				// if no other details needed for suggestion
+				if(this.actionData['suggestion']['character'] != '')
+				{
+					// send suggestion to backend
+					this.msgEngine.send('suggestion', {
+						'playerId':this.playerId,
+						'gameId':this.gameId,
+						'suggestedCharacterName':this.actionData['suggestion']['character'],
+						'suggestedWeaponName':this.actionData['suggestion']['weapon']});
+					// reset suggestion information
+					this.actionData['suggestion'] = {'character':'','weapon':''};
+					this.actionLock['proof_pending'] = 1;
+				}
+				// otherwise, prompt for more details
+				else
+				{
+					this.promptPlayer('SUGGESTION_NEED_CHARACTER');
+				}
 			}
-			// otherwise, prompt for more details
 			else
 			{
-				this.promptPlayer('SUGGESTION_NEED_CHARACTER');
+				console.log('waiting for proof!');
 			}
 		}
 		else
@@ -128,6 +169,7 @@ export class UIClient
 		if((button == 'END_TURN') && (this.actionValid['end_turn'] == 1))
 		{
 			this.msgEngine.send('turncomplete', {'playerId':this.playerId,'gameId':this.gameId});
+			this.disableEndTurn();
 		}
 		if((button == 'SUGGESTION') && (this.actionValid['suggestion'] == 1))
 		{
@@ -139,6 +181,24 @@ export class UIClient
 			else
 			{
 				this.promptPlayer('SUGGESTION_RUNNING');
+			}
+		}
+		if(button == 'PASS')
+		{
+			// if player can pass
+			if ((this.actionValid['pass'] == 1) && (this.actionLock['proof_select'] == 1))
+			{
+
+				// message backend
+				this.msgEngine.send('proof', {'playerId':this.playerId, 'gameId':this.gameId});
+				// reset valid action
+				this.actionValid['pass'] = 0;
+				// reset lock
+				this.actionLock['proof_select'] = 0;
+			}
+			else
+			{
+				console.log('Pass only available when prompted for proof');
 			}
 		}
 	}
@@ -159,6 +219,18 @@ export class UIClient
 	enableSuggestion()
 	{
 		this.actionValid['suggestion'] = 1;
+	}
+	disableSuggestion()
+	{
+		this.actionValid['suggestion'] = 0;
+		this.actionLock['proof_pending'] = 0;
+		this.actionLock['suggestion'] = 0;
+	}
+	enableProof()
+	{
+		this.actionLock['proof_select'] = 1;
+		this.actionValid['pass'] = 1;
+		this.promptPlayer('PROVIDE_PROOF');
 	}
 	enableEndTurn()
 	{

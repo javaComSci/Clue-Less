@@ -83,7 +83,7 @@ export class PixiHud extends GameHud
 		this.cards.forEach((card) => {
 			let pixiCard = new PIXI.Graphics();
 			pixiCard.eventMode = 'static';
-			pixiCard.on('pointerup', (event) => { window.client.testme(card.name); } );
+			pixiCard.on('pointerup', (event) => { window.client.selectCard(card.name, card.type); } );
 			pixiCard.beginFill(0xFBF8FB);
 			pixiCard.drawRect(0,0,card.width,card.length);
 			pixiCard.endFill();
