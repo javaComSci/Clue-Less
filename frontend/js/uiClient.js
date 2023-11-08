@@ -13,8 +13,24 @@ export class UIClient
 		this.playerId = crypto.randomUUID();
 		this.msgEngine.send('start', {'playerId': this.playerId, 'gameId': this.gameId } );
 		this.playerInfo;
-		this.validAction = {
-			'end_turn': 0
+		this.actionData = {
+			'suggestion':{
+				'character':'',
+				'weapon':''
+			},
+			'accusation':{
+				'character':'',
+				'weapon':'',
+				'room':''
+			}
+		};
+		this.actionLock = {
+			'suggestion':0,
+			'accusation':0
+		};
+		this.actionValid = {
+			'end_turn': 0,
+			'suggestion': 0
 		};
 		this.validationInfo = {
 			'move': []
@@ -41,21 +57,34 @@ export class UIClient
 	}
 	setPlayerTurn(playerInfo)
 	{
-		console.log('Player\'s Turn: ' + playerInfo);
+		console.log('Player\'s Turn: ' + playerInfo.playerId);
 	}
 	selectButton(button)
 	{
-		if((button == 'END_TURN') && (this.validAction['end_turn'] == 1))
+		if((button == 'END_TURN') && (this.actionValid['end_turn'] == 1))
 		{
 			this.msgEngine.send('turncomplete', {'playerId':this.playerId,'gameId':this.gameId});
+		}
+		if((button == 'SUGGESTION') && (this.actionValid['suggestion'] == 1))
+		{
+			if (this.actionLock['suggestion'] != 1)
+			{
+				this.setSuggestionLock();
+				this.promptPlayer('SUGGESTION_PLAYER');
+			}
+			else
+			{
+				this.promptPlayer('SUGGESTION_RUNNING');
+			}
+			//this.msgEngine.send('suggestion', {'playerId':this.playerId,'gameId':this.gameId,'suggestedCharacterName':character,'suggestedWeaponName':weapon});
 		}
 	}
 	selectArea(area)
 	{
-		if( ( this.validAction['move'] == 1 ) && ( this.validationInfo['move'].includes(area) == true ))
+		if( ( this.actionValid['move'] == 1 ) && ( this.validationInfo['move'].includes(area) == true ))
 		{
 			console.log('Move player to: ' + area);
-			this.validAction['move'] = 0;
+			this.actionValid['move'] = 0;
 			this.validationInfo['move'] = [];
 			this.msgEngine.send('move',{'playerId':this.playerId,'gameId':this.gameId,'newCharacterLocation':area});
 		}
@@ -64,20 +93,25 @@ export class UIClient
 			console.log('Player selected: ' + area);
 		}
 	}
+	setSuggestionLock()
+	{
+		this.actionLock['suggestion'] = 1;
+	}
 	enableSuggestion()
 	{
+		this.actionValid['suggestion'] = 1;
 	}
 	enableEndTurn()
 	{
-		this.validAction['end_turn'] = 1;
+		this.actionValid['end_turn'] = 1;
 	}
 	disableEndTurn()
 	{
-		this.validAction['end_turn'] = 0;
+		this.actionValid['end_turn'] = 0;
 	}
 	enableMove(moves)
 	{
-		this.validAction['move'] = 1;
+		this.actionValid['move'] = 1;
 		this.validationInfo['move'] = moves['potentialMoves'];
 		this.enableEndTurn();
 		console.log(moves);

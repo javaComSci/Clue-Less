@@ -62,6 +62,9 @@ export class EngineRecv
 	}
 	msgRequestSuggestion()
 	{
+		this.socket.on('REQUEST_SUGGESTION', function () {
+			window.client.enableSuggestion();
+		});
 	}
 	msgRequestProof()
 	{
