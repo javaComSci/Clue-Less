@@ -1,7 +1,8 @@
 /*
  * Abstract Representation of a GameHud ( Heads-up-Display )
  */
-import { Button,Card,Alert } from '/js/spaces.js';
+import { Button,Card,Alert,Weapon } from '/js/spaces.js';
+import { WeaponConstants } from '/common/representations/weapon.mjs';
 export class GameHud
 {
 	constructor(mapHeight, mapWidth, screenHeight, screenWidth, state)
@@ -19,8 +20,12 @@ export class GameHud
 		this.alertAreaWidth = screenWidth - mapWidth;
 		this.cardAreaStartX = mapWidth;
 		this.cardAreaStartY = this.alertAreaHeight;
-		this.cardAreaHeight = 3 * screenHeight/4;
+		this.cardAreaHeight = screenHeight/2;
 		this.cardAreaWidth = screenWidth - mapWidth;
+		this.weaponAreaStartX = mapWidth;
+		this.weaponAreaStartY = this.alertAreaHeight + this.cardAreaHeight;
+		this.weaponAreaHeight = screenHeight/4;
+		this.weaponAreaWidth = screenWidth - mapWidth;
 
 		this.buttonMarginSFactor = .25;
 		this.buttonGapSFactor = .125;
@@ -28,11 +33,15 @@ export class GameHud
 		this.cardMarginSFactor = .10;
 		this.cardGapSFactor = .05;
 
+		this.weaponMarginSFactor = .18;
+		this.weaponGapSFactor = .05;
+
 		this.alertMarginSFactor = .25;
 
 		this.buttons = [];
 		this.cards = [];
 		this.alerts = [];
+		this.weapons = [];
 		this.createHud(state);
 	}
 	createHud(state)
@@ -40,6 +49,22 @@ export class GameHud
 		this.createCards(state['cards']);
 		this.createButtons(state['buttons']);
 		this.createAlerts(state['alerts']);
+		this.createWeapons();
+	}
+	createWeapons()
+	{
+		let weaponWidth = this.weaponAreaWidth - 2 * ( this.weaponMarginSFactor * this.weaponAreaWidth );
+		let weaponGapCount = Object.keys(WeaponConstants).length - 1;
+		let weaponGapTotalHeight = ( this.weaponAreaHeight * this.weaponGapSFactor ) * weaponGapCount;
+		let weaponHeight = ((this.weaponAreaHeight - 2 * ( this.weaponMarginSFactor * this.weaponAreaHeight )) - weaponGapTotalHeight )/(weaponGapCount + 1);
+		let weaponStartX = (this.weaponMarginSFactor * this.weaponAreaWidth) + this.weaponAreaStartX;
+		let weaponStartY = (this.weaponMarginSFactor * this.weaponAreaHeight) + this.weaponAreaStartY;
+		for(var weapon in WeaponConstants)
+		{
+			let weaponNew = new Weapon(weapon,weaponStartX,weaponStartY,weaponHeight,weaponWidth);
+			weaponStartY += weaponHeight + (this.weaponAreaHeight * this.weaponGapSFactor);
+			this.weapons.push(weaponNew);
+		}
 	}
 	createCards(state)
 	{

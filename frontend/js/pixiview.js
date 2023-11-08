@@ -17,6 +17,48 @@ export class PixiHud extends GameHud
 		this.displayCards();
 		this.displayButtons();
 		this.displayAlerts();
+		this.displayWeapons();
+	}
+	displayWeapons()
+	{
+		if ( this.weaponContainer != null )
+		{
+			// free the memory!
+			this.weaponContainer.destroy();
+		}
+		this.weaponContainer = new PIXI.Graphics();
+		this.weaponContainer.beginFill(0xFC4B4B);
+		this.weaponContainer.drawRect(this.weaponAreaStartX,this.weaponAreaStartY,this.weaponAreaWidth,this.weaponAreaHeight);
+		this.weaponContainer.endFill();
+		let hudAreaText = new PIXI.Text(
+				'Weapons', {
+				fontSize: 60,
+				fill: 0x000000
+			}
+		);
+		hudAreaText.x = this.weaponAreaStartX + this.weaponAreaWidth/2 - hudAreaText.width/2;
+		hudAreaText.y = this.weaponAreaStartY;
+		this.weaponContainer.addChild(hudAreaText);
+		this.weapons.forEach((weapon) => {
+			let pixiWeapon = new PIXI.Graphics();
+			pixiWeapon.eventMode = 'static';
+			pixiWeapon.on('pointerup', (event) => { window.client.testme(weapon.name); } );
+			pixiWeapon.beginFill(0xFBF8FB);
+			pixiWeapon.drawRect(0,0,weapon.width,weapon.length);
+			pixiWeapon.endFill();
+			let text = new PIXI.Text(
+				weapon.name, {
+					fontSize: 30,
+					fill: 0x000000
+				}
+			);
+			text.x = 0;
+			text.y = 0;
+			pixiWeapon.addChild(text);
+			pixiWeapon.position.set(weapon.x,weapon.y);
+			this.weaponContainer.addChild(pixiWeapon);
+		});
+		this.app.stage.addChild(this.weaponContainer);
 	}
 	displayCards()
 	{

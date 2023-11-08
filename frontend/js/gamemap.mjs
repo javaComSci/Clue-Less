@@ -2,9 +2,8 @@
  * Abstract representation of the Clue-Less game map. Graphics libraries
  * can inherit this and implement display functions.
  */
-import { WeaponConstants } from '/common/representations/weapon.mjs';
 import { CharacterConstants } from '/common/representations/character.mjs';
-import { Character,Room,Hallway,Passageway,Weapon,Start } from '/js/spaces.js';
+import { Character,Room,Hallway,Passageway,Start } from '/js/spaces.js';
 export class GameMap
 {
     constructor(height, width)
@@ -93,7 +92,6 @@ export class GameMap
 		this.locations = {};
 		this.passageways = {};
 		this.characters = {};
-		this.weapons = {};
     }
 
 	// creates rooms
@@ -141,16 +139,6 @@ export class GameMap
 			this.locations[start] = startNew;
 		}
 	}
-
-	createWeapons()
-	{
-		for(var weapon in WeaponConstants)
-		{
-			let weaponNew = new Weapon(weapon,0,0,50,0);
-			this.weapons[weapon] = weaponNew;
-		}
-
-	}
 	// creates passageways
 	createPassageways()
 	{
@@ -178,7 +166,6 @@ export class GameMap
 		this.createCharacters();
 		this.createStarts();
 		this.createPassageways();
-		this.createWeapons();
 	}
 	/*
 	 * Define in subclass
