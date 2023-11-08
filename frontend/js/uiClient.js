@@ -13,6 +13,14 @@ export class UIClient
 		this.playerId = crypto.randomUUID();
 		this.msgEngine.send('start', {'playerId': this.playerId, 'gameId': this.gameId } );
 		this.playerInfo;
+		this.actionData;
+		this.actionLock;
+		this.actionValid;
+		this.validationInfo;
+		this.resetActionStates();
+	}
+	resetActionStates()
+	{
 		this.actionData = {
 			'suggestion':{
 				'character':'',
@@ -33,7 +41,8 @@ export class UIClient
 		this.actionValid = {
 			'end_turn': 0,		// can end turn
 			'suggestion': 0,	// can start a suggestion
-			'pass':0			// can pass turn
+			'pass':0,			// can pass turn
+			'accusation':1		// can perform accusation
 		};
 		this.validationInfo = {
 			'move': []
@@ -119,6 +128,33 @@ export class UIClient
 				console.log('waiting for proof!');
 			}
 		}
+		else if(this.actionLock['accusation'] == 1)
+		{
+			// define it
+			this.actionData['accusation']['character'] = character;
+			// if no other details needed for accusation
+			if((this.actionData['accusation']['weapon'] != '') && (this.actionData['accusation']['room'] != ''))
+			{
+				// send suggestion to backend
+				this.msgEngine.send('accuse', {
+					'playerId':this.playerId,
+					'gameId':this.gameId,
+					'accusingCharacter':this.actionData['accusation']['character'],
+					'accusingWeapon':this.actionData['accusation']['weapon'],
+					'accusingLocation':this.actionData['accusation']['room']});
+				// reset accusation information ( may not be necessary )
+				this.actionData['accusation'] = {'character':'','weapon':'','room':''};
+			}
+			// otherwise, prompt for more details
+			else if(this.actionData['accusation']['weapon'] == '')
+			{
+				this.promptPlayer('ACCUSATION_NEED_WEAPON');
+			}
+			else if(this.actionData['accusation']['room'] == '')
+			{
+				this.promptPlayer('ACCUSATION_NEED_LOCATION');
+			}
+		}
 		else
 		{
 			console.log('Clicked on Character: ' + character);
@@ -158,6 +194,33 @@ export class UIClient
 				console.log('waiting for proof!');
 			}
 		}
+		else if(this.actionLock['accusation'] == 1)
+		{
+			// define it
+			this.actionData['accusation']['weapon'] = weapon;
+			// if no other details needed for accusation
+			if((this.actionData['accusation']['character'] != '') && (this.actionData['accusation']['room'] != ''))
+			{
+				// send suggestion to backend
+				this.msgEngine.send('accuse', {
+					'playerId':this.playerId,
+					'gameId':this.gameId,
+					'accusingCharacter':this.actionData['accusation']['character'],
+					'accusingWeapon':this.actionData['accusation']['weapon'],
+					'accusingLocation':this.actionData['accusation']['room']});
+				// reset accusation information ( may not be necessary )
+				this.actionData['accusation'] = {'character':'','weapon':'','room':''};
+			}
+			// otherwise, prompt for more details
+			else if(this.actionData['accusation']['character'] == '')
+			{
+				this.promptPlayer('ACCUSATION_NEED_CHARACTER');
+			}
+			else if(this.actionData['accusation']['room'] == '')
+			{
+				this.promptPlayer('ACCUSATION_NEED_LOCATION');
+			}
+		}
 		else
 		{
 			console.log('Clicked on Weapon: ' + weapon);
@@ -169,9 +232,9 @@ export class UIClient
 		if((button == 'END_TURN') && (this.actionValid['end_turn'] == 1))
 		{
 			this.msgEngine.send('turncomplete', {'playerId':this.playerId,'gameId':this.gameId});
-			this.disableEndTurn();
+			this.resetActionStates();
 		}
-		if((button == 'SUGGESTION') && (this.actionValid['suggestion'] == 1))
+		else if((button == 'SUGGESTION') && (this.actionValid['suggestion'] == 1))
 		{
 			if (this.actionLock['suggestion'] != 1)
 			{
@@ -183,7 +246,7 @@ export class UIClient
 				this.promptPlayer('SUGGESTION_RUNNING');
 			}
 		}
-		if(button == 'PASS')
+		else if(button == 'PASS')
 		{
 			// if player can pass
 			if ((this.actionValid['pass'] == 1) && (this.actionLock['proof_select'] == 1))
@@ -201,6 +264,22 @@ export class UIClient
 				console.log('Pass only available when prompted for proof');
 			}
 		}
+		else if((button == 'ACCUSATION') && (this.actionValid['accusation'] == 1))
+		{
+			if (this.actionLock['accusation'] != 1)
+			{
+				this.setAccusationLock();
+				this.promptPlayer('ACCUSATION_PLAYER');
+			}
+			else
+			{
+				this.promptPlayer('ACCUSATION_BLOCKED');
+			}
+		}
+		else
+		{
+			console.log('You cannot perform this action right now!');
+		}
 	}
 	selectRoom(room)
 	{
@@ -210,6 +289,33 @@ export class UIClient
 			this.actionValid['move'] = 0;
 			this.validationInfo['move'] = [];
 			this.msgEngine.send('move',{'playerId':this.playerId,'gameId':this.gameId,'newCharacterLocation':room});
+		}
+		else if(this.actionLock['accusation'] == 1)
+		{
+			// define it
+			this.actionData['accusation']['room'] = room;
+			// if no other details needed for accusation
+			if((this.actionData['accusation']['character'] != '') && (this.actionData['accusation']['weapon'] != ''))
+			{
+				// send suggestion to backend
+				this.msgEngine.send('accuse', {
+					'playerId':this.playerId,
+					'gameId':this.gameId,
+					'accusingCharacter':this.actionData['accusation']['character'],
+					'accusingWeapon':this.actionData['accusation']['weapon'],
+					'accusingLocation':this.actionData['accusation']['room']});
+				// reset accusation information ( may not be necessary )
+				this.actionData['accusation'] = {'character':'','weapon':'','room':''};
+			}
+			// otherwise, prompt for more details
+			else if(this.actionData['accusation']['character'] == '')
+			{
+				this.promptPlayer('ACCUSATION_NEED_CHARACTER');
+			}
+			else if(this.actionData['accusation']['weapon'] == '')
+			{
+				this.promptPlayer('ACCUSATION_NEED_WEAPON');
+			}
 		}
 		else
 		{
@@ -239,6 +345,12 @@ export class UIClient
 		this.actionValid['suggestion'] = 0;
 		this.actionLock['proof_pending'] = 0;
 		this.actionLock['suggestion'] = 0;
+		this.actionValid['accusation'] = 1;
+	}
+	disableAccusation()
+	{
+		this.actionValid['accusation'] = 0;
+		this.actionLock['accusation'] = 0;
 	}
 	enableProof()
 	{
@@ -258,12 +370,17 @@ export class UIClient
 	{
 		this.actionValid['move'] = 1;
 		this.validationInfo['move'] = moves['potentialMoves'];
-		this.enableEndTurn();
 		console.log(moves);
 	}
 	setSuggestionLock()
 	{
 		this.actionLock['suggestion'] = 1;
+		this.actionValid['accusation'] = 0;
+	}
+	setAccusationLock()
+	{
+		this.actionLock['accusation'] = 1;
+		this.actionValid['suggestion'] = 0;
 	}
 	testme(data)
 	{

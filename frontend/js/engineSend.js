@@ -37,6 +37,7 @@ export class EngineSend {
 	}
 	msgAccuse(data)
 	{
+		this.push('accuse', data);
 	}
 	msgProof(data)
 	{
