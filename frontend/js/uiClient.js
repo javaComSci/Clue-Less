@@ -202,18 +202,32 @@ export class UIClient
 			}
 		}
 	}
-	selectArea(area)
+	selectRoom(room)
 	{
-		if( ( this.actionValid['move'] == 1 ) && ( this.validationInfo['move'].includes(area) == true ))
+		if( ( this.actionValid['move'] == 1 ) && ( this.validationInfo['move'].includes(room) == true ))
 		{
-			console.log('Move player to: ' + area);
+			console.log('Move player to: ' + room);
 			this.actionValid['move'] = 0;
 			this.validationInfo['move'] = [];
-			this.msgEngine.send('move',{'playerId':this.playerId,'gameId':this.gameId,'newCharacterLocation':area});
+			this.msgEngine.send('move',{'playerId':this.playerId,'gameId':this.gameId,'newCharacterLocation':room});
 		}
 		else
 		{
-			console.log('Player selected: ' + area);
+			console.log('Room selected: ' + room);
+		}
+	}
+	selectHallway(hallway)
+	{
+		if( ( this.actionValid['move'] == 1 ) && ( this.validationInfo['move'].includes(hallway) == true ))
+		{
+			console.log('Move player to: ' + hallway);
+			this.actionValid['move'] = 0;
+			this.validationInfo['move'] = [];
+			this.msgEngine.send('move',{'playerId':this.playerId,'gameId':this.gameId,'newCharacterLocation':hallway});
+		}
+		else
+		{
+			console.log('Hallway selected: ' + hallway);
 		}
 	}
 	enableSuggestion()
