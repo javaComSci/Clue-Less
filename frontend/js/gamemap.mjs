@@ -37,10 +37,10 @@ export class GameMap
 			'LIBRARY': { 'x': this.mb, 'y': this.mb + this.re + this.hl },
 			'CONSERVATORY': { 'x': this.mb, 'y': this.mb + 2 * ( this.re + this.hl ) },
 			'HALL': { 'x': this.mb + this.re + this.hl, 'y': this.mb },
-			'BILLIARD ROOM': { 'x': this.mb + this.re + this.hl, 'y': this.mb + this.re + this.hl },
+			'BILLIARDROOM': { 'x': this.mb + this.re + this.hl, 'y': this.mb + this.re + this.hl },
 			'BALLROOM': { 'x': this.mb + this.re + this.hl, 'y': this.mb + 2 * ( this.re + this.hl ) },
 			'LOUNGE': { 'x': this.mb + 2 * ( this.re + this.hl ), 'y': this.mb },
-			'DINING ROOM': { 'x': this.mb + 2 * ( this.re + this.hl ), 'y': this.mb + this.re + this.hl },
+			'DININGROOM': { 'x': this.mb + 2 * ( this.re + this.hl ), 'y': this.mb + this.re + this.hl },
 			'KITCHEN': { 'x': this.mb + 2 * ( this.re + this.hl ), 'y': this.mb + 2 * ( this.re + this.hl ) }
 		};
 		this.hallway_across_coordinates = {

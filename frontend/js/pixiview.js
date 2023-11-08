@@ -140,47 +140,59 @@ export class PixiMap extends GameMap
 		this.displayHallways();
 		this.displayPassageways();
 	}
+	displayRooms() {
+		if ( this.roomContainer != null )
+		{
+			// free the memory!
+			this.roomContainer.destroy();
+		}
+		this.roomContainer = new PIXI.Graphics();
+		for(var room in this.rooms) {
+			const pixiRoom = new PIXI.Graphics();
+			let roomObj = this.rooms[room];
+			let roomX = roomObj.x;
+			let roomY = roomObj.y;
 
-	// TODO: Create a parent container that holds the rooms on the pixiMap
-	/*
-	displayRooms() {
-		const rooms = new PIXI.Graphics();
-		for(var room in this.rooms) {
-			const rectangle = new PIXI.Rectangle(this.rooms[room].x,this.rooms[room].y,this.rooms[room].length,this.rooms[room].width);
-			rooms.beginFill(0x66CCFF);
-			// https://pixijs.download/release/docs/PIXI.Graphics.html#drawShape
-			rooms.drawShape(rectangle);
-			rooms.endFill();
-			this.app.stage.addChild(rectangle);
-		}
-	}
-	*/
-	displayRooms() {
-		for(var room in this.rooms) {
-			const rectangle = new PIXI.Graphics();
-			rectangle.beginFill(0x66CCFF);
-			rectangle.drawRect(this.rooms[room].x,this.rooms[room].y,this.rooms[room].length,this.rooms[room].width);
-			rectangle.endFill();
-			rectangle.eventMode = 'static';
-			rectangle.on('pointerup', (event) => { window.client.testme(); } );
-			this.app.stage.addChild(rectangle);
-			this.rooms[room].element = rectangle;
+			pixiRoom.beginFill(0x66CCFF);
+			pixiRoom.drawRect(0,0,roomObj.length,roomObj.width);
+			pixiRoom.endFill();
+			pixiRoom.eventMode = 'static';
+			pixiRoom.on('pointerup', (event) => { window.client.testme(roomObj.name); } );
+			pixiRoom.position.set(roomX,roomY);
+			this.rooms[room].element = pixiRoom;
+
 			const roomName = new PIXI.Text(room, { fontSize: 24, fill: 0xFBF8FB });
-			roomName.x = this.rooms[room].x;
-			roomName.y = this.rooms[room].y;
-			rectangle.addChild(roomName);
+			roomName.x = 0;
+			roomName.y = 0;
+			pixiRoom.addChild(roomName);
+			this.roomContainer.addChild(pixiRoom);
 		}
+		this.app.stage.addChild(this.roomContainer);
 	}
 	// TODO: Create a parent container that holds the hallways on the pixiMap
 	displayHallways() {
-		for(var hallway in this.hallways) {
-			const rectangle = new PIXI.Graphics();
-			rectangle.beginFill(0xD359DF);
-			rectangle.drawRect(this.hallways[hallway].x,this.hallways[hallway].y,this.hallways[hallway].length,this.hallways[hallway].width);
-			rectangle.endFill();
-			this.app.stage.addChild(rectangle);
-			this.hallways[hallway].element = rectangle;
+		if ( this.hallwayContainer != null )
+		{
+			// free the memory!
+			this.hallwayContainer.destroy();
 		}
+		this.hallwayContainer = new PIXI.Graphics();
+		for(var hallway in this.hallways) {
+			const pixiHallway = new PIXI.Graphics();
+			let hallwayObj = this.hallways[hallway];
+			let hallwayX = hallwayObj.x;
+			let hallwayY = hallwayObj.y;
+
+			pixiHallway.beginFill(0xD359DF)
+			pixiHallway.drawRect(0,0,hallwayObj.length,hallwayObj.width);
+			pixiHallway.endFill();
+			pixiHallway.eventMode = 'static';
+			pixiHallway.on('pointerup', (event) => { window.client.testme(hallwayObj.name); } );
+			pixiHallway.position.set(hallwayX,hallwayY);
+			this.hallways[hallway].element = pixiHallway;
+			this.hallwayContainer.addChild(pixiHallway);
+		}
+		this.app.stage.addChild(this.hallwayContainer);
 	}
 	displayCharacters(playerCharacters) {
 		if ( this.characterContainer != null )
