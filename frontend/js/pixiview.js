@@ -157,7 +157,7 @@ export class PixiMap extends GameMap
 			pixiRoom.drawRect(0,0,roomObj.length,roomObj.width);
 			pixiRoom.endFill();
 			pixiRoom.eventMode = 'static';
-			pixiRoom.on('pointerup', (event) => { window.client.testme(roomObj.name); } );
+			pixiRoom.on('pointerup', (event) => { window.client.selectArea(roomObj.name); } );
 			pixiRoom.position.set(roomX,roomY);
 			this.rooms[room].element = pixiRoom;
 
@@ -187,7 +187,7 @@ export class PixiMap extends GameMap
 			pixiHallway.drawRect(0,0,hallwayObj.length,hallwayObj.width);
 			pixiHallway.endFill();
 			pixiHallway.eventMode = 'static';
-			pixiHallway.on('pointerup', (event) => { window.client.testme(hallwayObj.name); } );
+			pixiHallway.on('pointerup', (event) => { window.client.selectArea(hallwayObj.name); } );
 			pixiHallway.position.set(hallwayX,hallwayY);
 			this.hallways[hallway].element = pixiHallway;
 			this.hallwayContainer.addChild(pixiHallway);

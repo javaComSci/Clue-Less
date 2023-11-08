@@ -28,6 +28,7 @@ export class EngineSend {
 	 */
 	msgMove(data)
 	{
+		this.push('move', data);
 	}
 	msgSuggestion(data)
 	{

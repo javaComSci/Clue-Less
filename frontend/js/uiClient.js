@@ -39,19 +39,21 @@ export class UIClient
 	}
 	selectArea(area)
 	{
-		if( ( this.validAction['move'] == 1 ) && ( this.validationInfo['move'].includes(area.name) == true ))
+		if( ( this.validAction['move'] == 1 ) && ( this.validationInfo['move'].includes(area) == true ))
 		{
-			console.log('Move player to: ' + area.name);
+			console.log('Move player to: ' + area);
 			this.validAction['move'] = 0;
 			this.validationInfo['move'] = [];
+			this.msgEngine.send('move',{'playerId':this.playerId,'gameId':this.gameId,'newCharacterLocation':area});
 		}
 		else
 		{
-			console.log('Player selected: ' + area.name);
+			console.log('Player selected: ' + area);
 		}
 	}
 	updateGameState(state)
 	{
+		console.log('Update Game State!: ' + state);
 		state['cards'] = this.playerInfo['cards'];
 		this.uiManager.updateGameState(state);
 	}
