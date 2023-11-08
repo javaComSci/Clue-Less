@@ -49,9 +49,15 @@ export class EngineRecv
 	}
 	msgRequestingMoveBroadcast()
 	{
+		this.socket.on('REQUESTING_MOVE_BROADCAST', function (obj) {
+			window.client.setPlayerTurn(obj);
+		});
 	}
 	msgRequestingMove()
 	{
+		this.socket.on('REQUEST_MOVE', function (obj) {
+			window.client.actionMove(obj);
+		});
 	}
 	msgRequestSuggestion()
 	{

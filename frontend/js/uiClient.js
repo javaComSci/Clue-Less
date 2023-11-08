@@ -13,6 +13,10 @@ export class UIClient
 		this.playerId = crypto.randomUUID();
 		this.msgEngine.send('start', {'playerId': this.playerId, 'gameId': this.gameId } );
 		this.playerInfo;
+		this.validAction = {};
+		this.validationInfo = {
+			'move': []
+		};
 	}
 	setPlayerInfo(playerInfo)
 	{
@@ -22,6 +26,29 @@ export class UIClient
 	testme(data)
 	{
 		console.log(data);
+	}
+	setPlayerTurn(playerInfo)
+	{
+		console.log('Player\'s Turn: ' + playerInfo);
+	}
+	actionMove(moves)
+	{
+		this.validAction['move'] = 1;
+		this.validationInfo['move'] = moves['potentialMoves'];
+		console.log(moves);
+	}
+	selectArea(area)
+	{
+		if( ( this.validAction['move'] == 1 ) && ( this.validationInfo['move'].includes(area.name) == true ))
+		{
+			console.log('Move player to: ' + area.name);
+			this.validAction['move'] = 0;
+			this.validationInfo['move'] = [];
+		}
+		else
+		{
+			console.log('Player selected: ' + area.name);
+		}
 	}
 	updateGameState(state)
 	{
