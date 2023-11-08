@@ -9,7 +9,8 @@ export class EngineSend {
 			'suggestion' 	: this.msgSuggestion.bind(this),
 			'accuse'		: this.msgAccuse.bind(this),
 			'proof'			: this.msgProof.bind(this),
-			'start'			: this.msgStart.bind(this)
+			'start'			: this.msgStart.bind(this),
+			'turncomplete'	: this.msgEndTurn.bind(this)
 		}
 	}
 	msg(action, data)
@@ -42,5 +43,9 @@ export class EngineSend {
 	msgStart(data)
 	{
 		this.push('start', data);
+	}
+	msgEndTurn(data)
+	{
+		this.push('turncomplete', data);
 	}
 }

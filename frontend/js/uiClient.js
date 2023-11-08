@@ -13,7 +13,9 @@ export class UIClient
 		this.playerId = crypto.randomUUID();
 		this.msgEngine.send('start', {'playerId': this.playerId, 'gameId': this.gameId } );
 		this.playerInfo;
-		this.validAction = {};
+		this.validAction = {
+			'end_turn': 0
+		};
 		this.validationInfo = {
 			'move': []
 		};
@@ -27,15 +29,26 @@ export class UIClient
 	{
 		console.log(data);
 	}
+	promptPlayer(ask)
+	{
+		/* TODO: Alert player
+		 */
+		console.log(ask);
+		if(ask == 'END_TURN')
+		{
+			this.enableEndTurn();
+		}
+	}
 	setPlayerTurn(playerInfo)
 	{
 		console.log('Player\'s Turn: ' + playerInfo);
 	}
-	actionMove(moves)
+	selectButton(button)
 	{
-		this.validAction['move'] = 1;
-		this.validationInfo['move'] = moves['potentialMoves'];
-		console.log(moves);
+		if((button == 'END_TURN') && (this.validAction['end_turn'] == 1))
+		{
+			this.msgEngine.send('turncomplete', {'playerId':this.playerId,'gameId':this.gameId});
+		}
 	}
 	selectArea(area)
 	{
@@ -50,6 +63,24 @@ export class UIClient
 		{
 			console.log('Player selected: ' + area);
 		}
+	}
+	enableSuggestion()
+	{
+	}
+	enableEndTurn()
+	{
+		this.validAction['end_turn'] = 1;
+	}
+	disableEndTurn()
+	{
+		this.validAction['end_turn'] = 0;
+	}
+	enableMove(moves)
+	{
+		this.validAction['move'] = 1;
+		this.validationInfo['move'] = moves['potentialMoves'];
+		this.enableEndTurn();
+		console.log(moves);
 	}
 	updateGameState(state)
 	{

@@ -57,15 +57,16 @@ export class GameHud
 	}
 	createButtons(state)
 	{
+		let buttonAreaSFactorLW = this.buttonAreaHeight/this.buttonAreaWidth;
 		let buttonHeight = this.buttonAreaHeight - 2 * ( this.buttonMarginSFactor * this.buttonAreaHeight );
 		let buttonGapCount = state.length - 1;
-		let buttonGapTotalWidth = ( this.buttonAreaWidth * this.buttonGapSFactor ) * buttonGapCount;
-		let buttonWidth = ((this.buttonAreaWidth - 2 * ( this.buttonMarginSFactor * this.buttonAreaWidth )) - buttonGapTotalWidth )/state.length;
-		let buttonStartX = (this.buttonMarginSFactor * this.buttonAreaWidth) + this.buttonAreaStartX;
+		let buttonGapTotalWidth = ( this.buttonAreaWidth * this.buttonGapSFactor);
+		let buttonWidth = ((this.buttonAreaWidth - 2 * ( this.buttonMarginSFactor/(buttonGapCount) * this.buttonAreaWidth )) - buttonGapTotalWidth )/state.length;
+		let buttonStartX = (this.buttonMarginSFactor/(buttonGapCount) * this.buttonAreaWidth) + this.buttonAreaStartX;
 		let buttonStartY = (this.buttonMarginSFactor * this.buttonAreaHeight) + this.buttonAreaStartY;
 		state.forEach((b) => {
 			let button = new Button(b['name'],b['content'],buttonStartX,buttonStartY,buttonHeight,buttonWidth);
-			buttonStartX += buttonWidth + (this.buttonAreaWidth * this.buttonGapSFactor);
+			buttonStartX += buttonWidth + (this.buttonAreaWidth * this.buttonGapSFactor)/buttonGapCount;
 			this.buttons.push(button);
 		});
 	}

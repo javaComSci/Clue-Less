@@ -16,8 +16,10 @@ export class UIState
 		 * set starting state for some elements
 		 */
 		this.state = {
-			'buttons': [ {'name':'Suggestion','content':'Suggestion'},
-				{'name':'Accusation','content':'Accusation'} ],
+			'buttons': [ {'name':'SUGGESTION','content':'Suggestion'},
+				{'name':'ACCUSATION','content':'Accusation'},
+				{'name':'PASS','content':'Pass'},
+				{'name':'END_TURN','content':'End Turn'}],
 			'cards':[],
 			'alerts': [ {'name':'pending','content':'Waiting on 2 more players'}]
 		};

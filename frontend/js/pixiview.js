@@ -82,7 +82,7 @@ export class PixiHud extends GameHud
 		this.buttons.forEach((button) => {
 			let pixiButton = new PIXI.Graphics();
 			pixiButton.eventMode = 'static';
-			pixiButton.on('pointerup', (event) => { window.client.testme(button.name); } );
+			pixiButton.on('pointerup', (event) => { window.client.selectButton(button.name); } );
 			pixiButton.beginFill(0xFBF8FB);
 			pixiButton.drawRect(0,0,button.width,button.length);
 			pixiButton.endFill();
@@ -154,7 +154,7 @@ export class PixiMap extends GameMap
 			let roomY = roomObj.y;
 
 			pixiRoom.beginFill(0x66CCFF);
-			pixiRoom.drawRect(0,0,roomObj.length,roomObj.width);
+			pixiRoom.drawRect(0,0,roomObj.width,roomObj.length);
 			pixiRoom.endFill();
 			pixiRoom.eventMode = 'static';
 			pixiRoom.on('pointerup', (event) => { window.client.selectArea(roomObj.name); } );
