@@ -66,3 +66,40 @@ export class LocationCard extends GameCard
         super(name, 'LOCATION')
     }
 }
+
+export function getAvailableHallwaysForMoving(roomLocation, totalCharacterPieces) {
+    // Get the hallways adjacent to the room.
+    let adjacentHallways = [];
+    for (let hallway in LocationConstants.Hallway) {
+        let connectingRooms = hallway.split("_");
+        if (roomLocation == connectingRooms[0] || roomLocation == connectingRooms[1]) {
+            adjacentHallways.push(hallway);
+        }
+    }
+
+    // For the hallways that are adjacent, check if any character already is there.
+    let potentialHallways = [];
+    for (let adjacentHallway of adjacentHallways) {
+        if (totalCharacterPieces.map(piece => piece.currentLocation).indexOf(adjacentHallway) === -1) {
+            potentialHallways.push(adjacentHallway);
+        }
+    }
+
+    return potentialHallways;
+}
+
+export function getAvailableDiagonalRoomsForMoving(roomLocation) {
+    if (roomLocation in DiagonalRooms) {
+        return [DiagonalRooms[roomLocation]];
+    }
+
+    return [];
+}
+
+export function getStayMove(character, playerId) {
+    if (character.pieceMover != playerId) {
+        return [STAY];
+    }
+
+    return [];
+}

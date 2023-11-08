@@ -4,5 +4,6 @@ export class Player
     {
         this.playerId = playerId;
         this.character = undefined;
+        this.canPlay = true;
     }
 }

@@ -55,5 +55,9 @@ export function initializeListeners()
         socket.on('accuse', ({ gameId, playerId, accusingCharacter, accusingWeapon, accusingLocation }) => {
             games[gameId].processAccusation(playerId, accusingCharacter, accusingWeapon, accusingLocation);
         });
+
+        socket.on('turncomplete', ({ gameId, playerId }) => {
+            games[gameId].proessTurnCompletion(playerId);
+        });
     });
 }
