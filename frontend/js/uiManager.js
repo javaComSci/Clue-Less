@@ -7,15 +7,38 @@ export class UIManager
 {
 	constructor()
 	{
-		this.ui = new UIState();
+		this.defaultStateUI = {
+			'buttons': [ {'name':'SUGGESTION','content':'Suggestion'},
+				{'name':'ACCUSATION','content':'Accusation'},
+				{'name':'PASS','content':'Pass'},
+				{'name':'END_TURN','content':'End Turn'}],
+			'cards':[],
+			'alerts': [ {'name':'pending','content':'Waiting on 2 more players'}]
+		};
+		this.defaultStateMap = {};
+		this.currentStateUI = this.defaultStateUI;
+		this.currentStateMap = this.defaultStateMap;
+		this.ui = new UIState({'ui':this.currentStateUI,'map':this.currentStateMap});
 	}
 	/*
 	 * Methods to be defined
 	 */
 	updateGameState(state)
 	{
-		this.ui.updateHudState(state);
-		this.ui.updateMapState(state);
+		if( state['cards'] != undefined )
+		{
+			this.currentStateUI['cards'] = state['cards'];
+		}
+		if( state['alerts'] != undefined )
+		{
+			this.currentStateUI['alerts'] = state['alerts'];
+		}
+		if( state['characterPieces'] != undefined )
+		{
+			this.currentStateMap['characterPieces'] = state['characterPieces'];
+		}
+		this.ui.updateHudState(this.currentStateUI);
+		this.ui.updateMapState(this.currentStateMap);
 	}
 	move()
 	{
@@ -28,6 +51,11 @@ export class UIManager
 	}
 	gameend()
 	{
+	}
+	messageUser(msg)
+	{
+		//this.ui.updateHudState(state);
+		console.log(msg);
 	}
 }
 

@@ -50,15 +50,17 @@ export class UIClient
 	}
 	updateGameState(state)
 	{
-		console.log('Update Game State!: ' + state);
+		//console.log('Update Game State!: ' + state); // INFO_GAME_STATE
 		state['cards'] = this.playerInfo['cards'];
 		this.uiManager.updateGameState(state);
+		this.promptPlayer('INFO_GAME_STATE');
 	}
 
 	setPlayerInfo(playerInfo)
 	{
 		this.playerInfo = playerInfo;
-		console.log(this.playerInfo);
+		//console.log(this.playerInfo); // INFO_NEW_PLAYER
+		this.promptPlayer('INFO_NEW_PLAYER');
 	}
 	promptPlayer(ask)
 	{
@@ -68,6 +70,10 @@ export class UIClient
 		if(ask == 'END_TURN')
 		{
 			this.enableEndTurn();
+		}
+		if((ask == 'INFO_NEW_PLAYER') || (ask == 'INFO_GAME_STATE'))
+		{
+			this.uiManager.messageUser(ask);
 		}
 	}
 	setPlayerTurn(playerInfo)
