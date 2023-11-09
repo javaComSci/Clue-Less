@@ -22,6 +22,8 @@ export class UIState
 	{
 		this.pixihud.createCards(state['cards']);
 		this.pixihud.displayCards();
+		this.pixihud.createAlerts(state['alerts']);
+		this.pixihud.displayAlerts();
 	}
 	updateMapState(state)
 	{

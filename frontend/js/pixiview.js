@@ -160,6 +160,15 @@ export class PixiHud extends GameHud
 			pixiAlert.beginFill(0xFBF8FB);
 			pixiAlert.drawRect(0,0,alertInfo.width,alertInfo.length);
 			pixiAlert.endFill();
+			let text = new PIXI.Text(
+				alertInfo.content, {
+					fontSize: 40,
+					fill: 0x000000
+				}
+			);
+			text.x = alertInfo.length/2 - text.width/2;
+			text.y = alertInfo.width/2 - text.height/2;
+			pixiAlert.addChild(text);
 			pixiAlert.position.set(alertInfo.x,alertInfo.y);
 			this.alertContainer.addChild(pixiAlert);
 		});

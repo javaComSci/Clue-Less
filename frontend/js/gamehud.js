@@ -97,6 +97,7 @@ export class GameHud
 	}
 	createAlerts(state)
 	{
+		this.alerts = [];
 		let alertHeight = this.alertAreaHeight - 2 * ( this.alertMarginSFactor * this.alertAreaHeight );
 		let alertWidth = this.alertAreaWidth - 2 * ( this.alertMarginSFactor * this.alertAreaWidth );
 		let alertStartX = (this.alertMarginSFactor * this.alertAreaWidth) + this.alertAreaStartX;

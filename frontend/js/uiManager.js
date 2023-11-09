@@ -2,6 +2,7 @@
  * Performs an action on the UI
  */
 import { UIState } from '/js/uiState.js';
+import { GameAlerts } from '/js/alerts.js';
 
 export class UIManager
 {
@@ -55,6 +56,7 @@ export class UIManager
 	messageUser(msg)
 	{
 		//this.ui.updateHudState(state);
+		this.updateGameState(GameAlerts[msg]);
 		console.log(msg);
 	}
 }
