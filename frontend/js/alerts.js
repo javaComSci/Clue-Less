@@ -15,6 +15,7 @@ export class GameAlerts {
 			'INFO_WAITING_PROOF'				: this.infoWaitingProof.bind(this),
 			'INFO_REQUESTING_PROOF_BROADCAST'	: this.infoRequestingProofBroadcast.bind(this),
 			'INFO_VALID_MOVES'					: this.infoValidMoves.bind(this),
+			'INFO_VALID_ACTIONS'				: this.infoValidActions.bind(this),
 			'PROMPT_NEED_WEAPON'				: this.promptNeedWeapon.bind(this),
 			'PROMPT_NEED_LOCATION'				: this.promptNeedLocation.bind(this),
 			'PROMPT_NEED_CHARACTER'				: this.promptNeedCharacter.bind(this),
@@ -34,6 +35,18 @@ export class GameAlerts {
 	{
 		let alerts = this.gameAlerts[name](data);
 		return {'alerts': alerts};
+	}
+	infoValidActions(actions)
+	{
+		let actionList = [];
+		for(var action in actions)
+		{
+			if(actions[action] == 1)
+			{
+				actionList.push(action)
+			}
+		}
+		return [{'name':'infoValidActions','content':'Valid Actions: ' + actionList.join(',')}];
 	}
 	infoValidMoves({potentialMoves})
 	{

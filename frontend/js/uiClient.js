@@ -309,6 +309,7 @@ export class UIClient
 			this.validationInfo['move'] = [];
 			this.msgEngine.send('move',{'playerId':this.playerId,'gameId':this.gameId,'newCharacterLocation':room});
 			this.enableEndTurn();
+			this.promptPlayer('INFO_VALID_ACTIONS', this.actionValid);
 		}
 		else if(this.actionLock['accusation'] == 1)
 		{
@@ -351,6 +352,7 @@ export class UIClient
 			this.validationInfo['move'] = [];
 			this.msgEngine.send('move',{'playerId':this.playerId,'gameId':this.gameId,'newCharacterLocation':hallway});
 			this.enableEndTurn();
+			this.promptPlayer('INFO_VALID_ACTIONS', this.actionValid);
 		}
 		else
 		{
@@ -360,6 +362,7 @@ export class UIClient
 	enableSuggestion()
 	{
 		this.actionValid['suggestion'] = 1;
+		this.promptPlayer('INFO_VALID_ACTIONS', this.actionValid);
 	}
 	disableSuggestion()
 	{
@@ -367,11 +370,13 @@ export class UIClient
 		this.actionLock['proof_pending'] = 0;
 		this.actionLock['suggestion'] = 0;
 		this.actionValid['accusation'] = 1;
+		this.promptPlayer('INFO_VALID_ACTIONS', this.actionValid);
 	}
 	disableAccusation()
 	{
 		this.actionValid['accusation'] = 0;
 		this.actionLock['accusation'] = 0;
+		this.promptPlayer('INFO_VALID_ACTIONS', this.actionValid);
 	}
 	enableProof()
 	{
