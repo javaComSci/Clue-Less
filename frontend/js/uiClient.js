@@ -63,7 +63,7 @@ export class UIClient
 		this.playerInfo = playerInfo;
 		this.promptPlayer('INFO_NEW_PLAYER');
 	}
-	promptPlayer(ask)
+	promptPlayer(ask, data)
 	{
 		/* TODO: Alert player
 		 */
@@ -71,7 +71,7 @@ export class UIClient
 		{
 			this.enableEndTurn();
 		}
-		this.uiManager.messageUser(ask);
+		this.uiManager.messageUser(ask, data);
 	}
 	setPlayerTurn(playerInfo)
 	{

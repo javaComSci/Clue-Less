@@ -8,6 +8,7 @@ export class UIManager
 {
 	constructor()
 	{
+		this.gameAlerts = new GameAlerts();
 		this.defaultStateUI = {
 			'buttons': [ {'name':'SUGGESTION','content':'Suggestion'},
 				{'name':'ACCUSATION','content':'Accusation'},
@@ -53,11 +54,11 @@ export class UIManager
 	gameend()
 	{
 	}
-	messageUser(msg)
+	messageUser(msg, data)
 	{
 		//this.ui.updateHudState(state);
 		console.log(msg);
-		this.updateGameState(GameAlerts[msg]);
+		this.updateGameState(this.gameAlerts.generateAlert(msg));
 	}
 }
 
