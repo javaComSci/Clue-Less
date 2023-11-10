@@ -129,7 +129,7 @@ export class EngineRecv
 	msgTurnCompleteConfirmation()
 	{
 		this.socket.on('REQUEST_TURN_COMPLETE_CONFIRM', function () {
-			//window.client.promptPlayer('PROMPT_END_TURN');
+			window.client.setTurnComplete();
 		});
 	}
 }

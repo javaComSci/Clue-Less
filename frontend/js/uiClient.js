@@ -73,26 +73,23 @@ export class UIClient
 	}
 	promptPlayer(ask, data)
 	{
-		/* TODO: Alert player
-		 */
-		if(ask == 'PROMPT_END_TURN')
-		{
-			this.enableEndTurn();
-		}
 		this.uiManager.messageUser(ask, data);
+	}
+	setTurnComplete()
+	{
+		this.promptPlayer('PROMPT_END_TURN');
 	}
 	setPlayerTurn(playerInfo)
 	{
-		/*
 		if ( playerInfo.playerId == this.playerInfo.playerId )
 		{
 			this.promptPlayer('INFO_YOUR_TURN');
+			this.enableEndTurn();
 		}
 		else
 		{
 			this.promptPlayer('INFO_OPPONENT_TURN');
 		}
-		*/
 	}
 	selectCard(cardName, cardType)
 	{
