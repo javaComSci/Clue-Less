@@ -98,7 +98,8 @@ export function getAvailableDiagonalRoomsForMoving(roomLocation) {
 
 export function getStayMove(character, playerId) {
     if (character.pieceMover != playerId) {
-        return [STAY];
+        return [character.currentLocation];
+        // return [STAY];
     }
 
     return [];
