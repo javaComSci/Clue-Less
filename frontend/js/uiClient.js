@@ -14,6 +14,7 @@ export class UIClient
 		this.msgEngine.send('start', {'playerId': this.playerId, 'gameId': this.gameId } );
 		this.proofReceived = '';
 		this.proofProvided = false;
+		this.failedAccusation = {};
 		this.playerInfo;
 		this.actionData;
 		this.actionLock;
@@ -47,7 +48,8 @@ export class UIClient
 			'End Turn': 0		// can end turn
 		};
 		this.validationInfo = {
-			'move': []
+			'move': [],
+			'proof': {}
 		};
 	}
 	updateGameState(state)
@@ -77,6 +79,31 @@ export class UIClient
 	{
 		this.uiManager.messageUser(ask, data);
 	}
+	playerWins(data)
+	{
+		this.promptPlayer('INFO_PLAYER_WINS',data);
+	}
+	accusationSolution(data)
+	{
+		this.validationInfo['accusation'] = data;
+	}
+	playerLoses(data)
+	{
+		this.failedAccusation = data;
+		let info = {
+			'solution': this.validationInfo['accusation'],
+			'accusation': data
+		};
+		if(data['isGameOver'] == false)
+		{
+			this.promptPlayer('INFO_PLAYER_LOSES',info);
+			this.playerInfo.canPlay = false;
+		}
+		else
+		{
+			this.promptPlayer('INFO_GAME_OVER',info);
+		}
+	}
 	setTurnComplete()
 	{
 		//do received proof message here, otherwise it will be overriden by REQUEST_COMPLETE_TURN
@@ -89,6 +116,10 @@ export class UIClient
 			this.promptPlayer('INFO_PROOF_RECEIVED', data);
 			this.proofReceived = '';
 		}
+		if( this.playerInfo.canPlay == false )
+		{
+			this.msgEngine.send('turncomplete', {'playerId':this.playerId,'gameId':this.gameId});
+		}
 		else
 		{
 			this.promptPlayer('INFO_VALID_ACTIONS', this.actionValid);
@@ -96,15 +127,39 @@ export class UIClient
 	}
 	setPlayerTurn(playerInfo)
 	{
+		//reset proof on new turn
 		this.proofProvided = false;
 		if ( playerInfo.playerId == this.playerInfo.playerId )
 		{
-			this.promptPlayer('INFO_YOUR_TURN');
+			if(this.failedAccusation['accusingPlayer'] != undefined)
+			{
+				this.promptPlayer('INFO_YOUR_TURN_PLAYER_LOSES', this.failedAccusation);
+				this.failedAccusation = {};
+			}
+			else
+			{
+				this.promptPlayer('INFO_YOUR_TURN');
+			}
 			this.enableEndTurn();
+		}
+		else if(this.validationInfo['accusation'] != undefined)
+		{
+			let solution = {
+				'solution': this.validationInfo['accusation']
+			};
+			this.promptPlayer('INFO_PLAYER_LOSES',solution);
 		}
 		else
 		{
-			this.promptPlayer('INFO_OPPONENT_TURN');
+			if(this.failedAccusation['accusingPlayer'] != undefined)
+			{
+				this.promptPlayer('INFO_OPPONENT_TURN_PLAYER_LOSES', this.failedAccusation);
+				this.failedAccusation = {};
+			}
+			else
+			{
+				this.promptPlayer('INFO_OPPONENT_TURN');
+			}
 		}
 	}
 	selectCard(cardName, cardType)
@@ -274,7 +329,11 @@ export class UIClient
 	}
 	selectButton(button)
 	{
-		if((button == 'END_TURN') && (this.actionValid['End Turn'] == 1))
+		if(this.playerInfo.canPlay == false)
+		{
+			this.promptPlayer('ERROR_PLAYER_DISABLED');
+		}
+		else if((button == 'END_TURN') && (this.actionValid['End Turn'] == 1))
 		{
 			this.msgEngine.send('turncomplete', {'playerId':this.playerId,'gameId':this.gameId});
 			this.resetActionStates();
@@ -454,7 +513,15 @@ export class UIClient
 	{
 		this.actionValid['move'] = 1;
 		this.validationInfo['move'] = moves['potentialMoves'];
-		this.promptPlayer('INFO_VALID_MOVES', moves);
+		if(this.failedAccusation['accusingPlayer'] != undefined)
+		{
+			this.promptPlayer('INFO_YOUR_TURN_PLAYER_LOSES', this.failedAccusation);
+			this.failedAccusation = {};
+		}
+		else
+		{
+			this.promptPlayer('INFO_VALID_MOVES', moves);
+		}
 	}
 	setSuggestionLock()
 	{

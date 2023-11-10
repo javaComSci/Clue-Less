@@ -9,7 +9,9 @@ export class GameAlerts {
 			'INFO_CLIENT_JOINED'				: this.infoClientJoined.bind(this),
 			'INFO_NEW_PLAYER'					: this.infoNewPlayer.bind(this),
 			'INFO_YOUR_TURN'					: this.infoYourTurn.bind(this),
+			'INFO_VALID_MOVES_PLAYER_LOSES'		: this.infoValidMovesPlayerLoses.bind(this),
 			'INFO_OPPONENT_TURN'				: this.infoOpponentTurn.bind(this),
+			'INFO_OPPONENT_TURN_PLAYER_LOSES'	: this.infoOpponentTurnPlayerLoses.bind(this),
 			'INFO_SUGGESTION_STARTED'			: this.infoSuggestionStarted.bind(this),
 			'INFO_ACCUSATION_STARTED'			: this.infoAccusationStarted.bind(this),
 			'INFO_WAITING_PROOF'				: this.infoWaitingProof.bind(this),
@@ -21,6 +23,9 @@ export class GameAlerts {
 			'INFO_REQUESTING_PROOF_BROADCAST'	: this.infoRequestingProofBroadcast.bind(this),
 			'INFO_VALID_MOVES'					: this.infoValidMoves.bind(this),
 			'INFO_VALID_ACTIONS'				: this.infoValidActions.bind(this),
+			'INFO_PLAYER_WINS'				    : this.infoPlayerWins.bind(this),
+			'INFO_PLAYER_LOSES'				    : this.infoPlayerLoses.bind(this),
+			'INFO_GAME_OVER'					: this.infoGameOver.bind(this),
 			'PROMPT_NEED_WEAPON'				: this.promptNeedWeapon.bind(this),
 			'PROMPT_NEED_LOCATION'				: this.promptNeedLocation.bind(this),
 			'PROMPT_NEED_CHARACTER'				: this.promptNeedCharacter.bind(this),
@@ -34,6 +39,7 @@ export class GameAlerts {
 			'ERROR_ACTION_BLOCKED'				: this.errorActionBlocked.bind(this),
 			'ERROR_PROOF_INVALID'				: this.errorProofInvalid.bind(this),
 			'ERROR_NOT_ENOUGH_PLAYERS'			: this.errorNotEnoughPlayers.bind(this),
+			'ERROR_PLAYER_DISABLED'			    : this.errorNotEnoughPlayers.bind(this),
 
 		}
 	}
@@ -53,6 +59,51 @@ export class GameAlerts {
 	{
 		let alerts = this.gameAlerts[name](data);
 		return {'alerts': alerts};
+	}
+	infoPlayerWins({winningPlayer,accusedCharacter,accusedWeapon,accusedLocation})
+	{
+		return [{'name':'infoPlayerWins','content':'Player ' + winningPlayer + ' wins! Solution: ' + accusedCharacter + ', ' + accusedWeapon + ', ' + accusedLocation}];
+	}
+	infoPlayerLoses({solution,accusation})
+	{
+		if(solution != undefined)
+		{
+			let solChar = solution['correctCharacter'];
+			let solWeapon = solution['correctWeapon'];
+			let solLocation = solution['correctLocation'];
+			return [{'name':'infoPlayerLoses','content':'You lose. Solution: ' + solChar.name + ' with the ' + solWeapon.name + ' in the ' + solLocation.name + '. Spectating...'}]
+		}
+		else
+		{
+			let accPlayer = accusation['accusingPlayer'];
+			let accChar = accusation['accusedCharacter'];
+			let accWeapon = accusation['accusedWeapon'];
+			let accLocation = accusation['accusedLocation'];
+			return [{'name':'infoPlayerLoses','content':'Player ' + accPlayer + ' loses. Accused: ' + accChar.name + ' with the ' + accWeapon.name + ' in the ' + accLocation.name + '. Spectating...'}];
+		}
+	}
+	infoYourTurnPlayerLoses(accusation)
+	{
+		let accPlayer = accusation['accusingPlayer'];
+		let accChar = accusation['accusedCharacter'];
+		let accWeapon = accusation['accusedWeapon'];
+		let accLocation = accusation['accusedLocation'];
+		return [{'name':'infoPlayerLoses','content':'Player ' + accPlayer + ' loses. Accused: ' + accChar.name + ' with the ' + accWeapon.name + ' in the ' + accLocation.name + '.Your Turn! Valid Moves: '}];
+	}
+	infoOpponentTurnPlayerLoses(accusation)
+	{
+		let accPlayer = accusation['accusingPlayer'];
+		let accChar = accusation['accusedCharacter'];
+		let accWeapon = accusation['accusedWeapon'];
+		let accLocation = accusation['accusedLocation'];
+		return [{'name':'infoPlayerLoses','content':'Player ' + accPlayer + ' loses. Accused: ' + accChar.name + ' with the ' + accWeapon.name + ' in the ' + accLocation.name + '. Opponent\'s Turn...'}];
+	}
+	infoGameOver({solution,accusation})
+	{
+		let solChar = solution['correctCharacter'];
+		let solWeapon = solution['correctWeapon'];
+		let solLocation = solution['correctLocation'];
+		return [{'name':'infoGameOver','content':'Game Over! No one wins. Solution: ' + solChar.name + ' with the ' + solWeapon.name + ' in the ' + solLocation.name}]
 	}
 	infoProofReceived({actions,proof})
 	{
@@ -78,12 +129,12 @@ export class GameAlerts {
 	infoValidActions(actions)
 	{
 		let actionList = this.getValidActions(actions);
-		return [{'name':'infoValidActions','content':'Valid Actions: ' + actionList.join(', ')}];
+		return [{'name':'infoValidActions','content':'Your turn! Valid Actions: ' + actionList.join(', ')}];
 	}
 	infoValidMoves({potentialMoves})
 	{
 		let content = potentialMoves.join(', ');
-		return [{'name':'infoValidMoves','content':'Valid Moves: ' + content}];
+		return [{'name':'infoValidMoves','content':'Your turn! Valid Moves: ' + content}];
 	}
 	infoGameState()
 	{
@@ -111,7 +162,7 @@ export class GameAlerts {
 	}
 	infoAccusationStarted()
 	{
-		return [{'name':'infoAccusationStarted','content':'Accusation! Pick a player, weapon, or room.'}];
+		return [{'name':'infoAccusationStarted','content':'Accusation! Pick a player, weapon, and room.'}];
 	}
 	infoWaitingProof()
 	{
@@ -151,7 +202,7 @@ export class GameAlerts {
 	}
 	errorAccusationRunning()
 	{
-		return [{'name':'errorAccusationRunning','content':'Already making accusation!'}];
+		return [{'name':'errorAccusationRunning','content':'Already making accusation! Pick player, weapon, and room'}];
 	}
 	errorAccusationBlocked()
 	{
@@ -172,6 +223,10 @@ export class GameAlerts {
 	errorProofInvalid({suggestedLocation,suggestedCharacterName,suggestedWeaponName, playerChoice})
 	{
 		return [{'name':'errorProofInvalid','content':'You clicked ' + playerChoice + '. Card must be one of: ' + suggestedLocation + ', ' + suggestedCharacterName + ', ' + suggestedWeaponName + '. Or, click Pass.'}];
+	}
+	errorPlayerDisabled()
+	{
+		return [{'name':'errorPlayerDisabled','content':'You are spectating and cannot perform any actions.'}];
 	}
 }
 

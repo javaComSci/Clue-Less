@@ -59,9 +59,6 @@ export class UIManager
 	}
 	messageUser(msg, data)
 	{
-		//this.ui.updateHudState(state);
-		console.log(msg);
-		//this.gameAlerts.generateAlert(msg);
 		this.updateGameState(this.gameAlerts.generateAlert(msg, data));
 	}
 }
