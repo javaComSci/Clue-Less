@@ -50,7 +50,6 @@ export class UIClient
 	}
 	updateGameState(state)
 	{
-		state['cards'] = this.playerInfo['cards'];
 		this.uiManager.updateGameState(state);
 		/*
 		this.promptPlayer('INFO_GAME_STATE');
@@ -69,6 +68,8 @@ export class UIClient
 	{
 		this.playerInfo = playerInfo;
 		this.promptPlayer('INFO_NEW_PLAYER');
+		let startState = {'cards':this.playerInfo['cards']}
+		this.updateGameState(startState);
 	}
 	promptPlayer(ask, data)
 	{
