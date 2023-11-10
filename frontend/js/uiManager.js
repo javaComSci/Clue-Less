@@ -21,26 +21,29 @@ export class UIManager
 		this.currentStateUI = this.defaultStateUI;
 		this.currentStateMap = this.defaultStateMap;
 		this.ui = new UIState({'ui':this.currentStateUI,'map':this.currentStateMap});
+		this.messageUser('INFO_CLIENT_JOINED');
 	}
 	/*
 	 * Methods to be defined
 	 */
 	updateGameState(state)
 	{
+		let newStateUI = {};
+		let newStateMap = {};
 		if( state['cards'] != undefined )
 		{
-			this.currentStateUI['cards'] = state['cards'];
+			newStateUI['cards'] = state['cards'];
 		}
 		if( state['alerts'] != undefined )
 		{
-			this.currentStateUI['alerts'] = state['alerts'];
+			newStateUI['alerts'] = state['alerts'];
 		}
 		if( state['characterPieces'] != undefined )
 		{
-			this.currentStateMap['characterPieces'] = state['characterPieces'];
+			newStateMap['characterPieces'] = state['characterPieces'];
 		}
-		this.ui.updateHudState(this.currentStateUI);
-		this.ui.updateMapState(this.currentStateMap);
+		this.ui.updateHudState(newStateUI);
+		this.ui.updateMapState(newStateMap);
 	}
 	move()
 	{
@@ -58,6 +61,7 @@ export class UIManager
 	{
 		//this.ui.updateHudState(state);
 		console.log(msg);
+		this.gameAlerts.generateAlert(msg);
 		this.updateGameState(this.gameAlerts.generateAlert(msg));
 	}
 }

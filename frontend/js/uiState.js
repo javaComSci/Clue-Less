@@ -20,13 +20,22 @@ export class UIState
 	}
 	updateHudState(state)
 	{
-		this.pixihud.createCards(state['cards']);
-		this.pixihud.displayCards();
-		this.pixihud.createAlerts(state['alerts']);
-		this.pixihud.displayAlerts();
+		if( state['cards'] != undefined )
+		{
+			this.pixihud.createCards(state['cards']);
+			this.pixihud.displayCards();
+		}
+		if( state['alerts'] != undefined )
+		{
+			this.pixihud.createAlerts(state['alerts']);
+			this.pixihud.displayAlerts();
+		}
 	}
 	updateMapState(state)
 	{
-		this.piximap.displayCharacters(state['characterPieces']);
+		if( state['characterPieces'] != undefined )
+		{
+			this.piximap.displayCharacters(state['characterPieces']);
+		}
 	}
 }

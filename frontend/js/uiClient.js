@@ -18,7 +18,6 @@ export class UIClient
 		this.actionValid;
 		this.validationInfo;
 		this.resetActionStates();
-		this.promptPlayer('INFO_NEW_PLAYER');
 	}
 	resetActionStates()
 	{
@@ -66,10 +65,10 @@ export class UIClient
 		console.log('not enough players');
 		this.promptPlayer('ERROR_NOT_ENOUGH_PLAYERS');
 	}
-	setPlayerInfo(playerInfo)
+	setPlayerStart(playerInfo)
 	{
 		this.playerInfo = playerInfo;
-		//this.promptPlayer('INFO_NEW_PLAYER');
+		this.promptPlayer('INFO_NEW_PLAYER');
 	}
 	promptPlayer(ask, data)
 	{

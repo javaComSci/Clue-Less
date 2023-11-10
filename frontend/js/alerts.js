@@ -6,6 +6,7 @@ export class GameAlerts {
 	{
 		this.gameAlerts = {
 			'INFO_GAME_STATE'					: this.infoGameState.bind(this),
+			'INFO_CLIENT_JOINED'				: this.infoClientJoined.bind(this),
 			'INFO_NEW_PLAYER'					: this.infoNewPlayer.bind(this),
 			'INFO_YOUR_TURN'					: this.infoYourTurn.bind(this),
 			'INFO_OPPONENT_TURN'				: this.infoOpponentTurn.bind(this),
@@ -43,9 +44,13 @@ export class GameAlerts {
 	{
 		return [{'name':'infoGameState','content':'Wait...'}];
 	}
-	infoNewPlayer()
+	infoClientJoined()
 	{
 		return [{'name':'infoNewPlayer','content':'Welcome! Waiting for additional players...'}];
+	}
+	infoNewPlayer()
+	{
+		return [{'name':'infoNewPlayer','content':'Begin!'}];
 	}
 	infoYourTurn()
 	{
