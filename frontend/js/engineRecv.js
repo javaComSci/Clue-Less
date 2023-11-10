@@ -39,7 +39,7 @@ export class EngineRecv
 	msgInsufficientPlayerCount()
 	{
 		this.socket.on('insufficientPlayerCount', function (obj) {
-			console.log('Not enough players to start!');
+			window.client.insufficientPlayers();
 		});
 	}
 	msgPlayerStartInfo()
@@ -57,7 +57,7 @@ export class EngineRecv
 	msgRequestingMoveBroadcast()
 	{
 		this.socket.on('REQUESTING_MOVE_BROADCAST', function (obj) {
-			window.client.promptPlayer('INFO_OPPONENT_TURN');
+			//window.client.promptPlayer('INFO_OPPONENT_TURN');
 			window.client.setPlayerTurn(obj);
 		});
 	}
@@ -65,7 +65,7 @@ export class EngineRecv
 	{
 		this.socket.on('REQUESTING_PROOF_BROADCAST', function (obj) {
 			//TODO: Alert players
-			window.client.promptPlayer('INFO_REQUESTING_PROOF_BROADCAST');
+			//window.client.promptPlayer('INFO_REQUESTING_PROOF_BROADCAST');
 		});
 	}
 	msgRequestingMove()
@@ -90,15 +90,15 @@ export class EngineRecv
 	{
 		this.socket.on('IS_PROOF_PROVIDED', function (data) {
 			/* TODO: Alert players */
-			console.log('Proof provided!');
-			window.client.testme(JSON.stringify(data));
+			//console.log('Proof provided!');
+			//window.client.testme(JSON.stringify(data));
 		});
 	}
 	msgProofProvided()
 	{
 		this.socket.on('PROOF_PROVIDED', function (data) {
 			/* TODO: Alert player */
-			console.log('PROOF_PROVIDED_BY: ' + JSON.stringify(data));
+			//console.log('PROOF_PROVIDED_BY: ' + JSON.stringify(data));
 			window.client.disableSuggestion();
 		});
 	}
@@ -106,30 +106,30 @@ export class EngineRecv
 	{
 		this.socket.on('ACCUSATION_CORRECT', function (data) {
 			/* TODO: Alert players */
-			console.log('Player wins!');
-			window.client.testme(JSON.stringify(data));
+			//console.log('Player wins!');
+			//window.client.testme(JSON.stringify(data));
 		});
 	}
 	msgAccusationIncorrect()
 	{
 		this.socket.on('ACCUSATION_INCORRECT', function (data) {
 			/* TODO: Alert players, set failed player to disabled state */
-			console.log('Accusation incorrect!');
-			window.client.testme(JSON.stringify(data));
+			//console.log('Accusation incorrect!');
+			//window.client.testme(JSON.stringify(data));
 		});
 	}
 	msgAccusationSolution()
 	{
 		this.socket.on('ACCUSATION_SOLUTION', function (data) {
 			/* TODO: Alert players */
-			console.log('Solution:');
-			window.client.testme(JSON.stringify(data));
+			//console.log('Solution:');
+			//window.client.testme(JSON.stringify(data));
 		});
 	}
 	msgTurnCompleteConfirmation()
 	{
 		this.socket.on('REQUEST_TURN_COMPLETE_CONFIRM', function () {
-			window.client.promptPlayer('PROMPT_END_TURN');
+			//window.client.promptPlayer('PROMPT_END_TURN');
 		});
 	}
 }

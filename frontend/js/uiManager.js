@@ -15,7 +15,7 @@ export class UIManager
 				{'name':'PASS','content':'Pass'},
 				{'name':'END_TURN','content':'End Turn'}],
 			'cards':[],
-			'alerts': [ {'name':'pending','content':'Waiting on 2 more players'}]
+			'alerts': []
 		};
 		this.defaultStateMap = {};
 		this.currentStateUI = this.defaultStateUI;

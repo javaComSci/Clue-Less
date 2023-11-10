@@ -18,6 +18,7 @@ export class UIClient
 		this.actionValid;
 		this.validationInfo;
 		this.resetActionStates();
+		this.promptPlayer('INFO_NEW_PLAYER');
 	}
 	resetActionStates()
 	{
@@ -52,16 +53,23 @@ export class UIClient
 	{
 		state['cards'] = this.playerInfo['cards'];
 		this.uiManager.updateGameState(state);
+		/*
 		this.promptPlayer('INFO_GAME_STATE');
 		if( this.actionValid['end_turn'] == 1 )
 		{
 			this.promptPlayer('INFO_YOUR_TURN');
 		}
+		*/
+	}
+	insufficientPlayers()
+	{
+		console.log('not enough players');
+		this.promptPlayer('ERROR_NOT_ENOUGH_PLAYERS');
 	}
 	setPlayerInfo(playerInfo)
 	{
 		this.playerInfo = playerInfo;
-		this.promptPlayer('INFO_NEW_PLAYER');
+		//this.promptPlayer('INFO_NEW_PLAYER');
 	}
 	promptPlayer(ask, data)
 	{
@@ -75,6 +83,7 @@ export class UIClient
 	}
 	setPlayerTurn(playerInfo)
 	{
+		/*
 		if ( playerInfo.playerId == this.playerInfo.playerId )
 		{
 			this.promptPlayer('INFO_YOUR_TURN');
@@ -83,6 +92,7 @@ export class UIClient
 		{
 			this.promptPlayer('INFO_OPPONENT_TURN');
 		}
+		*/
 	}
 	selectCard(cardName, cardType)
 	{
@@ -384,7 +394,7 @@ export class UIClient
 	{
 		this.actionValid['move'] = 1;
 		this.validationInfo['move'] = moves['potentialMoves'];
-		console.log(moves);
+		//this.promptPlayer('INFO_VALID_MOVES', moves);
 	}
 	setSuggestionLock()
 	{

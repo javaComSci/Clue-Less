@@ -13,6 +13,7 @@ export class GameAlerts {
 			'INFO_ACCUSATION_STARTED'			: this.infoAccusationStarted.bind(this),
 			'INFO_WAITING_PROOF'				: this.infoWaitingProof.bind(this),
 			'INFO_REQUESTING_PROOF_BROADCAST'	: this.infoRequestingProofBroadcast.bind(this),
+			'INFO_VALID_MOVES'					: this.infoValidMoves.bind(this),
 			'PROMPT_NEED_WEAPON'				: this.promptNeedWeapon.bind(this),
 			'PROMPT_NEED_LOCATION'				: this.promptNeedLocation.bind(this),
 			'PROMPT_NEED_CHARACTER'				: this.promptNeedCharacter.bind(this),
@@ -23,7 +24,8 @@ export class GameAlerts {
 			'ERROR_ACCUSATION_RUNNING'			: this.errorAccusationRunning.bind(this),
 			'ERROR_ACCUSATION_BLOCKED'			: this.errorAccusationBlocked.bind(this),
 			'ERROR_PASS_BLOCKED'				: this.errorPassBlocked.bind(this),
-			'ERROR_ACTION_BLOCKED'				: this.errorActionBlocked.bind(this)
+			'ERROR_ACTION_BLOCKED'				: this.errorActionBlocked.bind(this),
+			'ERROR_NOT_ENOUGH_PLAYERS'			: this.errorNotEnoughPlayers.bind(this),
 
 		}
 	}
@@ -32,13 +34,18 @@ export class GameAlerts {
 		let alerts = this.gameAlerts[name](data);
 		return {'alerts': alerts};
 	}
+	infoValidMoves({potentialMoves})
+	{
+		let content = potentialMoves.join(',');
+		return [{'name':'infoValidMoves','content':'Valid Moves: ' + content}];
+	}
 	infoGameState()
 	{
 		return [{'name':'infoGameState','content':'Wait...'}];
 	}
 	infoNewPlayer()
 	{
-		return [{'name':'infoNewPlayer','content':'Begin!'}];
+		return [{'name':'infoNewPlayer','content':'Welcome! Waiting for additional players...'}];
 	}
 	infoYourTurn()
 	{
@@ -107,5 +114,9 @@ export class GameAlerts {
 	errorActionBlocked()
 	{
 		return [{'name':'errorActionBlocked','content':'Cannot perform action right now.'}];
+	}
+	errorNotEnoughPlayers()
+	{
+		return [{'name':'errorNotEnoughPlayers','content':'Start Failed! At least three players required.'}];
 	}
 }
