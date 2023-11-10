@@ -57,6 +57,7 @@ export class EngineRecv
 	msgRequestingMoveBroadcast()
 	{
 		this.socket.on('REQUESTING_MOVE_BROADCAST', function (obj) {
+			window.client.promptPlayer('INFO_OPPONENT_TURN');
 			window.client.setPlayerTurn(obj);
 		});
 	}
@@ -64,8 +65,7 @@ export class EngineRecv
 	{
 		this.socket.on('REQUESTING_PROOF_BROADCAST', function (obj) {
 			//TODO: Alert players
-			console.log('Requesting proof!');
-			window.client.setPlayerTurn(obj);
+			window.client.promptPlayer('INFO_REQUESTING_PROOF_BROADCAST');
 		});
 	}
 	msgRequestingMove()
@@ -129,7 +129,7 @@ export class EngineRecv
 	msgTurnCompleteConfirmation()
 	{
 		this.socket.on('REQUEST_TURN_COMPLETE_CONFIRM', function () {
-			window.client.promptPlayer('END_TURN');
+			window.client.promptPlayer('PROMPT_END_TURN');
 		});
 	}
 }

@@ -56,8 +56,8 @@ export class UIManager
 	messageUser(msg)
 	{
 		//this.ui.updateHudState(state);
-		this.updateGameState(GameAlerts[msg]);
 		console.log(msg);
+		this.updateGameState(GameAlerts[msg]);
 	}
 }
 

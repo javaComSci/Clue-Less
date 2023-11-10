@@ -50,35 +50,39 @@ export class UIClient
 	}
 	updateGameState(state)
 	{
-		//console.log('Update Game State!: ' + state); // INFO_GAME_STATE
 		state['cards'] = this.playerInfo['cards'];
 		this.uiManager.updateGameState(state);
 		this.promptPlayer('INFO_GAME_STATE');
+		if( this.actionValid['end_turn'] == 1 )
+		{
+			this.promptPlayer('INFO_YOUR_TURN');
+		}
 	}
-
 	setPlayerInfo(playerInfo)
 	{
 		this.playerInfo = playerInfo;
-		//console.log(this.playerInfo); // INFO_NEW_PLAYER
 		this.promptPlayer('INFO_NEW_PLAYER');
 	}
 	promptPlayer(ask)
 	{
 		/* TODO: Alert player
 		 */
-		console.log(ask);
-		if(ask == 'END_TURN')
+		if(ask == 'PROMPT_END_TURN')
 		{
 			this.enableEndTurn();
 		}
-		if((ask == 'INFO_NEW_PLAYER') || (ask == 'INFO_GAME_STATE'))
-		{
-			this.uiManager.messageUser(ask);
-		}
+		this.uiManager.messageUser(ask);
 	}
 	setPlayerTurn(playerInfo)
 	{
-		console.log('Player\'s Turn: ' + playerInfo.playerId);
+		if ( playerInfo.playerId == this.playerInfo.playerId )
+		{
+			this.promptPlayer('INFO_YOUR_TURN');
+		}
+		else
+		{
+			this.promptPlayer('INFO_OPPONENT_TURN');
+		}
 	}
 	selectCard(cardName, cardType)
 	{
@@ -122,16 +126,17 @@ export class UIClient
 					// reset suggestion information
 					this.actionData['suggestion'] = {'character':'','weapon':''};
 					this.actionLock['proof_pending'] = 1;
+					this.promptPlayer('INFO_WAITING_PROOF');
 				}
 				// otherwise, prompt for more details
 				else
 				{
-					this.promptPlayer('SUGGESTION_NEED_WEAPON');
+					this.promptPlayer('PROMPT_NEED_WEAPON');
 				}
 			}
 			else
 			{
-				console.log('waiting for proof!');
+				this.promptPlayer('ERROR_WAITING_PROOF');
 			}
 		}
 		else if(this.actionLock['accusation'] == 1)
@@ -154,11 +159,11 @@ export class UIClient
 			// otherwise, prompt for more details
 			else if(this.actionData['accusation']['weapon'] == '')
 			{
-				this.promptPlayer('ACCUSATION_NEED_WEAPON');
+				this.promptPlayer('PROMPT_NEED_WEAPON');
 			}
 			else if(this.actionData['accusation']['room'] == '')
 			{
-				this.promptPlayer('ACCUSATION_NEED_LOCATION');
+				this.promptPlayer('PROMPT_NEED_LOCATION');
 			}
 		}
 		else
@@ -188,16 +193,17 @@ export class UIClient
 					// reset suggestion information
 					this.actionData['suggestion'] = {'character':'','weapon':''};
 					this.actionLock['proof_pending'] = 1;
+					this.promptPlayer('INFO_WAITING_PROOF');
 				}
 				// otherwise, prompt for more details
 				else
 				{
-					this.promptPlayer('SUGGESTION_NEED_CHARACTER');
+					this.promptPlayer('PROMPT_NEED_CHARACTER');
 				}
 			}
 			else
 			{
-				console.log('waiting for proof!');
+				this.promptPlayer('ERROR_WAITING_PROOF');
 			}
 		}
 		else if(this.actionLock['accusation'] == 1)
@@ -220,11 +226,11 @@ export class UIClient
 			// otherwise, prompt for more details
 			else if(this.actionData['accusation']['character'] == '')
 			{
-				this.promptPlayer('ACCUSATION_NEED_CHARACTER');
+				this.promptPlayer('PROMPT_NEED_CHARACTER');
 			}
 			else if(this.actionData['accusation']['room'] == '')
 			{
-				this.promptPlayer('ACCUSATION_NEED_LOCATION');
+				this.promptPlayer('PROMPT_NEED_LOCATION');
 			}
 		}
 		else
@@ -245,11 +251,11 @@ export class UIClient
 			if (this.actionLock['suggestion'] != 1)
 			{
 				this.setSuggestionLock();
-				this.promptPlayer('SUGGESTION_PLAYER');
+				this.promptPlayer('INFO_SUGGESTION_STARTED');
 			}
 			else
 			{
-				this.promptPlayer('SUGGESTION_RUNNING');
+				this.promptPlayer('ERROR_SUGGESTION_RUNNING');
 			}
 		}
 		else if(button == 'PASS')
@@ -267,7 +273,7 @@ export class UIClient
 			}
 			else
 			{
-				console.log('Pass only available when prompted for proof');
+				this.promptPlayer('ERROR_PASS_BLOCKED');
 			}
 		}
 		else if((button == 'ACCUSATION') && (this.actionValid['accusation'] == 1))
@@ -275,16 +281,16 @@ export class UIClient
 			if (this.actionLock['accusation'] != 1)
 			{
 				this.setAccusationLock();
-				this.promptPlayer('ACCUSATION_PLAYER');
+				this.promptPlayer('INFO_ACCUSATION_STARTED');
 			}
 			else
 			{
-				this.promptPlayer('ACCUSATION_BLOCKED');
+				this.promptPlayer('ERROR_ACCUSATION_RUNNING');
 			}
 		}
 		else
 		{
-			console.log('You cannot perform this action right now!');
+			this.promptPlayer('ERROR_ACTION_BLOCKED');
 		}
 	}
 	selectRoom(room)
@@ -295,6 +301,7 @@ export class UIClient
 			this.actionValid['move'] = 0;
 			this.validationInfo['move'] = [];
 			this.msgEngine.send('move',{'playerId':this.playerId,'gameId':this.gameId,'newCharacterLocation':room});
+			this.enableEndTurn();
 		}
 		else if(this.actionLock['accusation'] == 1)
 		{
@@ -316,11 +323,11 @@ export class UIClient
 			// otherwise, prompt for more details
 			else if(this.actionData['accusation']['character'] == '')
 			{
-				this.promptPlayer('ACCUSATION_NEED_CHARACTER');
+				this.promptPlayer('PROMPT_NEED_CHARACTER');
 			}
 			else if(this.actionData['accusation']['weapon'] == '')
 			{
-				this.promptPlayer('ACCUSATION_NEED_WEAPON');
+				this.promptPlayer('PROMPT_NEED_WEAPON');
 			}
 		}
 		else
@@ -336,6 +343,7 @@ export class UIClient
 			this.actionValid['move'] = 0;
 			this.validationInfo['move'] = [];
 			this.msgEngine.send('move',{'playerId':this.playerId,'gameId':this.gameId,'newCharacterLocation':hallway});
+			this.enableEndTurn();
 		}
 		else
 		{
@@ -362,7 +370,7 @@ export class UIClient
 	{
 		this.actionLock['proof_select'] = 1;
 		this.actionValid['pass'] = 1;
-		this.promptPlayer('PROVIDE_PROOF');
+		this.promptPlayer('PROMPT_PROOF_REQUESTED');
 	}
 	enableEndTurn()
 	{
