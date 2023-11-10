@@ -12,6 +12,8 @@ export class UIClient
 		this.gameId = '1';
 		this.playerId = crypto.randomUUID();
 		this.msgEngine.send('start', {'playerId': this.playerId, 'gameId': this.gameId } );
+		this.proofReceived = '';
+		this.proofProvided = false;
 		this.playerInfo;
 		this.actionData;
 		this.actionLock;
@@ -39,10 +41,10 @@ export class UIClient
 			'proof_pending':0	// waiting to receive proof
 		};
 		this.actionValid = {
-			'end_turn': 0,		// can end turn
-			'suggestion': 0,	// can start a suggestion
-			'pass':0,			// can pass turn
-			'accusation':1		// can perform accusation
+			'Suggestion': 0,	// can start a suggestion
+			'Accusation':1,		// can perform accusation
+			'Pass':0,			// can pass turn
+			'End Turn': 0		// can end turn
 		};
 		this.validationInfo = {
 			'move': []
@@ -53,7 +55,7 @@ export class UIClient
 		this.uiManager.updateGameState(state);
 		/*
 		this.promptPlayer('INFO_GAME_STATE');
-		if( this.actionValid['end_turn'] == 1 )
+		if( this.actionValid['End Turn'] == 1 )
 		{
 			this.promptPlayer('INFO_YOUR_TURN');
 		}
@@ -77,10 +79,24 @@ export class UIClient
 	}
 	setTurnComplete()
 	{
-		this.promptPlayer('PROMPT_END_TURN');
+		//do received proof message here, otherwise it will be overriden by REQUEST_COMPLETE_TURN
+		if( this.proofReceived != '')
+		{
+			let data = {
+				'actions': this.actionValid,
+				'proof': this.proofReceived
+			};
+			this.promptPlayer('INFO_PROOF_RECEIVED', data);
+			this.proofReceived = '';
+		}
+		else
+		{
+			this.promptPlayer('INFO_VALID_ACTIONS', this.actionValid);
+		}
 	}
 	setPlayerTurn(playerInfo)
 	{
+		this.proofProvided = false;
 		if ( playerInfo.playerId == this.playerInfo.playerId )
 		{
 			this.promptPlayer('INFO_YOUR_TURN');
@@ -93,18 +109,28 @@ export class UIClient
 	}
 	selectCard(cardName, cardType)
 	{
-		if ((this.actionValid['pass'] == 1) && (this.actionLock['proof_select'] == 1))
+		if ((this.actionValid['Pass'] == 1) && (this.actionLock['proof_select'] == 1))
 		{
-
 			// message backend
-			this.msgEngine.send('proof', {
-				'playerId':this.playerId,
-				'gameId':this.gameId,
-				'proofCard':cardName});
-			// reset valid
-			this.actionValid['pass'] = 0;
-			// reset lock
-			this.actionLock['proof_select'] = 0;
+			let sugWeapon = this.validationInfo['proof']['suggestedWeaponName'];
+			let sugChar = this.validationInfo['proof']['suggestedCharacterName'];
+			let sugRoom = this.validationInfo['proof']['suggestedLocation'];
+			if((cardName != sugWeapon) && (cardName != sugRoom) && (cardName != sugChar))
+			{
+				let data = this.validationInfo['proof'];
+				data['playerChoice'] = cardName;
+				this.promptPlayer('ERROR_PROOF_INVALID',data);
+			}
+			else
+			{
+				this.proofProvided = true;
+				this.promptPlayer('INFO_PROOF_SENT',cardName);
+				this.msgEngine.send('proof', {
+					'playerId':this.playerId,
+					'gameId':this.gameId,
+					'proofCard':cardName});
+				this.endProofRequest();
+			}
 		}
 		else
 		{
@@ -248,12 +274,12 @@ export class UIClient
 	}
 	selectButton(button)
 	{
-		if((button == 'END_TURN') && (this.actionValid['end_turn'] == 1))
+		if((button == 'END_TURN') && (this.actionValid['End Turn'] == 1))
 		{
 			this.msgEngine.send('turncomplete', {'playerId':this.playerId,'gameId':this.gameId});
 			this.resetActionStates();
 		}
-		else if((button == 'SUGGESTION') && (this.actionValid['suggestion'] == 1))
+		else if((button == 'SUGGESTION') && (this.actionValid['Suggestion'] == 1))
 		{
 			if (this.actionLock['suggestion'] != 1)
 			{
@@ -268,22 +294,20 @@ export class UIClient
 		else if(button == 'PASS')
 		{
 			// if player can pass
-			if ((this.actionValid['pass'] == 1) && (this.actionLock['proof_select'] == 1))
+			if ((this.actionValid['Pass'] == 1) && (this.actionLock['proof_select'] == 1))
 			{
 
 				// message backend
 				this.msgEngine.send('proof', {'playerId':this.playerId, 'gameId':this.gameId});
-				// reset valid action
-				this.actionValid['pass'] = 0;
-				// reset lock
-				this.actionLock['proof_select'] = 0;
+				this.endProofRequest();
+				//this.promptPlayer('INFO_PASSED');
 			}
 			else
 			{
 				this.promptPlayer('ERROR_PASS_BLOCKED');
 			}
 		}
-		else if((button == 'ACCUSATION') && (this.actionValid['accusation'] == 1))
+		else if((button == 'ACCUSATION') && (this.actionValid['Accusation'] == 1))
 		{
 			if (this.actionLock['accusation'] != 1)
 			{
@@ -359,38 +383,72 @@ export class UIClient
 			console.log('Hallway selected: ' + hallway);
 		}
 	}
+	checkProofProvided(check)
+	{
+		if(check == true)
+		{
+			if(this.proofProvided == false)
+			{
+				this.promptPlayer('INFO_PROOF_PROVIDED');
+			}
+		}
+		else
+		{
+			this.promptPlayer('INFO_NO_PROOF');
+		}
+	}
+	receiveProof(proof)
+	{
+		this.disableSuggestion();
+		if(proof != undefined)
+		{
+			this.proofReceived = proof;
+		}
+		else
+		{
+			this.proofReceived = 'NONE';
+		}
+	}
+	endProofRequest()
+	{
+		// reset valid action
+		this.actionValid['Pass'] = 0;
+		// reset lock
+		this.actionLock['proof_select'] = 0;
+		this.validationInfo['proof'] = {};
+	}
 	enableSuggestion()
 	{
-		this.actionValid['suggestion'] = 1;
+		this.actionValid['Suggestion'] = 1;
 		this.promptPlayer('INFO_VALID_ACTIONS', this.actionValid);
 	}
 	disableSuggestion()
 	{
-		this.actionValid['suggestion'] = 0;
+		this.actionValid['Suggestion'] = 0;
 		this.actionLock['proof_pending'] = 0;
 		this.actionLock['suggestion'] = 0;
-		this.actionValid['accusation'] = 1;
-		this.promptPlayer('INFO_VALID_ACTIONS', this.actionValid);
+		this.actionValid['Accusation'] = 1;
 	}
 	disableAccusation()
 	{
-		this.actionValid['accusation'] = 0;
+		this.actionValid['Accusation'] = 0;
 		this.actionLock['accusation'] = 0;
 		this.promptPlayer('INFO_VALID_ACTIONS', this.actionValid);
 	}
-	enableProof()
+	requestProof(validationData)
 	{
+		this.validationInfo['proof'] = validationData;
 		this.actionLock['proof_select'] = 1;
-		this.actionValid['pass'] = 1;
-		this.promptPlayer('PROMPT_PROOF_REQUESTED');
+		this.actionValid['Pass'] = 1;
+		this.promptPlayer('PROMPT_PROOF_REQUESTED', validationData);
 	}
 	enableEndTurn()
 	{
-		this.actionValid['end_turn'] = 1;
+		this.actionValid['End Turn'] = 1;
 	}
 	disableEndTurn()
 	{
-		this.actionValid['end_turn'] = 0;
+		this.actionValid['End Turn'] = 0;
 	}
 	setMove(moves)
 	{
@@ -401,12 +459,12 @@ export class UIClient
 	setSuggestionLock()
 	{
 		this.actionLock['suggestion'] = 1;
-		this.actionValid['accusation'] = 0;
+		this.actionValid['Accusation'] = 0;
 	}
 	setAccusationLock()
 	{
 		this.actionLock['accusation'] = 1;
-		this.actionValid['suggestion'] = 0;
+		this.actionValid['Suggestion'] = 0;
 	}
 	testme(data)
 	{

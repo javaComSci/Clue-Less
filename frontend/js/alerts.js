@@ -13,6 +13,11 @@ export class GameAlerts {
 			'INFO_SUGGESTION_STARTED'			: this.infoSuggestionStarted.bind(this),
 			'INFO_ACCUSATION_STARTED'			: this.infoAccusationStarted.bind(this),
 			'INFO_WAITING_PROOF'				: this.infoWaitingProof.bind(this),
+			'INFO_NO_PROOF'						: this.infoNoProof.bind(this),
+			'INFO_PROOF_SENT'					: this.infoProofSent.bind(this),
+			'INFO_PROOF_PROVIDED'				: this.infoProofProvided.bind(this),
+			'INFO_PROOF_RECEIVED'				: this.infoProofReceived.bind(this),
+			'INFO_PASSED'						: this.infoPassed.bind(this),
 			'INFO_REQUESTING_PROOF_BROADCAST'	: this.infoRequestingProofBroadcast.bind(this),
 			'INFO_VALID_MOVES'					: this.infoValidMoves.bind(this),
 			'INFO_VALID_ACTIONS'				: this.infoValidActions.bind(this),
@@ -27,16 +32,12 @@ export class GameAlerts {
 			'ERROR_ACCUSATION_BLOCKED'			: this.errorAccusationBlocked.bind(this),
 			'ERROR_PASS_BLOCKED'				: this.errorPassBlocked.bind(this),
 			'ERROR_ACTION_BLOCKED'				: this.errorActionBlocked.bind(this),
+			'ERROR_PROOF_INVALID'				: this.errorProofInvalid.bind(this),
 			'ERROR_NOT_ENOUGH_PLAYERS'			: this.errorNotEnoughPlayers.bind(this),
 
 		}
 	}
-	generateAlert(name, data)
-	{
-		let alerts = this.gameAlerts[name](data);
-		return {'alerts': alerts};
-	}
-	infoValidActions(actions)
+	getValidActions(actions)
 	{
 		let actionList = [];
 		for(var action in actions)
@@ -46,11 +47,42 @@ export class GameAlerts {
 				actionList.push(action)
 			}
 		}
-		return [{'name':'infoValidActions','content':'Valid Actions: ' + actionList.join(',')}];
+		return actionList;
+	}
+	generateAlert(name, data)
+	{
+		let alerts = this.gameAlerts[name](data);
+		return {'alerts': alerts};
+	}
+	infoProofReceived({actions,proof})
+	{
+		let actionList = this.getValidActions(actions);
+		return [{'name':'infoNoProof','content':'Proof received: ' + proof + '   Valid Actions: ' + actionList.join(', ')}];
+	}
+	infoProofProvided()
+	{
+		return [{'name':'infoNoProof','content':'Proof has been provided! Waiting on opponent...'}];
+	}
+	infoNoProof()
+	{
+		return [{'name':'infoNoProof','content':'No players provided proof! Waiting for opponent...'}];
+	}
+	infoPassed()
+	{
+		return [{'name':'infoPassed','content':'You passed. Another player prompted for proof'}];
+	}
+	infoProofSent(proof)
+	{
+		return [{'name':'infoProofSent','content':'You provided proof: ' + proof + '. Waiting on opponent...'}];
+	}
+	infoValidActions(actions)
+	{
+		let actionList = this.getValidActions(actions);
+		return [{'name':'infoValidActions','content':'Valid Actions: ' + actionList.join(', ')}];
 	}
 	infoValidMoves({potentialMoves})
 	{
-		let content = potentialMoves.join(',');
+		let content = potentialMoves.join(', ');
 		return [{'name':'infoValidMoves','content':'Valid Moves: ' + content}];
 	}
 	infoGameState()
@@ -87,7 +119,7 @@ export class GameAlerts {
 	}
 	infoRequestingProofBroadcast()
 	{
-		return [{'name':'infoRequestingProofBroadcast','content':'Suggestion started! Gathering proof...'}];
+		return [{'name':'infoRequestingProofBroadcast','content':'Suggestion made! No proof provided yet. Waiting on opponents...'}];
 	}
 	promptNeedWeapon()
 	{
@@ -101,9 +133,9 @@ export class GameAlerts {
 	{
 		return [{'name':'promptNeedCharacter','content':'Select a character'}];
 	}
-	promptProofRequested()
+	promptProofRequested({suggestedLocation,suggestedCharacterName,suggestedWeaponName})
 	{
-		return [{'name':'promptProofRequested','content':'Proof requested! Select a card'}];
+		return [{'name':'promptProofRequested','content':'Proof requested! Select a card. Must be one of: ' + suggestedLocation + ', ' + suggestedCharacterName + ', ' + suggestedWeaponName + '. Or, click Pass.'}];
 	}
 	promptEndTurn()
 	{
@@ -137,4 +169,9 @@ export class GameAlerts {
 	{
 		return [{'name':'errorNotEnoughPlayers','content':'Start Failed! At least three players required.'}];
 	}
+	errorProofInvalid({suggestedLocation,suggestedCharacterName,suggestedWeaponName, playerChoice})
+	{
+		return [{'name':'errorProofInvalid','content':'You clicked ' + playerChoice + '. Card must be one of: ' + suggestedLocation + ', ' + suggestedCharacterName + ', ' + suggestedWeaponName + '. Or, click Pass.'}];
+	}
 }
+

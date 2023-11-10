@@ -36,7 +36,7 @@ export class GameHud
 		this.weaponMarginSFactor = .18;
 		this.weaponGapSFactor = .05;
 
-		this.alertMarginSFactor = .05;
+		this.alertMarginSFactor = .01;
 
 		this.buttons = [];
 		this.cards = [];
