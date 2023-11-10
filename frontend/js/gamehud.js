@@ -14,29 +14,29 @@ export class GameHud
 		this.buttonAreaStartY = mapHeight + 50;
 		this.buttonAreaHeight = screenHeight - mapHeight;
 		this.buttonAreaWidth = mapWidth;
-		this.alertAreaStartX = mapWidth;
-		this.alertAreaStartY = 0;
-		this.alertAreaHeight = screenHeight/4;
-		this.alertAreaWidth = screenWidth - mapWidth;
+		this.alertAreaStartX = 0;
+		this.alertAreaStartY = mapHeight;
+		this.alertAreaHeight = 50;
+		this.alertAreaWidth = mapWidth;
 		this.cardAreaStartX = mapWidth;
-		this.cardAreaStartY = this.alertAreaHeight;
-		this.cardAreaHeight = screenHeight/2;
+		this.cardAreaStartY = 0;
+		this.cardAreaHeight = 3 * screenHeight/4;
 		this.cardAreaWidth = screenWidth - mapWidth;
 		this.weaponAreaStartX = mapWidth;
-		this.weaponAreaStartY = this.alertAreaHeight + this.cardAreaHeight;
+		this.weaponAreaStartY = this.cardAreaHeight;
 		this.weaponAreaHeight = screenHeight/4;
 		this.weaponAreaWidth = screenWidth - mapWidth;
 
 		this.buttonMarginSFactor = .25;
 		this.buttonGapSFactor = .125;
 
-		this.cardMarginSFactor = .10;
+		this.cardMarginSFactor = .05;
 		this.cardGapSFactor = .05;
 
 		this.weaponMarginSFactor = .18;
 		this.weaponGapSFactor = .05;
 
-		this.alertMarginSFactor = .25;
+		this.alertMarginSFactor = .05;
 
 		this.buttons = [];
 		this.cards = [];

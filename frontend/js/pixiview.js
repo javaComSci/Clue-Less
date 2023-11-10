@@ -166,8 +166,8 @@ export class PixiHud extends GameHud
 					fill: 0x000000
 				}
 			);
-			text.x = alertInfo.length/2 - text.width/2;
-			text.y = alertInfo.width/2 - text.height/2;
+			text.x = alertInfo.x + alertInfo.width/2 - text.width/2;
+			text.y = 0;
 			pixiAlert.addChild(text);
 			pixiAlert.position.set(alertInfo.x,alertInfo.y);
 			this.alertContainer.addChild(pixiAlert);
