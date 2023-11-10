@@ -71,7 +71,7 @@ export class EngineRecv
 	msgRequestingMove()
 	{
 		this.socket.on('REQUEST_MOVE', function (obj) {
-			window.client.enableMove(obj);
+			window.client.setMove(obj);
 		});
 	}
 	msgRequestSuggestion()

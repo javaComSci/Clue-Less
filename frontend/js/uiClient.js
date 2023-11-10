@@ -387,11 +387,11 @@ export class UIClient
 	{
 		this.actionValid['end_turn'] = 0;
 	}
-	enableMove(moves)
+	setMove(moves)
 	{
 		this.actionValid['move'] = 1;
 		this.validationInfo['move'] = moves['potentialMoves'];
-		//this.promptPlayer('INFO_VALID_MOVES', moves);
+		this.promptPlayer('INFO_VALID_MOVES', moves);
 	}
 	setSuggestionLock()
 	{
