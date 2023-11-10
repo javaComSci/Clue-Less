@@ -1,5 +1,6 @@
 import { getIOInstance } from '../../index.js';
 import { GameEngine } from '../engine/gameEngine.js';
+import { GameState } from '../engine/gameState.js';
 import { getPerUserRoomId } from './socketEmits.js';
 
 // Keep the games object as global to map the gameId to game instance.
@@ -23,7 +24,7 @@ export function initializeListeners()
             // This will be used for emitting to just this player.
             socket.join(getPerUserRoomId(gameId, playerId));
 
-            if (!(gameId in games)){
+            if (!(gameId in games) || games[gameId].gameState == GameState.GAME_OVER){
                 console.log('Starting up timer for game start.');
 
                 // Start up a timer to start the game in 1 min.
