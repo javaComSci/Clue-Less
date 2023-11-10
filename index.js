@@ -15,8 +15,8 @@ export var getIOInstance = function()
 var io = new Server(server);
 initializeListeners();
 
-server.listen(3000, () => {
-  	console.log('Server running at http://localhost:3000');
+server.listen(process.env.PORT || 80, () => {
+  	console.log(`Server running at http://localhost:${process.env.PORT || 80}`);
 });
 
 // app.use(express.static('frontend'));
