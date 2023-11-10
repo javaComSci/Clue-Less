@@ -12,6 +12,11 @@ export class UIManager
 	/*
 	 * Methods to be defined
 	 */
+	updateGameState(state)
+	{
+		this.ui.updateHudState(state);
+		this.ui.updateMapState(state);
+	}
 	move()
 	{
 	}

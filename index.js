@@ -19,17 +19,17 @@ server.listen(process.env.PORT || 80, () => {
   	console.log(`Server running at http://localhost:${process.env.PORT || 80}`);
 });
 
-// app.use(express.static('frontend'));
-// app.use('/common', express.static('./common'));
+app.use(express.static('frontend'));
+app.use('/common', express.static('./common'));
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-import path from 'path';
-import { fileURLToPath } from 'url';
-app.get('/', (req, res) => {
-	res.sendFile(__dirname + '/frontend/mockIndex.html');
-});
+//const __filename = fileURLToPath(import.meta.url);
+//const __dirname = path.dirname(__filename);
+//
+//import path from 'path';
+//import { fileURLToPath } from 'url';
+//app.get('/', (req, res) => {
+//	res.sendFile(__dirname + '/frontend/mockIndex.html');
+//});
 
 // app.use('/js', express.static(__dirname + '/../frontend/js'));
 // app.use('/assets', express.static(__dirname + '/../frontend/assets'));
