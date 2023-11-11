@@ -163,7 +163,7 @@ export class PixiHud extends GameHud
 			pixiAlert.endFill();
 			let text = new PIXI.Text(
 				alertInfo.content, {
-					fontSize: 25,
+					fontSize: 20,
 					fill: 0x000000
 				}
 			);

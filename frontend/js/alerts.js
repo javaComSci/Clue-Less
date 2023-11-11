@@ -75,28 +75,30 @@ export class GameAlerts {
 		}
 		else
 		{
-			let accPlayer = accusation['accusingPlayer'];
+			let accPlayer = accusation['accusingPlayer']['character']['name'];
 			let accChar = accusation['accusedCharacter'];
 			let accWeapon = accusation['accusedWeapon'];
 			let accLocation = accusation['accusedLocation'];
-			return [{'name':'infoPlayerLoses','content':'Player ' + accPlayer + ' loses. Accused: ' + accChar.name + ' with the ' + accWeapon.name + ' in the ' + accLocation.name + '. Spectating...'}];
+			return [{'name':'infoPlayerLoses','content':'Player ' + accPlayer + ' loses. Accused: ' + accChar + ' with the ' + accWeapon + ' in the ' + accLocation + '. Spectating...'}];
 		}
 	}
-	infoYourTurnPlayerLoses(accusation)
+	infoValidMovesPlayerLoses({accusation, move})
 	{
-		let accPlayer = accusation['accusingPlayer'];
+		console.log(JSON.stringify(accusation));
+		let accPlayer = accusation['accusingPlayer']['character']['name'];
 		let accChar = accusation['accusedCharacter'];
 		let accWeapon = accusation['accusedWeapon'];
 		let accLocation = accusation['accusedLocation'];
-		return [{'name':'infoPlayerLoses','content':'Player ' + accPlayer + ' loses. Accused: ' + accChar.name + ' with the ' + accWeapon.name + ' in the ' + accLocation.name + '.Your Turn! Valid Moves: '}];
+		let content = move.join(', ');
+		return [{'name':'infoPlayerLoses','content': 'Your Turn! ' + accPlayer + ' loses! Accusation: ' + accChar + ', ' + accWeapon + ', ' + accLocation + '. Select Action or Move: ' + content }];
 	}
 	infoOpponentTurnPlayerLoses(accusation)
 	{
-		let accPlayer = accusation['accusingPlayer'];
+		let accPlayer = accusation['accusingPlayer']['character']['name'];
 		let accChar = accusation['accusedCharacter'];
 		let accWeapon = accusation['accusedWeapon'];
 		let accLocation = accusation['accusedLocation'];
-		return [{'name':'infoPlayerLoses','content':'Player ' + accPlayer + ' loses. Accused: ' + accChar.name + ' with the ' + accWeapon.name + ' in the ' + accLocation.name + '. Opponent\'s Turn...'}];
+		return [{'name':'infoPlayerLoses','content':'Player ' + accPlayer + ' loses. Accused: ' + accChar + ' with the ' + accWeapon + ' in the ' + accLocation + '. Opponent\'s Turn...'}];
 	}
 	infoGameOver({solution,accusation})
 	{
@@ -134,7 +136,7 @@ export class GameAlerts {
 	infoValidMoves({potentialMoves})
 	{
 		let content = potentialMoves.join(', ');
-		return [{'name':'infoValidMoves','content':'Your turn! Valid Moves: ' + content}];
+		return [{'name':'infoValidMoves','content':'Your turn! Select Action or Move: ' + content}];
 	}
 	infoGameState()
 	{

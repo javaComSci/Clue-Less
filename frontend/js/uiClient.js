@@ -90,6 +90,10 @@ export class UIClient
 	playerLoses(data)
 	{
 		this.failedAccusation = data;
+		if(data['accusingPlayer']['playerId'] == this.playerInfo.playerId)
+		{
+			this.playerInfo.canPlay = false;
+		}
 		let info = {
 			'solution': this.validationInfo['accusation'],
 			'accusation': data
@@ -97,7 +101,6 @@ export class UIClient
 		if(data['isGameOver'] == false)
 		{
 			this.promptPlayer('INFO_PLAYER_LOSES',info);
-			this.playerInfo.canPlay = false;
 		}
 		else
 		{
@@ -131,15 +134,6 @@ export class UIClient
 		this.proofProvided = false;
 		if ( playerInfo.playerId == this.playerInfo.playerId )
 		{
-			if(this.failedAccusation['accusingPlayer'] != undefined)
-			{
-				this.promptPlayer('INFO_YOUR_TURN_PLAYER_LOSES', this.failedAccusation);
-				this.failedAccusation = {};
-			}
-			else
-			{
-				this.promptPlayer('INFO_YOUR_TURN');
-			}
 			this.enableEndTurn();
 		}
 		else if(this.validationInfo['accusation'] != undefined)
@@ -515,7 +509,11 @@ export class UIClient
 		this.validationInfo['move'] = moves['potentialMoves'];
 		if(this.failedAccusation['accusingPlayer'] != undefined)
 		{
-			this.promptPlayer('INFO_YOUR_TURN_PLAYER_LOSES', this.failedAccusation);
+			let info = {
+				'accusation': this.failedAccusation,
+				'move': this.validationInfo['move']
+			}
+			this.promptPlayer('INFO_VALID_MOVES_PLAYER_LOSES', info);
 			this.failedAccusation = {};
 		}
 		else
