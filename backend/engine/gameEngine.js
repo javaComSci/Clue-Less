@@ -225,8 +225,8 @@ export class GameEngine {
 		if (this.gameState == GameState.REQUESTED_MOVE && playerId == this.getCurrentPlayer().playerId) {
 			console.log(`MOVE: ${this.getCurrentPlayer().character.name} from ${this.getCurrentPlayer().character.currentLocation} to ${newCharacterLocation}.`)
 			this.setGameState(GameState.PROCESSING_MOVE);
-
-			if (newCharacterLocation != STAY && newCharacterLocation != CANNOTMOVE) {
+			
+			if (newCharacterLocation != CANNOTMOVE) {
 				this.getCurrentPlayer().character.movePiece(newCharacterLocation, playerId);
 			}
 
@@ -234,9 +234,6 @@ export class GameEngine {
 			this.setGameState(GameState.PROCESSED_MOVE);
 
 			if (newCharacterLocation in LocationConstants.Room && newCharacterLocation != CANNOTMOVE) {
-				this.requestSuggestion();
-			}
-			else if (newCharacterLocation == STAY) {
 				this.requestSuggestion();
 			}
 			else {

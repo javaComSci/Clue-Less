@@ -1,0 +1,10 @@
+- alerts
+- non-overlapping players
+- colors 
+
+For demo:
+- maybe restart server
+- redeploy code 
+
+for target:
+- delete game after game end rather than reuse of gameid
