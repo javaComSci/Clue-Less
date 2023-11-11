@@ -60,7 +60,7 @@ export class PixiHud extends GameHud
 		this.weaponContainer.endFill();
 		let hudAreaText = new PIXI.Text(
 				'Weapons', {
-				fontSize: 60,
+				fontSize: 45,
 				fill: 0xffffff
 			}
 		);
