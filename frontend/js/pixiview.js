@@ -28,7 +28,7 @@ export class PixiHud extends GameHud
 			this.weaponContainer.destroy();
 		}
 		this.weaponContainer = new PIXI.Graphics();
-		this.weaponContainer.beginFill(0x005799);
+		this.weaponContainer.beginFill(0x0B355E);
 		this.weaponContainer.drawRect(this.weaponAreaStartX,this.weaponAreaStartY,this.weaponAreaWidth,this.weaponAreaHeight);
 		this.weaponContainer.endFill();
 		let hudAreaText = new PIXI.Text(
@@ -69,7 +69,7 @@ export class PixiHud extends GameHud
 			this.cardContainer.destroy();
 		}
 		this.cardContainer = new PIXI.Graphics();
-		this.cardContainer.beginFill(0x1C0069);
+		this.cardContainer.beginFill(0x247BA0);
 		this.cardContainer.drawRect(this.cardAreaStartX,this.cardAreaStartY,this.cardAreaWidth,this.cardAreaHeight);
 		this.cardContainer.endFill();
 		let hudAreaText = new PIXI.Text(
@@ -110,7 +110,7 @@ export class PixiHud extends GameHud
 			this.buttonContainer.destroy();
 		}
 		this.buttonContainer = new PIXI.Graphics();
-		this.buttonContainer.beginFill(0x1C0069);
+		this.buttonContainer.beginFill(0x247BA0);
 		this.buttonContainer.drawRect(this.buttonAreaStartX,this.buttonAreaStartY,this.buttonAreaWidth,this.buttonAreaHeight);
 		this.buttonContainer.endFill();
 		let hudAreaText = new PIXI.Text(
@@ -151,7 +151,7 @@ export class PixiHud extends GameHud
 			this.alertContainer.destroy();
 		}
 		this.alertContainer = new PIXI.Graphics();
-		this.alertContainer.beginFill(0xFEE6B4);
+		this.alertContainer.beginFill(0x0B355E);
 		this.alertContainer.drawRect(this.alertAreaStartX,this.alertAreaStartY,this.alertAreaWidth,this.alertAreaHeight);
 		this.alertContainer.endFill();
 		this.alerts.forEach((alertInfo) => {
@@ -196,7 +196,7 @@ export class PixiMap extends GameMap
 			let roomX = roomObj.x;
 			let roomY = roomObj.y;
 
-			pixiRoom.beginFill(0x8A5050);
+			pixiRoom.beginFill(0x247BA0);
 			pixiRoom.drawRect(0,0,roomObj.width,roomObj.length);
 			pixiRoom.endFill();
 			pixiRoom.eventMode = 'static';
@@ -226,7 +226,7 @@ export class PixiMap extends GameMap
 			let hallwayX = hallwayObj.x;
 			let hallwayY = hallwayObj.y;
 
-			pixiHallway.beginFill(0xffe4c4)
+			pixiHallway.beginFill(0xE8F1F2)
 			pixiHallway.drawRect(0,0,hallwayObj.length,hallwayObj.width);
 			pixiHallway.endFill();
 			pixiHallway.eventMode = 'static';
@@ -295,7 +295,7 @@ export class PixiMap extends GameMap
 			let passagewayObj = this.passageways[passageway];
 			pixiPassageway.eventMode = 'static';
 			pixiPassageway.on('pointerup', (event) => { window.client.testme(passagewayObj.name); } );
-			pixiPassageway.beginFill(0x340B0B);
+			pixiPassageway.beginFill(0x13293D);
 			pixiPassageway.drawRect(0,0,this.pe,this.pe);
 			pixiPassageway.endFill();
 			pixiPassageway.position.set(passagewayObj.x,passagewayObj.y);
