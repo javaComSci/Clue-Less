@@ -71,7 +71,7 @@ export class UIClient
 	setPlayerStart(playerInfo)
 	{
 		this.playerInfo = playerInfo;
-		this.promptPlayer('INFO_NEW_PLAYER');
+		this.promptPlayer('INFO_NEW_PLAYER', playerInfo.character.name);
 		let startState = {'cards':this.playerInfo['cards']}
 		this.updateGameState(startState);
 	}

@@ -30,6 +30,10 @@ export class UIState
 			this.pixihud.createAlerts(state['alerts']);
 			this.pixihud.displayAlerts();
 		}
+		if( state['characterName'] != undefined )
+		{
+			this.pixihud.displayCharacterName(state['characterName']);
+		}
 	}
 	updateMapState(state)
 	{

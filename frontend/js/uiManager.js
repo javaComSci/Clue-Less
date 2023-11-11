@@ -15,13 +15,14 @@ export class UIManager
 				{'name':'PASS','content':'Pass'},
 				{'name':'END_TURN','content':'End Turn'}],
 			'cards':[],
-			'alerts': []
+			'alerts': [],
+			'characterName': 'Pending...'
 		};
 		this.defaultStateMap = {};
 		this.currentStateUI = this.defaultStateUI;
 		this.currentStateMap = this.defaultStateMap;
 		this.ui = new UIState({'ui':this.currentStateUI,'map':this.currentStateMap});
-		this.messageUser('INFO_CLIENT_JOINED');
+		this.messageUser('INFO_CLIENT_JOINED', this.defaultStateUI.characterName);
 	}
 	/*
 	 * Methods to be defined
@@ -33,6 +34,10 @@ export class UIManager
 		if( state['cards'] != undefined )
 		{
 			newStateUI['cards'] = state['cards'];
+		}
+		if( state['characterName'] != undefined )
+		{
+			newStateUI['characterName'] = state['characterName'];
 		}
 		if( state['alerts'] != undefined )
 		{

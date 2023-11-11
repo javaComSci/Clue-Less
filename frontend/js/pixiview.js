@@ -19,6 +19,33 @@ export class PixiHud extends GameHud
 		this.displayButtons();
 		this.displayAlerts();
 		this.displayWeapons();
+		this.displayCharacterName();
+	}
+	displayCharacterName(text)
+	{
+		if ( this.charNameContainer != null )
+		{
+			// free the memory!
+			this.charNameContainer.destroy();
+		}
+		if ( text == undefined )
+		{
+			text = 'initializing...'
+		}
+		this.charNameContainer = new PIXI.Graphics();
+		this.charNameContainer.beginFill(0x0B355E);
+		this.charNameContainer.drawRect(this.characterNameAreaStartX,this.characterNameAreaStartY,this.characterNameAreaWidth,this.characterNameAreaHeight);
+		this.charNameContainer.endFill();
+		let hudAreaText = new PIXI.Text(
+				'Character:\n' + text, {
+				fontSize: 60,
+				fill: 0xffffff
+			}
+		);
+		hudAreaText.x = this.characterNameAreaStartX + this.characterNameAreaWidth/2 - hudAreaText.width/2;
+		hudAreaText.y = this.characterNameAreaStartY;
+		this.charNameContainer.addChild(hudAreaText);
+		this.app.stage.addChild(this.charNameContainer);
 	}
 	displayWeapons()
 	{
@@ -90,7 +117,7 @@ export class PixiHud extends GameHud
 			pixiCard.endFill();
 			let text = new PIXI.Text(
 				'Type:' + card.type + '\n' + 'Name:' + card.name, {
-					fontSize: 30,
+					fontSize: 25,
 					fill: 0x000000
 				}
 			);
