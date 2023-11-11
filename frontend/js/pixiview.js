@@ -247,6 +247,11 @@ export class PixiMap extends GameMap
 		this.app.stage.addChild(this.hallwayContainer);
 	}
 	displayCharacters(playerCharacters) {
+		// reset number of occupants in each location
+		for( var loc in this.locations )
+		{
+			this.locations[loc].resetOccupants();
+		}
 		if ( this.characterContainer != null )
 		{
 			// free the memory!
@@ -255,8 +260,9 @@ export class PixiMap extends GameMap
 		this.characterContainer = new PIXI.Graphics();
 		playerCharacters.forEach((character) => {
 			let charRep = this.characters[character['name']];
-			let charX = this.locations[character['currentLocation']].playerLocationX;
-			let charY = this.locations[character['currentLocation']].playerLocationY;
+			let coordinates = this.locations[character['currentLocation']].getPlayerLocation();
+			let charX = coordinates['x'];
+			let charY = coordinates['y'];
 
 			let pixiCharacter = new PIXI.Graphics();
 			pixiCharacter.eventMode = 'static';
