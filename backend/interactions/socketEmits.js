@@ -81,7 +81,7 @@ export function emitRequestPlayerTurnCompleteConfirmation(gameId, currentPlayer)
 export function emitAccusationCorrect(gameId, winningPlayer, accusedCharacter, accusedWeapon, accusedLocation)
 {
     console.log(`ACCUSATION: ${accusedCharacter} in ${accusedLocation} with ${accusedWeapon} is correct. PLAYER ${winningPlayer.playerId} WON! GAME OVER!`);
-    getIOInstance().to(getGameSocketId(gameId)).emit('ACCUSATION_CORRECT', { winningPlayer: winningPlayer.playerId, accusedCharacter: accusedCharacter, accusedWeapon: accusedWeapon, accusedLocation: accusedLocation });
+    getIOInstance().to(getGameSocketId(gameId)).emit('ACCUSATION_CORRECT', { winningPlayer: winningPlayer, accusedCharacter: accusedCharacter, accusedWeapon: accusedWeapon, accusedLocation: accusedLocation });
 }
 
 export function emitAccusationIncorrect(gameId, currentPlayer, accusedCharacter, accusedWeapon, accusedLocation, correctCharacter, correctWeapon, correctLocation, isGameOver)
@@ -92,5 +92,5 @@ export function emitAccusationIncorrect(gameId, currentPlayer, accusedCharacter,
         console.log(`GAME IS OVER. NO ONE WON.`);
     }
     getIOInstance().to(getPerUserRoomId(gameId, currentPlayer.playerId)).emit('ACCUSATION_SOLUTION', { correctCharacter: correctCharacter, correctWeapon: correctWeapon, correctLocation: correctLocation });
-    getIOInstance().to(getGameSocketId(gameId)).emit('ACCUSATION_INCORRECT', { accusingPlayer: currentPlayer.playerId, accusedCharacter: accusedCharacter, accusedWeapon: accusedWeapon, accusedLocation: accusedLocation, isGameOver: isGameOver });
+    getIOInstance().to(getGameSocketId(gameId)).emit('ACCUSATION_INCORRECT', { accusingPlayer: currentPlayer, accusedCharacter: accusedCharacter, accusedWeapon: accusedWeapon, accusedLocation: accusedLocation, isGameOver: isGameOver });
 }
