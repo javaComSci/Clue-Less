@@ -1,7 +1,7 @@
 import { getIOInstance } from '../../index.js';
 import { GameEngine } from '../engine/gameEngine.js';
 import { GameState } from '../engine/gameState.js';
-import { getPerUserRoomId } from './socketEmits.js';
+import { getPerUserRoomId, getGameSocketId } from './socketEmits.js';
 
 // Keep the games object as global to map the gameId to game instance.
 let games = {};
@@ -18,7 +18,7 @@ export function initializeListeners()
 
             // Join game room.
             // This will be used for emitting information to all players in the game.
-            socket.join(gameId);
+            socket.join(getGameSocketId(gameId));
     
             // Join room with just this player.
             // This will be used for emitting to just this player.

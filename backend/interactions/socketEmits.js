@@ -14,10 +14,15 @@ export function getPerUserRoomId(gameId, playerId)
     return `${gameId}-${playerId}`;
 }
 
+export function getGameSocketId(gameId)
+{
+    return `$GAME-${gameId};`
+}
+
 export function emitGameCannotStart(gameId)
 {
     logToConsole('At least 3 players are required for playing the game.');
-    getIOInstance().to(gameId).emit('insufficientPlayerCount');
+    getIOInstance().to(getGameSocketId(gameId)).emit('insufficientPlayerCount');
 }
 
 export function emitPlayerStartInfo(gameId, player)
@@ -28,13 +33,13 @@ export function emitPlayerStartInfo(gameId, player)
 export function emitGameState(gameId, characterPieces, weaponPieces)
 {
     // Only character/weapon pieces need to be emitted as they contain the location that can be used to render.
-    getIOInstance().to(gameId).emit('GAME_STATE', { characterPieces: characterPieces, weaponPieces: weaponPieces });
+    getIOInstance().to(getGameSocketId(gameId)).emit('GAME_STATE', { characterPieces: characterPieces, weaponPieces: weaponPieces });
 }
 
 export function emitRequestMove(gameId, currentPlayer, potentialMoves)
 {
     logToConsole(`REQUEST: GAME MOVE from player ${currentPlayer.playerId}. Available moves: ${potentialMoves}.`);
-    getIOInstance().to(gameId).emit('REQUESTING_MOVE_BROADCAST', { playerId: currentPlayer.playerId });
+    getIOInstance().to(getGameSocketId(gameId)).emit('REQUESTING_MOVE_BROADCAST', { playerId: currentPlayer.playerId });
     getIOInstance().to(getPerUserRoomId(gameId, currentPlayer.playerId)).emit('REQUEST_MOVE', { potentialMoves: potentialMoves });
 }
 
@@ -52,14 +57,14 @@ export function emitSuggestionWasProvided(gameId, currentPlayer)
 export function emitRequestProof(gameId, proofRequestedPlayer, proofSuggestion)
 {
     logToConsole(`REQUEST: PROOF from player ${proofRequestedPlayer.playerId}`);
-    getIOInstance().to(gameId).emit('REQUESTING_PROOF_BROADCAST', { playerId: proofRequestedPlayer.playerId });
+    getIOInstance().to(getGameSocketId(gameId)).emit('REQUESTING_PROOF_BROADCAST', { playerId: proofRequestedPlayer.playerId });
     getIOInstance().to(getPerUserRoomId(gameId, proofRequestedPlayer.playerId)).emit('REQUEST_PROOF', proofSuggestion);
 }
 
 export function emitIsProofProvided(gameId, isProofProvided, proofProviderPlayerId)
 {
     logToConsole(`BROADCAST: PROOF was provided by player ${proofProviderPlayerId}`)
-    getIOInstance().to(gameId).emit('IS_PROOF_PROVIDED', { isProofProvided: isProofProvided, proofProviderPlayerId: proofProviderPlayerId });
+    getIOInstance().to(getGameSocketId(gameId)).emit('IS_PROOF_PROVIDED', { isProofProvided: isProofProvided, proofProviderPlayerId: proofProviderPlayerId });
 }
 
 export function emitProofProvided(gameId, currentPlayer, proofProviderPlayerId)
@@ -76,7 +81,7 @@ export function emitRequestPlayerTurnCompleteConfirmation(gameId, currentPlayer)
 export function emitAccusationCorrect(gameId, winningPlayer, accusedCharacter, accusedWeapon, accusedLocation)
 {
     console.log(`ACCUSATION: ${accusedCharacter} in ${accusedLocation} with ${accusedWeapon} is correct. PLAYER ${winningPlayer.playerId} WON! GAME OVER!`);
-    getIOInstance().to(gameId).emit('ACCUSATION_CORRECT', { winningPlayer: winningPlayer.playerId, accusedCharacter: accusedCharacter, accusedWeapon: accusedWeapon, accusedLocation: accusedLocation });
+    getIOInstance().to(getGameSocketId(gameId)).emit('ACCUSATION_CORRECT', { winningPlayer: winningPlayer.playerId, accusedCharacter: accusedCharacter, accusedWeapon: accusedWeapon, accusedLocation: accusedLocation });
 }
 
 export function emitAccusationIncorrect(gameId, currentPlayer, accusedCharacter, accusedWeapon, accusedLocation, correctCharacter, correctWeapon, correctLocation, isGameOver)
@@ -87,5 +92,5 @@ export function emitAccusationIncorrect(gameId, currentPlayer, accusedCharacter,
         console.log(`GAME IS OVER. NO ONE WON.`);
     }
     getIOInstance().to(getPerUserRoomId(gameId, currentPlayer.playerId)).emit('ACCUSATION_SOLUTION', { correctCharacter: correctCharacter, correctWeapon: correctWeapon, correctLocation: correctLocation });
-    getIOInstance().to(gameId).emit('ACCUSATION_INCORRECT', { accusingPlayer: currentPlayer.playerId, accusedCharacter: accusedCharacter, accusedWeapon: accusedWeapon, accusedLocation: accusedLocation, isGameOver: isGameOver });
+    getIOInstance().to(getGameSocketId(gameId)).emit('ACCUSATION_INCORRECT', { accusingPlayer: currentPlayer.playerId, accusedCharacter: accusedCharacter, accusedWeapon: accusedWeapon, accusedLocation: accusedLocation, isGameOver: isGameOver });
 }
