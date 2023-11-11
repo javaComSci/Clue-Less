@@ -62,7 +62,7 @@ export class GameAlerts {
 	}
 	infoPlayerWins({winningPlayer,accusedCharacter,accusedWeapon,accusedLocation})
 	{
-		return [{'name':'infoPlayerWins','content':'Player ' + winningPlayer + ' wins! Solution: ' + accusedCharacter + ', ' + accusedWeapon + ', ' + accusedLocation}];
+		return [{'name':'infoPlayerWins','content':'Player ' + winningPlayer.character.name + ' wins! Solution: ' + accusedCharacter + ', ' + accusedWeapon + ', ' + accusedLocation}];
 	}
 	infoPlayerLoses({solution,accusation})
 	{
@@ -84,7 +84,6 @@ export class GameAlerts {
 	}
 	infoValidMovesPlayerLoses({accusation, move})
 	{
-		console.log(JSON.stringify(accusation));
 		let accPlayer = accusation['accusingPlayer']['character']['name'];
 		let accChar = accusation['accusedCharacter'];
 		let accWeapon = accusation['accusedWeapon'];
@@ -224,7 +223,7 @@ export class GameAlerts {
 	}
 	errorProofInvalid({suggestedLocation,suggestedCharacterName,suggestedWeaponName, playerChoice})
 	{
-		return [{'name':'errorProofInvalid','content':'You clicked ' + playerChoice + '. Card must be one of: ' + suggestedLocation + ', ' + suggestedCharacterName + ', ' + suggestedWeaponName + '. Or, click Pass.'}];
+		return [{'name':'errorProofInvalid','content':'You choose ' + playerChoice + '. Card must be one of: ' + suggestedLocation + ', ' + suggestedCharacterName + ', ' + suggestedWeaponName + '. Or, click Pass.'}];
 	}
 	errorPlayerDisabled()
 	{

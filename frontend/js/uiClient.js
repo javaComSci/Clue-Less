@@ -110,7 +110,11 @@ export class UIClient
 	setTurnComplete()
 	{
 		//do received proof message here, otherwise it will be overriden by REQUEST_COMPLETE_TURN
-		if( this.proofReceived != '')
+		if( this.playerInfo.canPlay == false )
+		{
+			this.msgEngine.send('turncomplete', {'playerId':this.playerId,'gameId':this.gameId});
+		}
+		else if( this.proofReceived != '')
 		{
 			let data = {
 				'actions': this.actionValid,
@@ -118,10 +122,6 @@ export class UIClient
 			};
 			this.promptPlayer('INFO_PROOF_RECEIVED', data);
 			this.proofReceived = '';
-		}
-		if( this.playerInfo.canPlay == false )
-		{
-			this.msgEngine.send('turncomplete', {'playerId':this.playerId,'gameId':this.gameId});
 		}
 		else
 		{
@@ -453,6 +453,7 @@ export class UIClient
 	receiveProof(proof)
 	{
 		this.disableSuggestion();
+		console.log('Receive Proof: ' + proof);
 		if(proof != undefined)
 		{
 			this.proofReceived = proof;
