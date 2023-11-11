@@ -148,7 +148,11 @@ export class UIClient
 		{
 			if(this.failedAccusation['accusingPlayer'] != undefined)
 			{
-				this.promptPlayer('INFO_OPPONENT_TURN_PLAYER_LOSES', this.failedAccusation, playerInfo.name);
+				let info = {
+					'accusation' : this.failedAccusation,
+					'player': playerInfo.name
+				};
+				this.promptPlayer('INFO_OPPONENT_TURN_PLAYER_LOSES', info);
 				this.failedAccusation = {};
 			}
 			else

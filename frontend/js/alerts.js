@@ -94,7 +94,7 @@ export class GameAlerts {
 		let content = move.join(', ');
 		return {'alerts':[{'name':'infoPlayerLoses','content': 'Your Turn! ' + accPlayer + ' loses! Accusation: ' + accChar + ', ' + accWeapon + ', ' + accLocation + '. Select Action or Move: ' + content }]};
 	}
-	infoOpponentTurnPlayerLoses(accusation, player)
+	infoOpponentTurnPlayerLoses({accusation, player})
 	{
 		let accPlayer = accusation['accusingPlayer']['character']['name'];
 		let accChar = accusation['accusedCharacter'];
