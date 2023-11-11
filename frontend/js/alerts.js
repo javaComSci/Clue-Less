@@ -30,6 +30,7 @@ export class GameAlerts {
 			'PROMPT_NEED_LOCATION'				: this.promptNeedLocation.bind(this),
 			'PROMPT_NEED_CHARACTER'				: this.promptNeedCharacter.bind(this),
 			'PROMPT_PROOF_REQUESTED'			: this.promptProofRequested.bind(this),
+			'PROMPT_PASS'						: this.promptPass.bind(this),
 			'PROMPT_END_TURN'					: this.promptEndTurn.bind(this),
 			'ERROR_WAITING_PROOF'				: this.errorWaitingProof.bind(this),
 			'ERROR_SUGGESTION_RUNNING'			: this.errorSuggestionRunning.bind(this),
@@ -40,6 +41,8 @@ export class GameAlerts {
 			'ERROR_PROOF_INVALID'				: this.errorProofInvalid.bind(this),
 			'ERROR_NOT_ENOUGH_PLAYERS'			: this.errorNotEnoughPlayers.bind(this),
 			'ERROR_PLAYER_DISABLED'			    : this.errorPlayerDisabled.bind(this),
+			'ERROR_INVALID_DESTINATION'			: this.errorInvalidDestination.bind(this),
+			'ERROR_CANNOT_MOVE'					: this.errorCannotMove.bind(this),
 
 		}
 	}
@@ -64,14 +67,14 @@ export class GameAlerts {
 	{
 		return {'alerts':[{'name':'infoPlayerWins','content':'Player ' + winningPlayer.character.name + ' wins! Solution: ' + accusedCharacter + ', ' + accusedWeapon + ', ' + accusedLocation}]};
 	}
-	infoPlayerLoses({solution,accusation})
+	infoPlayerLoses({solution, accusation, player})
 	{
 		if(solution != undefined)
 		{
 			let solChar = solution['correctCharacter'];
 			let solWeapon = solution['correctWeapon'];
 			let solLocation = solution['correctLocation'];
-			return {'alerts':[{'name':'infoPlayerLoses','content':'You lose. Solution: ' + solChar.name + ' with the ' + solWeapon.name + ' in the ' + solLocation.name + '. Spectating...'}]}
+			return {'alerts':[{'name':'infoPlayerLoses','content':'You lose. Solution: ' + solChar.name + ' with the ' + solWeapon.name + ' in the ' + solLocation.name + '. Spectating ' + player + '...'}]}
 		}
 		else
 		{
@@ -91,13 +94,13 @@ export class GameAlerts {
 		let content = move.join(', ');
 		return {'alerts':[{'name':'infoPlayerLoses','content': 'Your Turn! ' + accPlayer + ' loses! Accusation: ' + accChar + ', ' + accWeapon + ', ' + accLocation + '. Select Action or Move: ' + content }]};
 	}
-	infoOpponentTurnPlayerLoses(accusation)
+	infoOpponentTurnPlayerLoses(accusation, player)
 	{
 		let accPlayer = accusation['accusingPlayer']['character']['name'];
 		let accChar = accusation['accusedCharacter'];
 		let accWeapon = accusation['accusedWeapon'];
 		let accLocation = accusation['accusedLocation'];
-		return {'alerts':[{'name':'infoPlayerLoses','content':'Player ' + accPlayer + ' loses. Accused: ' + accChar + ' with the ' + accWeapon + ' in the ' + accLocation + '. Opponent\'s Turn...'}]};
+		return {'alerts':[{'name':'infoPlayerLoses','content':'Player ' + accPlayer + ' loses. Accused: ' + accChar + ' with the ' + accWeapon + ' in the ' + accLocation + '. ' + player + '\'S Turn...'}]};
 	}
 	infoGameOver({solution,accusation})
 	{
@@ -187,7 +190,11 @@ export class GameAlerts {
 	}
 	promptProofRequested({suggestedLocation,suggestedCharacterName,suggestedWeaponName})
 	{
-		return {'alerts':[{'name':'promptProofRequested','content':'Proof requested! Select a card. Must be one of: ' + suggestedLocation + ', ' + suggestedCharacterName + ', ' + suggestedWeaponName + '. Or, click Pass.'}]};
+		return {'alerts':[{'name':'promptProofRequested','content':'Proof requested! Select a card. Must be one of: ' + suggestedLocation + ', ' + suggestedCharacterName + ', ' + suggestedWeaponName}]};
+	}
+	promptPass({suggestedLocation,suggestedCharacterName,suggestedWeaponName})
+	{
+		return {'alerts':[{'name':'promptPass','content':'Proof requested: ' + suggestedCharacterName + ', ' + suggestedWeaponName + ', ' + suggestedLocation + '...but you don\'t have relevant cards! Select Pass to skip.'}]};
 	}
 	promptEndTurn()
 	{
@@ -211,11 +218,12 @@ export class GameAlerts {
 	}
 	errorPassBlocked()
 	{
-		return {'alerts':[{'name':'errorPassBlocked','content':'You can pass when prompted for proof.'}]};
+		return {'alerts':[{'name':'errorPassBlocked','content':'You can pass when prompted for proof and have no relevant cards.'}]};
 	}
-	errorActionBlocked()
+	errorActionBlocked(info)
 	{
-		return {'alerts':[{'name':'errorActionBlocked','content':'Cannot perform action right now.'}]};
+		let actionList = this.getValidActions(info['validation']);
+		return {'alerts':[{'name':'errorActionBlocked','content':'Cannot perform ' + info['selection'] + ' right now. Valid Actions: ' + actionList.join(', ')}]};
 	}
 	errorNotEnoughPlayers()
 	{
@@ -228,6 +236,16 @@ export class GameAlerts {
 	errorPlayerDisabled()
 	{
 		return {'alerts':[{'name':'errorPlayerDisabled','content':'You are spectating and cannot perform any actions.'}]};
+	}
+	errorInvalidDestination({selection,validation})
+	{
+		let content = validation.join(', ');
+		return {'alerts':[{'name':'errorInvalidDestination','content':'Cannot move to ' + selection +'. Valid Moves: ' + content }]};
+	}
+	errorCannotMove({selection,validation})
+	{
+		let content = validation.join(', ');
+		return {'alerts':[{'name':'errorInvalidDestination','content':'Cannot move to ' + selection +'. Valid Moves: ' + content }]};
 	}
 }
 

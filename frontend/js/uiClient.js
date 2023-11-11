@@ -139,7 +139,8 @@ export class UIClient
 		else if(this.validationInfo['accusation'] != undefined)
 		{
 			let solution = {
-				'solution': this.validationInfo['accusation']
+				'solution': this.validationInfo['accusation'],
+				'player': playerInfo.name
 			};
 			this.promptPlayer('INFO_PLAYER_LOSES',solution);
 		}
@@ -147,7 +148,7 @@ export class UIClient
 		{
 			if(this.failedAccusation['accusingPlayer'] != undefined)
 			{
-				this.promptPlayer('INFO_OPPONENT_TURN_PLAYER_LOSES', this.failedAccusation);
+				this.promptPlayer('INFO_OPPONENT_TURN_PLAYER_LOSES', this.failedAccusation, playerInfo.name);
 				this.failedAccusation = {};
 			}
 			else
@@ -158,7 +159,7 @@ export class UIClient
 	}
 	selectCard(cardName, cardType)
 	{
-		if ((this.actionValid['Pass'] == 1) && (this.actionLock['proof_select'] == 1))
+		if ((this.actionValid['Pass'] != 1) && (this.actionLock['proof_select'] == 1))
 		{
 			// message backend
 			let sugWeapon = this.validationInfo['proof']['suggestedWeaponName'];
@@ -323,7 +324,23 @@ export class UIClient
 	}
 	selectButton(button)
 	{
-		if(this.playerInfo.canPlay == false)
+		if(button == 'PASS')
+		{
+			// if player can pass
+			if ((this.actionValid['Pass'] == 1) && (this.actionLock['proof_select'] == 1))
+			{
+
+				// message backend
+				this.msgEngine.send('proof', {'playerId':this.playerId, 'gameId':this.gameId});
+				this.endProofRequest();
+				//this.promptPlayer('INFO_PASSED');
+			}
+			else
+			{
+				this.promptPlayer('ERROR_PASS_BLOCKED');
+			}
+		}
+		else if(this.playerInfo.canPlay == false)
 		{
 			this.promptPlayer('ERROR_PLAYER_DISABLED');
 		}
@@ -344,22 +361,6 @@ export class UIClient
 				this.promptPlayer('ERROR_SUGGESTION_RUNNING');
 			}
 		}
-		else if(button == 'PASS')
-		{
-			// if player can pass
-			if ((this.actionValid['Pass'] == 1) && (this.actionLock['proof_select'] == 1))
-			{
-
-				// message backend
-				this.msgEngine.send('proof', {'playerId':this.playerId, 'gameId':this.gameId});
-				this.endProofRequest();
-				//this.promptPlayer('INFO_PASSED');
-			}
-			else
-			{
-				this.promptPlayer('ERROR_PASS_BLOCKED');
-			}
-		}
 		else if((button == 'ACCUSATION') && (this.actionValid['Accusation'] == 1))
 		{
 			if (this.actionLock['accusation'] != 1)
@@ -374,18 +375,21 @@ export class UIClient
 		}
 		else
 		{
-			this.promptPlayer('ERROR_ACTION_BLOCKED');
+			let info = {
+				'selection': button,
+				'validation': this.actionValid
+			};
+			this.promptPlayer('ERROR_ACTION_BLOCKED', info);
 		}
 	}
 	selectRoom(room)
 	{
-		if( ( this.actionValid['move'] == 1 ) && ( this.validationInfo['move'].includes(room) == true ))
+		if( ( this.actionValid['Move'] == 1 ) && ( this.validationInfo['move'].includes(room) == true ))
 		{
 			console.log('Move player to: ' + room);
-			this.actionValid['move'] = 0;
+			this.actionValid['Move'] = 0;
 			this.validationInfo['move'] = [];
 			this.msgEngine.send('move',{'playerId':this.playerId,'gameId':this.gameId,'newCharacterLocation':room});
-			this.enableEndTurn();
 			this.promptPlayer('INFO_VALID_ACTIONS', this.actionValid);
 		}
 		else if(this.actionLock['accusation'] == 1)
@@ -415,6 +419,14 @@ export class UIClient
 				this.promptPlayer('PROMPT_NEED_WEAPON');
 			}
 		}
+		else if( ( this.actionValid['Move'] == 1 ) && ( this.validationInfo['move'].includes(room) != true ))
+		{
+			let info = {
+				'selection': room,
+				'validation': this.validationInfo['move']
+			}
+			this.promptPlayer('ERROR_INVALID_DESTINATION', info);
+		}
 		else
 		{
 			console.log('Room selected: ' + room);
@@ -422,17 +434,32 @@ export class UIClient
 	}
 	selectHallway(hallway)
 	{
-		if( ( this.actionValid['move'] == 1 ) && ( this.validationInfo['move'].includes(hallway) == true ))
+		if( ( this.actionValid['Move'] == 1 ) && ( this.validationInfo['move'].includes(hallway) == true ))
 		{
 			console.log('Move player to: ' + hallway);
-			this.actionValid['move'] = 0;
+			this.actionValid['Move'] = 0;
 			this.validationInfo['move'] = [];
 			this.msgEngine.send('move',{'playerId':this.playerId,'gameId':this.gameId,'newCharacterLocation':hallway});
 			this.enableEndTurn();
 			this.promptPlayer('INFO_VALID_ACTIONS', this.actionValid);
 		}
+		else if( ( this.actionValid['Move'] == 1 ) && ( this.validationInfo['move'].includes(hallway) != true ))
+		{
+			let info = {
+				'selection': hallway,
+				'validation': this.validationInfo['move']
+			}
+			this.promptPlayer('ERROR_INVALID_DESTINATION', info);
+		}
 		else
 		{
+			/* TODO player might be waiting on opponent or move disabled
+			let info = {
+				'selction': hallway,
+				'validation': this.validAction
+			}
+			this.promptPlayer('ERROR_CANNOT_MOVE', hallway);
+			*/
 			console.log('Hallway selected: ' + hallway);
 		}
 	}
@@ -453,7 +480,6 @@ export class UIClient
 	receiveProof(proof)
 	{
 		this.disableSuggestion();
-		console.log('Receive Proof: ' + proof);
 		if(proof != undefined)
 		{
 			this.proofReceived = proof;
@@ -482,6 +508,7 @@ export class UIClient
 		this.actionLock['proof_pending'] = 0;
 		this.actionLock['suggestion'] = 0;
 		this.actionValid['Accusation'] = 1;
+		this.enableEndTurn();
 	}
 	disableAccusation()
 	{
@@ -491,10 +518,40 @@ export class UIClient
 	}
 	requestProof(validationData)
 	{
+		this.disablePass(); // disable until enabled by verifyPassCondition()
 		this.validationInfo['proof'] = validationData;
 		this.actionLock['proof_select'] = 1;
+		this.verifyPassCondition();
+	}
+	enablePass()
+	{
 		this.actionValid['Pass'] = 1;
-		this.promptPlayer('PROMPT_PROOF_REQUESTED', validationData);
+	}
+	disablePass()
+	{
+		this.actionValid['Pass'] = 0;
+	}
+	verifyPassCondition(proofs)
+	{
+		let sugWeapon = this.validationInfo['proof']['suggestedWeaponName'];
+		let sugChar = this.validationInfo['proof']['suggestedCharacterName'];
+		let sugRoom = this.validationInfo['proof']['suggestedLocation'];
+		let pass = true;
+		this.playerInfo.cards.forEach((card) => {
+			if((card.name == sugWeapon) || (card.name == sugRoom) || (card.name == sugChar)) {
+				pass = false;
+			}
+		});
+		if(pass == true)
+		{
+			this.enablePass();
+			this.promptPlayer('PROMPT_PASS', this.validationInfo['proof']);
+		}
+		else
+		{
+			this.disablePass();
+			this.promptPlayer('PROMPT_PROOF_REQUESTED', this.validationInfo['proof'] );
+		}
 	}
 	enableEndTurn()
 	{
@@ -506,7 +563,7 @@ export class UIClient
 	}
 	setMove(moves)
 	{
-		this.actionValid['move'] = 1;
+		this.actionValid['Move'] = 1;
 		this.validationInfo['move'] = moves['potentialMoves'];
 		if(this.failedAccusation['accusingPlayer'] != undefined)
 		{
