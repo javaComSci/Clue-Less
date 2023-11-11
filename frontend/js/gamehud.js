@@ -14,17 +14,21 @@ export class GameHud
 		this.buttonAreaStartY = mapHeight + 50;
 		this.buttonAreaHeight = screenHeight - mapHeight;
 		this.buttonAreaWidth = mapWidth;
-		this.alertAreaStartX = mapWidth;
-		this.alertAreaStartY = 0;
-		this.alertAreaHeight = screenHeight/4;
-		this.alertAreaWidth = screenWidth - mapWidth;
+		this.alertAreaStartX = 0;
+		this.alertAreaStartY = mapHeight;
+		this.alertAreaHeight = 50;
+		this.alertAreaWidth = screenWidth;
+		this.characterNameAreaStartX = mapWidth
+		this.characterNameAreaStartY = 0;
+		this.characterNameAreaHeight = screenHeight/4;
+		this.characterNameAreaWidth = screenWidth - mapWidth;
 		this.cardAreaStartX = mapWidth;
-		this.cardAreaStartY = this.alertAreaHeight;
+		this.cardAreaStartY = this.characterNameAreaHeight;
 		this.cardAreaHeight = screenHeight/2;
 		this.cardAreaWidth = screenWidth - mapWidth;
 		this.weaponAreaStartX = mapWidth;
-		this.weaponAreaStartY = this.alertAreaHeight + this.cardAreaHeight;
-		this.weaponAreaHeight = screenHeight/4;
+		this.weaponAreaStartY = this.alertAreaStartY + this.alertAreaHeight;
+		this.weaponAreaHeight = screenHeight/4 - this.alertAreaHeight;
 		this.weaponAreaWidth = screenWidth - mapWidth;
 
 		this.buttonMarginSFactor = .25;
@@ -33,10 +37,10 @@ export class GameHud
 		this.cardMarginSFactor = .10;
 		this.cardGapSFactor = .05;
 
-		this.weaponMarginSFactor = .18;
-		this.weaponGapSFactor = .05;
+		this.weaponMarginSFactor = .14;
+		this.weaponGapSFactor = .02;
 
-		this.alertMarginSFactor = .25;
+		this.alertMarginSFactor = .01;
 
 		this.buttons = [];
 		this.cards = [];
@@ -97,9 +101,10 @@ export class GameHud
 	}
 	createAlerts(state)
 	{
+		this.alerts = [];
 		let alertHeight = this.alertAreaHeight - 2 * ( this.alertMarginSFactor * this.alertAreaHeight );
-		let alertWidth = this.alertAreaWidth - 2 * ( this.alertMarginSFactor * this.alertAreaWidth );
-		let alertStartX = (this.alertMarginSFactor * this.alertAreaWidth) + this.alertAreaStartX;
+		let alertWidth = this.alertAreaWidth;
+		let alertStartX = this.alertAreaStartX;
 		let alertStartY = (this.alertMarginSFactor * this.alertAreaHeight) + this.alertAreaStartY;
 		state.forEach((a) => {
 			let alertInfo = new Alert(a['name'],a['content'],alertStartX,alertStartY,alertHeight,alertWidth);

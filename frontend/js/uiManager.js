@@ -2,20 +2,53 @@
  * Performs an action on the UI
  */
 import { UIState } from '/js/uiState.js';
+import { GameAlerts } from '/js/alerts.js';
 
 export class UIManager
 {
 	constructor()
 	{
-		this.ui = new UIState();
+		this.gameAlerts = new GameAlerts();
+		this.defaultStateUI = {
+			'buttons': [ {'name':'SUGGESTION','content':'Suggestion'},
+				{'name':'ACCUSATION','content':'Accusation'},
+				{'name':'PASS','content':'Pass'},
+				{'name':'END_TURN','content':'End Turn'}],
+			'cards':[],
+			'alerts': [],
+			'characterName': 'Pending...'
+		};
+		this.defaultStateMap = {};
+		this.currentStateUI = this.defaultStateUI;
+		this.currentStateMap = this.defaultStateMap;
+		this.ui = new UIState({'ui':this.currentStateUI,'map':this.currentStateMap});
+		this.messageUser('INFO_CLIENT_JOINED', this.defaultStateUI.characterName);
 	}
 	/*
 	 * Methods to be defined
 	 */
 	updateGameState(state)
 	{
-		this.ui.updateHudState(state);
-		this.ui.updateMapState(state);
+		let newStateUI = {};
+		let newStateMap = {};
+		if( state['cards'] != undefined )
+		{
+			newStateUI['cards'] = state['cards'];
+		}
+		if( state['characterName'] != undefined )
+		{
+			newStateUI['characterName'] = state['characterName'];
+		}
+		if( state['alerts'] != undefined )
+		{
+			newStateUI['alerts'] = state['alerts'];
+		}
+		if( state['characterPieces'] != undefined )
+		{
+			newStateMap['characterPieces'] = state['characterPieces'];
+		}
+		this.ui.updateHudState(newStateUI);
+		this.ui.updateMapState(newStateMap);
 	}
 	move()
 	{
@@ -28,6 +61,10 @@ export class UIManager
 	}
 	gameend()
 	{
+	}
+	messageUser(msg, data)
+	{
+		this.updateGameState(this.gameAlerts.generateAlert(msg, data));
 	}
 }
 

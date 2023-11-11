@@ -12,6 +12,9 @@ export class UIClient
 		this.gameId = '1';
 		this.playerId = crypto.randomUUID();
 		this.msgEngine.send('start', {'playerId': this.playerId, 'gameId': this.gameId } );
+		this.proofReceived = '';
+		this.proofProvided = false;
+		this.failedAccusation = {};
 		this.playerInfo;
 		this.actionData;
 		this.actionLock;
@@ -39,55 +42,149 @@ export class UIClient
 			'proof_pending':0	// waiting to receive proof
 		};
 		this.actionValid = {
-			'end_turn': 0,		// can end turn
-			'suggestion': 0,	// can start a suggestion
-			'pass':0,			// can pass turn
-			'accusation':1		// can perform accusation
+			'Suggestion': 0,	// can start a suggestion
+			'Accusation':1,		// can perform accusation
+			'Pass':0,			// can pass turn
+			'End Turn': 0		// can end turn
 		};
 		this.validationInfo = {
-			'move': []
+			'move': [],
+			'proof': {}
 		};
 	}
 	updateGameState(state)
 	{
-		console.log('Update Game State!: ' + state);
-		state['cards'] = this.playerInfo['cards'];
 		this.uiManager.updateGameState(state);
+		/*
+		this.promptPlayer('INFO_GAME_STATE');
+		if( this.actionValid['End Turn'] == 1 )
+		{
+			this.promptPlayer('INFO_YOUR_TURN');
+		}
+		*/
 	}
-
-	setPlayerInfo(playerInfo)
+	insufficientPlayers()
+	{
+		console.log('not enough players');
+		this.promptPlayer('ERROR_NOT_ENOUGH_PLAYERS');
+	}
+	setPlayerStart(playerInfo)
 	{
 		this.playerInfo = playerInfo;
-		console.log(this.playerInfo);
+		this.promptPlayer('INFO_NEW_PLAYER', playerInfo.character.name);
+		let startState = {'cards':this.playerInfo['cards']}
+		this.updateGameState(startState);
 	}
-	promptPlayer(ask)
+	promptPlayer(ask, data)
 	{
-		/* TODO: Alert player
-		 */
-		console.log(ask);
-		if(ask == 'END_TURN')
+		this.uiManager.messageUser(ask, data);
+	}
+	playerWins(data)
+	{
+		this.promptPlayer('INFO_PLAYER_WINS',data);
+	}
+	accusationSolution(data)
+	{
+		this.validationInfo['accusation'] = data;
+	}
+	playerLoses(data)
+	{
+		this.failedAccusation = data;
+		if(data['accusingPlayer']['playerId'] == this.playerInfo.playerId)
 		{
-			this.enableEndTurn();
+			this.playerInfo.canPlay = false;
+		}
+		let info = {
+			'solution': this.validationInfo['accusation'],
+			'accusation': data
+		};
+		if(data['isGameOver'] == false)
+		{
+			this.promptPlayer('INFO_PLAYER_LOSES',info);
+		}
+		else
+		{
+			this.promptPlayer('INFO_GAME_OVER',info);
+		}
+	}
+	setTurnComplete()
+	{
+		//do received proof message here, otherwise it will be overriden by REQUEST_COMPLETE_TURN
+		if( this.playerInfo.canPlay == false )
+		{
+			this.msgEngine.send('turncomplete', {'playerId':this.playerId,'gameId':this.gameId});
+		}
+		else if( this.proofReceived != '')
+		{
+			let data = {
+				'actions': this.actionValid,
+				'proof': this.proofReceived
+			};
+			this.promptPlayer('INFO_PROOF_RECEIVED', data);
+			this.proofReceived = '';
+		}
+		else
+		{
+			this.promptPlayer('INFO_VALID_ACTIONS', this.actionValid);
 		}
 	}
 	setPlayerTurn(playerInfo)
 	{
-		console.log('Player\'s Turn: ' + playerInfo.playerId);
+		//reset proof on new turn
+		this.proofProvided = false;
+		if ( playerInfo.playerId == this.playerInfo.playerId )
+		{
+			this.disableEndTurn();
+		}
+		else if(this.validationInfo['accusation'] != undefined)
+		{
+			let solution = {
+				'solution': this.validationInfo['accusation'],
+				'player': playerInfo.name
+			};
+			this.promptPlayer('INFO_PLAYER_LOSES',solution);
+		}
+		else
+		{
+			if(this.failedAccusation['accusingPlayer'] != undefined)
+			{
+				let info = {
+					'accusation' : this.failedAccusation,
+					'player': playerInfo.name
+				};
+				this.promptPlayer('INFO_OPPONENT_TURN_PLAYER_LOSES', info);
+				this.failedAccusation = {};
+			}
+			else
+			{
+				this.promptPlayer('INFO_OPPONENT_TURN',playerInfo.name);
+			}
+		}
 	}
 	selectCard(cardName, cardType)
 	{
-		if ((this.actionValid['pass'] == 1) && (this.actionLock['proof_select'] == 1))
+		if ((this.actionValid['Pass'] != 1) && (this.actionLock['proof_select'] == 1))
 		{
-
 			// message backend
-			this.msgEngine.send('proof', {
-				'playerId':this.playerId,
-				'gameId':this.gameId,
-				'proofCard':cardName});
-			// reset valid
-			this.actionValid['pass'] = 0;
-			// reset lock
-			this.actionLock['proof_select'] = 0;
+			let sugWeapon = this.validationInfo['proof']['suggestedWeaponName'];
+			let sugChar = this.validationInfo['proof']['suggestedCharacterName'];
+			let sugRoom = this.validationInfo['proof']['suggestedLocation'];
+			if((cardName != sugWeapon) && (cardName != sugRoom) && (cardName != sugChar))
+			{
+				let data = this.validationInfo['proof'];
+				data['playerChoice'] = cardName;
+				this.promptPlayer('ERROR_PROOF_INVALID',data);
+			}
+			else
+			{
+				this.proofProvided = true;
+				this.promptPlayer('INFO_PROOF_SENT',cardName);
+				this.msgEngine.send('proof', {
+					'playerId':this.playerId,
+					'gameId':this.gameId,
+					'proofCard':cardName});
+				this.endProofRequest();
+			}
 		}
 		else
 		{
@@ -116,16 +213,17 @@ export class UIClient
 					// reset suggestion information
 					this.actionData['suggestion'] = {'character':'','weapon':''};
 					this.actionLock['proof_pending'] = 1;
+					this.promptPlayer('INFO_WAITING_PROOF');
 				}
 				// otherwise, prompt for more details
 				else
 				{
-					this.promptPlayer('SUGGESTION_NEED_WEAPON');
+					this.promptPlayer('PROMPT_NEED_WEAPON');
 				}
 			}
 			else
 			{
-				console.log('waiting for proof!');
+				this.promptPlayer('ERROR_WAITING_PROOF');
 			}
 		}
 		else if(this.actionLock['accusation'] == 1)
@@ -148,11 +246,11 @@ export class UIClient
 			// otherwise, prompt for more details
 			else if(this.actionData['accusation']['weapon'] == '')
 			{
-				this.promptPlayer('ACCUSATION_NEED_WEAPON');
+				this.promptPlayer('PROMPT_NEED_WEAPON');
 			}
 			else if(this.actionData['accusation']['room'] == '')
 			{
-				this.promptPlayer('ACCUSATION_NEED_LOCATION');
+				this.promptPlayer('PROMPT_NEED_LOCATION');
 			}
 		}
 		else
@@ -182,16 +280,17 @@ export class UIClient
 					// reset suggestion information
 					this.actionData['suggestion'] = {'character':'','weapon':''};
 					this.actionLock['proof_pending'] = 1;
+					this.promptPlayer('INFO_WAITING_PROOF');
 				}
 				// otherwise, prompt for more details
 				else
 				{
-					this.promptPlayer('SUGGESTION_NEED_CHARACTER');
+					this.promptPlayer('PROMPT_NEED_CHARACTER');
 				}
 			}
 			else
 			{
-				console.log('waiting for proof!');
+				this.promptPlayer('ERROR_WAITING_PROOF');
 			}
 		}
 		else if(this.actionLock['accusation'] == 1)
@@ -214,11 +313,11 @@ export class UIClient
 			// otherwise, prompt for more details
 			else if(this.actionData['accusation']['character'] == '')
 			{
-				this.promptPlayer('ACCUSATION_NEED_CHARACTER');
+				this.promptPlayer('PROMPT_NEED_CHARACTER');
 			}
 			else if(this.actionData['accusation']['room'] == '')
 			{
-				this.promptPlayer('ACCUSATION_NEED_LOCATION');
+				this.promptPlayer('PROMPT_NEED_LOCATION');
 			}
 		}
 		else
@@ -229,66 +328,73 @@ export class UIClient
 	}
 	selectButton(button)
 	{
-		if((button == 'END_TURN') && (this.actionValid['end_turn'] == 1))
-		{
-			this.msgEngine.send('turncomplete', {'playerId':this.playerId,'gameId':this.gameId});
-			this.resetActionStates();
-		}
-		else if((button == 'SUGGESTION') && (this.actionValid['suggestion'] == 1))
-		{
-			if (this.actionLock['suggestion'] != 1)
-			{
-				this.setSuggestionLock();
-				this.promptPlayer('SUGGESTION_PLAYER');
-			}
-			else
-			{
-				this.promptPlayer('SUGGESTION_RUNNING');
-			}
-		}
-		else if(button == 'PASS')
+		if(button == 'PASS')
 		{
 			// if player can pass
-			if ((this.actionValid['pass'] == 1) && (this.actionLock['proof_select'] == 1))
+			if ((this.actionValid['Pass'] == 1) && (this.actionLock['proof_select'] == 1))
 			{
 
 				// message backend
 				this.msgEngine.send('proof', {'playerId':this.playerId, 'gameId':this.gameId});
-				// reset valid action
-				this.actionValid['pass'] = 0;
-				// reset lock
-				this.actionLock['proof_select'] = 0;
+				this.endProofRequest();
+				//this.promptPlayer('INFO_PASSED');
 			}
 			else
 			{
-				console.log('Pass only available when prompted for proof');
+				this.promptPlayer('ERROR_PASS_BLOCKED');
 			}
 		}
-		else if((button == 'ACCUSATION') && (this.actionValid['accusation'] == 1))
+		else if(this.playerInfo.canPlay == false)
+		{
+			this.promptPlayer('ERROR_PLAYER_DISABLED');
+		}
+		else if((button == 'END_TURN') && (this.actionValid['End Turn'] == 1))
+		{
+			this.msgEngine.send('turncomplete', {'playerId':this.playerId,'gameId':this.gameId});
+			this.resetActionStates();
+		}
+		else if((button == 'SUGGESTION') && (this.actionValid['Suggestion'] == 1))
+		{
+			if (this.actionLock['suggestion'] != 1)
+			{
+				this.setSuggestionLock();
+				this.promptPlayer('INFO_SUGGESTION_STARTED');
+			}
+			else
+			{
+				this.promptPlayer('ERROR_SUGGESTION_RUNNING');
+			}
+		}
+		else if((button == 'ACCUSATION') && (this.actionValid['Accusation'] == 1))
 		{
 			if (this.actionLock['accusation'] != 1)
 			{
 				this.setAccusationLock();
-				this.promptPlayer('ACCUSATION_PLAYER');
+				this.promptPlayer('INFO_ACCUSATION_STARTED');
 			}
 			else
 			{
-				this.promptPlayer('ACCUSATION_BLOCKED');
+				this.promptPlayer('ERROR_ACCUSATION_RUNNING');
 			}
 		}
 		else
 		{
-			console.log('You cannot perform this action right now!');
+			let info = {
+				'selection': button,
+				'validation': this.actionValid
+			};
+			this.promptPlayer('ERROR_ACTION_BLOCKED', info);
 		}
 	}
 	selectRoom(room)
 	{
-		if( ( this.actionValid['move'] == 1 ) && ( this.validationInfo['move'].includes(room) == true ))
+		if( ( this.actionValid['Move'] == 1 ) && ( this.validationInfo['move'].includes(room) == true ))
 		{
 			console.log('Move player to: ' + room);
-			this.actionValid['move'] = 0;
+			this.actionValid['Move'] = 0;
 			this.validationInfo['move'] = [];
 			this.msgEngine.send('move',{'playerId':this.playerId,'gameId':this.gameId,'newCharacterLocation':room});
+			this.promptPlayer('INFO_VALID_ACTIONS', this.actionValid);
 		}
 		else if(this.actionLock['accusation'] == 1)
 		{
@@ -310,12 +416,20 @@ export class UIClient
 			// otherwise, prompt for more details
 			else if(this.actionData['accusation']['character'] == '')
 			{
-				this.promptPlayer('ACCUSATION_NEED_CHARACTER');
+				this.promptPlayer('PROMPT_NEED_CHARACTER');
 			}
 			else if(this.actionData['accusation']['weapon'] == '')
 			{
-				this.promptPlayer('ACCUSATION_NEED_WEAPON');
+				this.promptPlayer('PROMPT_NEED_WEAPON');
 			}
+		}
+		else if( ( this.actionValid['Move'] == 1 ) && ( this.validationInfo['move'].includes(room) != true ))
+		{
+			let info = {
+				'selection': room,
+				'validation': this.validationInfo['move']
+			}
+			this.promptPlayer('ERROR_INVALID_DESTINATION', info);
 		}
 		else
 		{
@@ -324,63 +438,160 @@ export class UIClient
 	}
 	selectHallway(hallway)
 	{
-		if( ( this.actionValid['move'] == 1 ) && ( this.validationInfo['move'].includes(hallway) == true ))
+		if( ( this.actionValid['Move'] == 1 ) && ( this.validationInfo['move'].includes(hallway) == true ))
 		{
 			console.log('Move player to: ' + hallway);
-			this.actionValid['move'] = 0;
+			this.actionValid['Move'] = 0;
 			this.validationInfo['move'] = [];
 			this.msgEngine.send('move',{'playerId':this.playerId,'gameId':this.gameId,'newCharacterLocation':hallway});
+			this.enableEndTurn();
+			this.promptPlayer('INFO_VALID_ACTIONS', this.actionValid);
+		}
+		else if( ( this.actionValid['Move'] == 1 ) && ( this.validationInfo['move'].includes(hallway) != true ))
+		{
+			let info = {
+				'selection': hallway,
+				'validation': this.validationInfo['move']
+			}
+			this.promptPlayer('ERROR_INVALID_DESTINATION', info);
 		}
 		else
 		{
+			/* TODO player might be waiting on opponent or move disabled
+			let info = {
+				'selction': hallway,
+				'validation': this.validAction
+			}
+			this.promptPlayer('ERROR_CANNOT_MOVE', hallway);
+			*/
 			console.log('Hallway selected: ' + hallway);
 		}
 	}
+	checkProofProvided(check)
+	{
+		if(check == true)
+		{
+			if(this.proofProvided == false)
+			{
+				this.promptPlayer('INFO_PROOF_PROVIDED');
+			}
+		}
+		else
+		{
+			this.promptPlayer('INFO_NO_PROOF');
+		}
+	}
+	receiveProof(proof)
+	{
+		this.disableSuggestion();
+		if(proof != undefined)
+		{
+			this.proofReceived = proof;
+		}
+		else
+		{
+			this.proofReceived = 'NONE';
+		}
+	}
+	endProofRequest()
+	{
+		// reset valid action
+		this.actionValid['Pass'] = 0;
+		// reset lock
+		this.actionLock['proof_select'] = 0;
+		this.validationInfo['proof'] = {};
+	}
 	enableSuggestion()
 	{
-		this.actionValid['suggestion'] = 1;
+		this.actionValid['Suggestion'] = 1;
+		this.promptPlayer('INFO_VALID_ACTIONS', this.actionValid);
 	}
 	disableSuggestion()
 	{
-		this.actionValid['suggestion'] = 0;
+		this.actionValid['Suggestion'] = 0;
 		this.actionLock['proof_pending'] = 0;
 		this.actionLock['suggestion'] = 0;
-		this.actionValid['accusation'] = 1;
+		this.actionValid['Accusation'] = 1;
+		this.enableEndTurn();
 	}
 	disableAccusation()
 	{
-		this.actionValid['accusation'] = 0;
+		this.actionValid['Accusation'] = 0;
 		this.actionLock['accusation'] = 0;
+		this.promptPlayer('INFO_VALID_ACTIONS', this.actionValid);
 	}
-	enableProof()
+	requestProof(validationData)
 	{
+		this.disablePass(); // disable until enabled by verifyPassCondition()
+		this.validationInfo['proof'] = validationData;
 		this.actionLock['proof_select'] = 1;
-		this.actionValid['pass'] = 1;
-		this.promptPlayer('PROVIDE_PROOF');
+		this.verifyPassCondition();
+	}
+	enablePass()
+	{
+		this.actionValid['Pass'] = 1;
+	}
+	disablePass()
+	{
+		this.actionValid['Pass'] = 0;
+	}
+	verifyPassCondition(proofs)
+	{
+		let sugWeapon = this.validationInfo['proof']['suggestedWeaponName'];
+		let sugChar = this.validationInfo['proof']['suggestedCharacterName'];
+		let sugRoom = this.validationInfo['proof']['suggestedLocation'];
+		let pass = true;
+		this.playerInfo.cards.forEach((card) => {
+			if((card.name == sugWeapon) || (card.name == sugRoom) || (card.name == sugChar)) {
+				pass = false;
+			}
+		});
+		if(pass == true)
+		{
+			this.enablePass();
+			this.promptPlayer('PROMPT_PASS', this.validationInfo['proof']);
+		}
+		else
+		{
+			this.disablePass();
+			this.promptPlayer('PROMPT_PROOF_REQUESTED', this.validationInfo['proof'] );
+		}
 	}
 	enableEndTurn()
 	{
-		this.actionValid['end_turn'] = 1;
+		this.actionValid['End Turn'] = 1;
 	}
 	disableEndTurn()
 	{
-		this.actionValid['end_turn'] = 0;
+		this.actionValid['End Turn'] = 0;
 	}
-	enableMove(moves)
+	setMove(moves)
 	{
-		this.actionValid['move'] = 1;
+		this.actionValid['Move'] = 1;
 		this.validationInfo['move'] = moves['potentialMoves'];
-		console.log(moves);
+		if(this.failedAccusation['accusingPlayer'] != undefined)
+		{
+			let info = {
+				'accusation': this.failedAccusation,
+				'move': this.validationInfo['move']
+			}
+			this.promptPlayer('INFO_VALID_MOVES_PLAYER_LOSES', info);
+			this.failedAccusation = {};
+		}
+		else
+		{
+			this.promptPlayer('INFO_VALID_MOVES', moves);
+		}
 	}
 	setSuggestionLock()
 	{
 		this.actionLock['suggestion'] = 1;
-		this.actionValid['accusation'] = 0;
+		this.actionValid['Accusation'] = 0;
 	}
 	setAccusationLock()
 	{
 		this.actionLock['accusation'] = 1;
-		this.actionValid['suggestion'] = 0;
+		this.actionValid['Suggestion'] = 0;
 	}
 	testme(data)
 	{

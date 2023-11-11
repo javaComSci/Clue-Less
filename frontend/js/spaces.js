@@ -6,7 +6,16 @@ class Space
 		this.y = y;
 		this.length = length;
 		this.width = width;
+		this.occupants = 0;
 		this.element;
+	}
+	resetOccupants()
+	{
+		// implement in child class if necessary
+	}
+	getPlayerLocation()
+	{
+		// implement in child class if necessary
 	}
 }
 
@@ -26,12 +35,23 @@ export class Room extends Space
 	{
 		super(x, y, length, width);
 		this.name = name;
-		this.playerLocationX = x + length/3;
-		this.playerLocationY = y + width/3;
-		/* be careful here, these are somewhat arbitrary. 
-		 * If player area size is too large, they may overlap */
-		this.playerSuggestLocationX = x + (2 * length/3);
-		this.playerSuggestLocationY = y + width/3;
+		this.playerLocations = [
+			{ 'x': x + width/8, 'y': y + length/4 },
+			{ 'x': x + 3 * width/8, 'y': y + length/4 },
+			{ 'x': x + 5 * width/8, 'y': y + length/4 },
+			{ 'x': x + width/8, 'y': y + length/2 },
+			{ 'x': x + 3 * width/8, 'y': y + length/2 },
+			{ 'x': x + 5 * width/8, 'y': y + length/2 }
+		];
+	}
+	getPlayerLocation()
+	{
+		this.occupants += 1;
+		return this.playerLocations[this.occupants-1];
+	}
+	resetOccupants()
+	{
+		this.occupants = 0;
 	}
 }
 
@@ -43,6 +63,11 @@ export class Hallway extends Space
 		this.name = name;
 		this.playerLocationX = x + length/3;
 		this.playerLocationY = y + width/3;
+	}
+	getPlayerLocation()
+	{
+		this.occupants += 1;
+		return {'x':this.playerLocationX,'y':this.playerLocationY};
 	}
 }
 
@@ -72,6 +97,10 @@ export class Start extends Space
 		this.name = name;
 		this.playerLocationX = x;
 		this.playerLocationY = y;
+	}
+	getPlayerLocation()
+	{
+		return {'x':this.playerLocationX,'y':this.playerLocationY};
 	}
 }
 

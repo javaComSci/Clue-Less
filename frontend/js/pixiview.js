@@ -19,6 +19,33 @@ export class PixiHud extends GameHud
 		this.displayButtons();
 		this.displayAlerts();
 		this.displayWeapons();
+		this.displayCharacterName();
+	}
+	displayCharacterName(text)
+	{
+		if ( this.charNameContainer != null )
+		{
+			// free the memory!
+			this.charNameContainer.destroy();
+		}
+		if ( text == undefined )
+		{
+			text = 'initializing...'
+		}
+		this.charNameContainer = new PIXI.Graphics();
+		this.charNameContainer.beginFill(0x0B355E);
+		this.charNameContainer.drawRect(this.characterNameAreaStartX,this.characterNameAreaStartY,this.characterNameAreaWidth,this.characterNameAreaHeight);
+		this.charNameContainer.endFill();
+		let hudAreaText = new PIXI.Text(
+				'Character:\n' + text, {
+				fontSize: 60,
+				fill: 0xffffff
+			}
+		);
+		hudAreaText.x = this.characterNameAreaStartX + this.characterNameAreaWidth/2 - hudAreaText.width/2;
+		hudAreaText.y = this.characterNameAreaStartY;
+		this.charNameContainer.addChild(hudAreaText);
+		this.app.stage.addChild(this.charNameContainer);
 	}
 	displayWeapons()
 	{
@@ -33,7 +60,7 @@ export class PixiHud extends GameHud
 		this.weaponContainer.endFill();
 		let hudAreaText = new PIXI.Text(
 				'Weapons', {
-				fontSize: 60,
+				fontSize: 45,
 				fill: 0xffffff
 			}
 		);
@@ -90,7 +117,7 @@ export class PixiHud extends GameHud
 			pixiCard.endFill();
 			let text = new PIXI.Text(
 				'Type:' + card.type + '\n' + 'Name:' + card.name, {
-					fontSize: 30,
+					fontSize: 25,
 					fill: 0x000000
 				}
 			);
@@ -161,6 +188,15 @@ export class PixiHud extends GameHud
 			pixiAlert.beginFill(0xFBF8FB);
 			pixiAlert.drawRect(0,0,alertInfo.width,alertInfo.length);
 			pixiAlert.endFill();
+			let text = new PIXI.Text(
+				alertInfo.content, {
+					fontSize: 20,
+					fill: 0x000000
+				}
+			);
+			text.x = alertInfo.x + alertInfo.width/2 - text.width/2;
+			text.y = 0;
+			pixiAlert.addChild(text);
 			pixiAlert.position.set(alertInfo.x,alertInfo.y);
 			this.alertContainer.addChild(pixiAlert);
 		});
@@ -238,6 +274,11 @@ export class PixiMap extends GameMap
 		this.app.stage.addChild(this.hallwayContainer);
 	}
 	displayCharacters(playerCharacters) {
+		// reset number of occupants in each location
+		for( var loc in this.locations )
+		{
+			this.locations[loc].resetOccupants();
+		}
 		if ( this.characterContainer != null )
 		{
 			// free the memory!
@@ -246,8 +287,9 @@ export class PixiMap extends GameMap
 		this.characterContainer = new PIXI.Graphics();
 		playerCharacters.forEach((character) => {
 			let charRep = this.characters[character['name']];
-			let charX = this.locations[character['currentLocation']].playerLocationX;
-			let charY = this.locations[character['currentLocation']].playerLocationY;
+			let coordinates = this.locations[character['currentLocation']].getPlayerLocation();
+			let charX = coordinates['x'];
+			let charY = coordinates['y'];
 
 			let pixiCharacter = new PIXI.Graphics();
 			pixiCharacter.eventMode = 'static';
