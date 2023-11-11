@@ -153,9 +153,9 @@ export class GameAlerts {
 	{
 		return {'alerts':[{'name':'infoYourTurn','content':'Your turn!'}]};
 	}
-	infoOpponentTurn()
+	infoOpponentTurn(name)
 	{
-		return {'alerts':[{'name':'infoOpponentTurn','content':'Waiting on opponent...'}]};
+		return {'alerts':[{'name':'infoOpponentTurn','content':'Waiting on ' + name + '...'}]};
 	}
 	infoSuggestionStarted()
 	{

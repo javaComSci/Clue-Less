@@ -134,7 +134,7 @@ export class UIClient
 		this.proofProvided = false;
 		if ( playerInfo.playerId == this.playerInfo.playerId )
 		{
-			this.enableEndTurn();
+			this.disableEndTurn();
 		}
 		else if(this.validationInfo['accusation'] != undefined)
 		{
@@ -152,7 +152,7 @@ export class UIClient
 			}
 			else
 			{
-				this.promptPlayer('INFO_OPPONENT_TURN');
+				this.promptPlayer('INFO_OPPONENT_TURN',playerInfo.name);
 			}
 		}
 	}
