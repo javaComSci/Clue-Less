@@ -374,6 +374,10 @@ export class UIClient
 			{
 				this.promptPlayer('ERROR_PLAYER_DISABLED');
 			}
+			else if(this.opponentTurn != '')
+			{
+				this.promptPlayer('INFO_OPPONENT_TURN',this.opponentTurn);
+			}
 			else
 			{
 				this.promptPlayer('ERROR_PASS_BLOCKED', this.actionValid);
@@ -382,6 +386,10 @@ export class UIClient
 		else if(this.playerInfo.canPlay == false)
 		{
 			this.promptPlayer('ERROR_PLAYER_DISABLED');
+		}
+		else if(this.opponentTurn != '')
+		{
+			this.promptPlayer('INFO_OPPONENT_TURN',this.opponentTurn);
 		}
 		else if((button == 'END_TURN') && (this.actionValid['End Turn'] == 1))
 		{
