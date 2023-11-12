@@ -262,7 +262,7 @@ export class PixiMap extends GameMap
 			let hallwayX = hallwayObj.x;
 			let hallwayY = hallwayObj.y;
 
-			pixiHallway.beginFill(0xE8F1F2)
+			pixiHallway.beginFill(0x7DC2C9)
 			pixiHallway.drawRect(0,0,hallwayObj.length,hallwayObj.width);
 			pixiHallway.endFill();
 			pixiHallway.eventMode = 'static';
