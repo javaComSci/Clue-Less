@@ -1,3 +1,5 @@
+import { LocationConstants } from './location.mjs';
+
 export class GamePiece
 {
     constructor(name, startingLocation, type)
@@ -13,4 +15,13 @@ export class GamePiece
 		this.priorLocation = this.currentLocation;
 		this.currentLocation = newLocation;
 	}
+
+    movePieceToNearestRoom()
+    {
+        if (this.currentLocation in LocationConstants.Hallway)
+        {
+            let connectingRooms = hallway.split("_");
+            this.movePiece(connectingRooms[0], this.pieceMover);
+        }
+    }
 }
