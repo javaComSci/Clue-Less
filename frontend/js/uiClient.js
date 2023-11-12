@@ -15,6 +15,7 @@ export class UIClient
 		this.proofReceived = '';
 		this.proofProvided = false;
 		this.failedAccusation = {};
+		this.opponentTurn = '';
 		this.playerInfo;
 		this.actionData;
 		this.actionLock;
@@ -50,6 +51,21 @@ export class UIClient
 		this.validationInfo = {
 			'move': [],
 			'proof': {}
+		};
+	}
+	disabledActionState()
+	{
+		this.actionLock = {
+			'suggestion':0, 	// doing suggestion
+			'accusation':0, 	// doing accusation
+			'proof_select':0, 	// selecting proof
+			'proof_pending':0	// waiting to receive proof
+		};
+		this.actionValid = {
+			'Suggestion': 0,	// can start a suggestion
+			'Accusation':0,		// can perform accusation
+			'Pass':0,			// can pass turn
+			'End Turn': 0		// can end turn
 		};
 	}
 	updateGameState(state)
@@ -93,6 +109,7 @@ export class UIClient
 		if(data['accusingPlayer']['playerId'] == this.playerInfo.playerId)
 		{
 			this.playerInfo.canPlay = false;
+			this.disabledActionState();
 		}
 		let info = {
 			'solution': this.validationInfo['accusation'],
@@ -134,6 +151,7 @@ export class UIClient
 		this.proofProvided = false;
 		if ( playerInfo.playerId == this.playerInfo.playerId )
 		{
+			this.opponentTurn = '';
 			this.disableEndTurn();
 		}
 		else if(this.validationInfo['accusation'] != undefined)
@@ -157,6 +175,7 @@ export class UIClient
 			}
 			else
 			{
+				this.opponentTurn = playerInfo.name;
 				this.promptPlayer('INFO_OPPONENT_TURN',playerInfo.name);
 			}
 		}
@@ -328,7 +347,15 @@ export class UIClient
 	}
 	selectButton(button)
 	{
-		if(button == 'PASS')
+		if((this.opponentTurn != '') && (this.actionLock['proof_select'] != 1))
+		{
+			let info = {
+				'selection': button,
+				'opponent': this.opponentTurn
+			}
+			this.promptPlayer('ERROR_WAITING_ON_OPPONENT', info);
+		}
+		else if(button == 'PASS')
 		{
 			// if player can pass
 			if ((this.actionValid['Pass'] == 1) && (this.actionLock['proof_select'] == 1))
@@ -339,9 +366,17 @@ export class UIClient
 				this.endProofRequest();
 				//this.promptPlayer('INFO_PASSED');
 			}
+			else if((this.actionValid['Pass'] == 0) && (this.actionLock['proof_select'] == 1))
+			{
+				this.promptPlayer('ERROR_PASS_BLOCKED_PROVIDE_PROOF', this.validationInfo['proof']);
+			}
+			else if((this.playerInfo.canPlay != true))
+			{
+				this.promptPlayer('ERROR_PLAYER_DISABLED');
+			}
 			else
 			{
-				this.promptPlayer('ERROR_PASS_BLOCKED');
+				this.promptPlayer('ERROR_PASS_BLOCKED', this.actionValid);
 			}
 		}
 		else if(this.playerInfo.canPlay == false)
