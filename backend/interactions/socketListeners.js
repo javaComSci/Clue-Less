@@ -58,7 +58,7 @@ export function initializeListeners()
         });
 
         socket.on('turncomplete', ({ gameId, playerId }) => {
-            games[gameId].proessTurnCompletion(playerId);
+            games[gameId].processTurnCompletion(playerId);
         });
     });
 }

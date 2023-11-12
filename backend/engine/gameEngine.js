@@ -167,10 +167,10 @@ export class GameEngine {
 		emitRequestPlayerTurnCompleteConfirmation(this.gameId, this.getCurrentPlayer());
 	}
 
-	proessTurnCompletion(playerId)
+	processTurnCompletion(playerId)
 	{
-		// A turn can said to be completed after move, before providing suggestion, after proof processed, or after accusation processed.
-		if ((this.gameState == GameState.PROCESSED_MOVE || this.gameState == GameState.REQUESTED_SUGGESTION || this.gameState == GameState.PROCESSED_PROOF || this.gameState == GameState.PROCESSED_ACCUSATION) 
+		// A turn can said to be completed after move, after proof processed, or after accusation processed.
+		if ((this.gameState == GameState.PROCESSED_MOVE || this.gameState == GameState.PROCESSED_PROOF || this.gameState == GameState.PROCESSED_ACCUSATION) 
 			&& this.getCurrentPlayer().playerId == playerId) {
 			
 			for (let i = 1; i < this.getPlayerCount(); i++)
