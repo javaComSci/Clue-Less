@@ -37,12 +37,14 @@ export class GameAlerts {
 			'ERROR_ACCUSATION_RUNNING'			: this.errorAccusationRunning.bind(this),
 			'ERROR_ACCUSATION_BLOCKED'			: this.errorAccusationBlocked.bind(this),
 			'ERROR_PASS_BLOCKED'				: this.errorPassBlocked.bind(this),
+			'ERROR_PASS_BLOCKED_PROVIDE_PROOF'	: this.errorPassBlockedProvideProof.bind(this),
 			'ERROR_ACTION_BLOCKED'				: this.errorActionBlocked.bind(this),
 			'ERROR_PROOF_INVALID'				: this.errorProofInvalid.bind(this),
 			'ERROR_NOT_ENOUGH_PLAYERS'			: this.errorNotEnoughPlayers.bind(this),
 			'ERROR_PLAYER_DISABLED'			    : this.errorPlayerDisabled.bind(this),
 			'ERROR_INVALID_DESTINATION'			: this.errorInvalidDestination.bind(this),
 			'ERROR_CANNOT_MOVE'					: this.errorCannotMove.bind(this),
+			'ERROR_WAITING_ON_OPPONENT'			: this.errorWaitingOnOpponent.bind(this),
 
 		}
 	}
@@ -216,9 +218,14 @@ export class GameAlerts {
 	{
 		return {'alerts':[{'name':'errorAccusationBlocked','content':'Cannot make accusation right now!'}]};
 	}
-	errorPassBlocked()
+	errorPassBlocked(validation)
 	{
-		return {'alerts':[{'name':'errorPassBlocked','content':'You can pass when prompted for proof and have no relevant cards.'}]};
+		let actionList = this.getValidActions(validation);
+		return {'alerts':[{'name':'errorPassBlocked','content':'You can pass when prompted for proof and have no relevant cards. Valid Actions: ' + actionList.join(', ')}]};
+	}
+	errorPassBlockedProvideProof({suggestedLocation,suggestedCharacterName,suggestedWeaponName})
+	{
+		return {'alerts':[{'name':'promptPass','content':'Cannot pass! Please select one of these cards: ' + suggestedCharacterName + ', ' + suggestedWeaponName + ', ' + suggestedLocation + '.'}]};
 	}
 	errorActionBlocked(info)
 	{
@@ -246,6 +253,10 @@ export class GameAlerts {
 	{
 		let content = validation.join(', ');
 		return {'alerts':[{'name':'errorInvalidDestination','content':'Cannot move to ' + selection +'. Valid Moves: ' + content }]};
+	}
+	errorWaitingOnOpponent({selection,opponent})
+	{
+		return {'alerts':[{'name':'errorInvalidDestination','content':'Cannot perform ' + selection +'. Waiting on ' + opponent + '...' }]};
 	}
 }
 
