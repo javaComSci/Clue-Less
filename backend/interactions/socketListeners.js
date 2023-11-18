@@ -5,6 +5,23 @@ import { getPerUserRoomId, getGameSocketId, emitPlayers, emitNavigateToGameBoard
 // Keep the games object as global to map the gameId to game instance.
 let games = {};
 
+function isPlayerExisting(playerId)
+{
+    for (const game in games)
+    {
+        console.log(games[game].players);
+
+        for (const player in games[game].players)
+        {
+            if (games[game].players[player].playerId == playerId)
+            {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 export function initializeListeners()
 {
     getIOInstance().on('connection', (socket) => {
@@ -16,14 +33,18 @@ export function initializeListeners()
             // Callback will be called to notifying whether the player could be added to the game or not.
             if(!(gameId in games))
             {
-                callback(false);
+                callback("No game");
+            }
+            else if (isPlayerExisting(playerId))
+            {
+                callback("Existing player");
             }
             else
             {
                 socket.join(getGameSocketId(gameId));
                 socket.join(getPerUserRoomId(gameId, playerId));
                 games[gameId].addPlayer(playerId);
-                callback(true);
+                callback("Joined");
                 emitPlayers(gameId, games[gameId].players);
             }
         });
@@ -34,7 +55,11 @@ export function initializeListeners()
             // Callback will be called to notifying whether the game was successfully created or not.
             if((gameId in games))
             {
-                callback(false);
+                callback("Existing game");
+            }
+            else if (isPlayerExisting(playerId))
+            {
+                callback("Existing player");
             }
             else
             {
@@ -42,7 +67,7 @@ export function initializeListeners()
                 socket.join(getPerUserRoomId(gameId, playerId));
                 games[gameId] = new GameEngine(gameId);
                 games[gameId].addPlayer(playerId);
-                callback(true);
+                callback("Created");
                 emitPlayers(gameId, games[gameId].players);
             }
         });
@@ -51,7 +76,7 @@ export function initializeListeners()
             console.log(`Getting the game start request for game ${gameId}, player: ${playerId}.`);
 
             if (games[gameId].players.length >= 3) {
-                emitNavigateToGameBoard();
+                emitNavigateToGameBoard(gameId);
                 games[gameId].startGame();
                 callback(true);
             }

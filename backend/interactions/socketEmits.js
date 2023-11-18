@@ -32,7 +32,7 @@ export function emitPlayers(gameId, players)
 
 export function emitNavigateToGameBoard(gameId)
 {
-    getIOInstance().to(getGameSocketId(gameId)).emit('SHOW_GAME_BOARD');
+    getIOInstance().to(getGameSocketId(gameId)).emit('SHOW_GAME_BOARD', {});
 }
 
 export function emitPlayerStartInfo(gameId, player)

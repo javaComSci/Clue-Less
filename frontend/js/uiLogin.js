@@ -1,15 +1,14 @@
 /*
- * Interface ( facade ) between the user and the UI for login.
+ * Updates the UI for login.
  */
 
-import { GameBoardClient } from '/js/gameBoardClient.js';
-
-export class LoginClient
+export class UILogin
 {
-	constructor(msgEngine, playerId)
+	constructor(msgEngine)
 	{
-        this.msgEngine = msgEngine;
-        this.playerId = playerId;
+		this.msgEngine = msgEngine;
+		this.proposedPlayerId = "";
+        this.playerId = undefined;
 
         this.appHeight = 1600;
         this.appWidth = 1600;
@@ -28,7 +27,7 @@ export class LoginClient
         this.app = new PIXI.Application({ height: this.appHeight, width: this.appWidth});
 		document.body.appendChild(this.app.view);
 
-        this.createGameChooseButtons();
+        this.createGameDisplay();
 	}
 
     clearStage()
@@ -43,7 +42,7 @@ export class LoginClient
         const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
         const charactersLength = characters.length;
         let counter = 0;
-        while (counter < 5) {
+        while (counter < 2) {
           result += characters.charAt(Math.floor(Math.random() * charactersLength));
           counter += 1;
         }
@@ -54,13 +53,17 @@ export class LoginClient
     {
         this.isGameStarter = true;
         this.proposedGameId = this.generateGameId();
-        this.msgEngine.sendWithCallback('createNewGame', { 'playerId': this.playerId, 'gameId': this.proposedGameId }, (response) => {
-            if (response) {
+        this.msgEngine.sendWithCallback('createNewGame', { 'playerId': this.proposedPlayerId, 'gameId': this.proposedGameId }, (response) => {
+            if (response == "Created") {
                 this.gameId = this.proposedGameId;
+				this.playerId = this.proposedPlayerId;
             }
-            else {
-                this.renderError(this.getXPlacement(3), this.getYPlacement(14), "Game could not created", 20);
+            else if (response == "Existing game") {
+                this.renderError(this.getXPlacement(3), this.getYPlacement(10), "Game could not created", 30);
             }
+			else if (response == "Existing player") {
+				this.renderError(this.getXPlacement(3), this.getYPlacement(10), "Player name already exists, please enter different name", 30);
+			}
         });
     }
 
@@ -72,14 +75,17 @@ export class LoginClient
 
     onClickJoinGameWithID(e)
     {
-        let gameId = this.proposedGameId;
-        this.msgEngine.sendWithCallback('joinExistingGame', { 'playerId': this.playerId, 'gameId': gameId }, (response) => {
-            if (response) {
-                this.gameId = gameId;
+        this.msgEngine.sendWithCallback('joinExistingGame', { 'playerId': this.proposedPlayerId, 'gameId': this.proposedGameId }, (response) => {
+            if (response == "Joined") {
+                this.gameId = this.proposedGameId;
+				this.playerId = this.proposedPlayerId;
             }
-            else {
-                this.renderError(this.getXPlacement(3), this.getYPlacement(14), "Game could not be found. Please enter valid game ID.", 20);
+            else if (response == "No game") {
+                this.renderError(this.getXPlacement(3), this.getYPlacement(10), "Game could not be found. Please enter valid game ID.", 30);
             }
+			else if (response == "Existing player") {
+				this.renderError(this.getXPlacement(3), this.getYPlacement(10), "Player name already exists, please enter different name", 30);
+			}
         });
     }
 
@@ -95,9 +101,13 @@ export class LoginClient
         });
     }
 
-    createGameChooseButtons()
+    createGameDisplay()
     {
         const graphics = new PIXI.Graphics();
+
+		// Allow user to add in a player name
+		let input = this.createTextInput(this.getXPlacement(3), this.getYPlacement(13), "Player Name", (e) => this.onPlayerNameInputHandler(e));
+		graphics.addChild(input);
 
         // Join new game button
         let newGameButton = this.createButton(this.getXPlacement(3), this.getYPlacement(17), "Create New Game", 30, (e) => this.onClickCreateNewGameChoice(e));
@@ -132,7 +142,15 @@ export class LoginClient
         return button;
     }
 
-    createTextInput(placeholder)
+	onGameNameInputHandler(text) {
+		this.proposedGameId = text;
+	}
+
+	onPlayerNameInputHandler(text) {
+		this.proposedPlayerId = text;
+	}
+
+    createTextInput(x, y, placeholder, typeHandler)
     {
         var input = new PIXI.TextInput({
             input: {
@@ -146,13 +164,13 @@ export class LoginClient
             }
         });
 
-        input.x = this.getXPlacement(3);
-        input.y = this.getYPlacement(16);
+        input.x = x; 
+        input.y = y;
 
         input.placeholder = placeholder;
 
         input.on('input', text => {
-            this.proposedGameId = text;
+			typeHandler(text);
         });
 
         return input;
@@ -178,7 +196,7 @@ export class LoginClient
 
         const graphics = new PIXI.Graphics();
 
-        let input = this.createTextInput("Enter GameID");
+        let input = this.createTextInput(this.getXPlacement(3), this.getYPlacement(16), "Enter GameID", (e) => this.onGameNameInputHandler(e));
         graphics.addChild(input);
 
         let joinGameButton = this.createButton(this.getXPlacement(3), this.getYPlacement(19), "Join Game", 30, (e) => this.onClickJoinGameWithID(e));
@@ -235,11 +253,6 @@ export class LoginClient
 
         this.app.stage.addChild(graphics);
 	}
-
-    displayGameBoard()
-    {
-        window.client = new GameBoardClient(this.msgEngine, this.playerId);
-    }
 
     getXPlacement(factor)
     {
