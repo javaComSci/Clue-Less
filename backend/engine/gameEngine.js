@@ -150,16 +150,11 @@ export class GameEngine {
 	}
 
 	startGame() {
-		if (this.getPlayerCount() < 3) {
-			emitGameCannotStart(this.gameId);
-		}
-		else {
-			this.setupPlayers();
-			this.emitCurrentGameState();
+		this.setupPlayers();
+		this.emitCurrentGameState();
 
-			// Everything has been setup and initialized, so start the game sequence.
-			this.requestMove();
-		}
+		// Everything has been setup and initialized, so start the game sequence.
+		this.requestMove();
 	}
 
 	requestTurnCompletion()

@@ -17,6 +17,10 @@ export class EngineSend {
 	{
 		this.socketSendMessages[action](data);
 	}
+	pushMsgWithCallback(msg, data, callback)
+	{
+		this.socket.emit(msg, data, callback);
+	}
 	/*
 	 * Private, pushes data to backend
 	 */

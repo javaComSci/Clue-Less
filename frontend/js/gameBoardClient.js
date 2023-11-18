@@ -5,13 +5,14 @@ import { EngineComm } from "/js/engineComm.js";
 import { UIManager } from "/js/uiManager.js";
 export class GameBoardClient
 {
-	constructor()
+	constructor(msgEngine, playerId)
 	{
 		this.uiManager = new UIManager();
-		this.msgEngine = new EngineComm();
+		this.msgEngine = msgEngine;
+
 		this.gameId = '1';
 		this.playerId = crypto.randomUUID();
-		this.msgEngine.send('start', {'playerId': this.playerId, 'gameId': this.gameId } );
+		
 		this.proofReceived = '';
 		this.proofProvided = false;
 		this.failedAccusation = {};

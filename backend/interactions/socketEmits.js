@@ -25,6 +25,16 @@ export function emitGameCannotStart(gameId)
     getIOInstance().to(getGameSocketId(gameId)).emit('insufficientPlayerCount');
 }
 
+export function emitPlayers(gameId, players)
+{
+    getIOInstance().to(getGameSocketId(gameId)).emit('GAME_PLAYERS', { players: players });
+}
+
+export function emitNavigateToGameBoard(gameId)
+{
+    getIOInstance().to(getGameSocketId(gameId)).emit('SHOW_GAME_BOARD');
+}
+
 export function emitPlayerStartInfo(gameId, player)
 {
     getIOInstance().to(getPerUserRoomId(gameId, player.playerId)).emit('PLAYER_START_INFO', player);
