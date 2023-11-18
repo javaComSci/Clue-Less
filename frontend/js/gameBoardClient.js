@@ -3,7 +3,7 @@
  */
 import { EngineComm } from "/js/engineComm.js";
 import { UIManager } from "/js/uiManager.js";
-export class UIClient
+export class GameBoardClient
 {
 	constructor()
 	{

@@ -38,3 +38,19 @@ ANIMATION:
 NOTES:
 - linking to external service or text box
 
+
+
+For login screen:
+- UI loads up files
+- UI asks if the user wants to create new game or join existing game
+
+If new game:
+- send message /startGame message to server for creating new game with the randomly generated game id and randomly generated player id
+- See a "START" button that can be clicked on for actually starting the game when at least 3 people have joined
+
+If existing game:
+- ask user to enter the game id
+- send the mssage for /start game message with the randomly generated player id
+
+
+Server: when anyone joins that game, send message to everyone on who is currently in the game
