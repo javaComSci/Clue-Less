@@ -162,8 +162,8 @@ export class PixiHud extends GameHud
 					fill: 0x000000
 				}
 			);
-			text.x = button.length/2 - text.width/2;
-			text.y = button.width/2 - text.height/2;
+			text.x = button.width/2 - text.width/2;
+			text.y = button.length/2 - text.height/2;
 			pixiButton.addChild(text);
 			pixiButton.position.set(button.x,button.y);
 			this.buttonContainer.addChild(pixiButton);

@@ -10,10 +10,10 @@ export class GameHud
 		/*
 		 * Define areas for the hud
 		 */
-		this.buttonAreaStartX = 0;
-		this.buttonAreaStartY = mapHeight + 50;
-		this.buttonAreaHeight = screenHeight - mapHeight;
-		this.buttonAreaWidth = mapWidth;
+		this.cardAreaStartX = 0;
+		this.cardAreaStartY = mapHeight + 50;
+		this.cardAreaHeight = screenHeight - mapHeight;
+		this.cardAreaWidth = mapWidth;
 		this.alertAreaStartX = 0;
 		this.alertAreaStartY = mapHeight;
 		this.alertAreaHeight = 50;
@@ -22,19 +22,19 @@ export class GameHud
 		this.characterNameAreaStartY = 0;
 		this.characterNameAreaHeight = screenHeight/4;
 		this.characterNameAreaWidth = screenWidth - mapWidth;
-		this.cardAreaStartX = mapWidth;
-		this.cardAreaStartY = this.characterNameAreaHeight;
-		this.cardAreaHeight = screenHeight/2;
-		this.cardAreaWidth = screenWidth - mapWidth;
+		this.buttonAreaStartX = mapWidth;
+		this.buttonAreaStartY = this.characterNameAreaHeight;
+		this.buttonAreaHeight = screenHeight/2;
+		this.buttonAreaWidth = screenWidth - mapWidth;
 		this.weaponAreaStartX = mapWidth;
 		this.weaponAreaStartY = this.alertAreaStartY + this.alertAreaHeight;
 		this.weaponAreaHeight = screenHeight/4 - this.alertAreaHeight;
 		this.weaponAreaWidth = screenWidth - mapWidth;
 
-		this.buttonMarginSFactor = .25;
-		this.buttonGapSFactor = .125;
+		this.buttonMarginSFactor = .15;
+		this.buttonGapSFactor = .05;
 
-		this.cardMarginSFactor = .10;
+		this.cardMarginSFactor = .20;
 		this.cardGapSFactor = .05;
 
 		this.weaponMarginSFactor = .14;
@@ -72,30 +72,30 @@ export class GameHud
 	}
 	createCards(state)
 	{
-		let cardWidth = this.cardAreaWidth - 2 * ( this.cardMarginSFactor * this.cardAreaWidth );
+		let cardHeight = this.cardAreaHeight - 2 * ( this.cardMarginSFactor * this.cardAreaHeight );
 		let cardGapCount = state.length - 1;
-		let cardGapTotalHeight = ( this.cardAreaHeight * this.cardGapSFactor ) * cardGapCount;
-		let cardHeight = ((this.cardAreaHeight - 2 * ( this.cardMarginSFactor * this.cardAreaHeight )) - cardGapTotalHeight )/state.length;
-		let cardStartX = (this.cardMarginSFactor * this.cardAreaWidth) + this.cardAreaStartX;
+		let cardGapTotalWidth = ( this.cardAreaWidth * this.cardGapSFactor ) * cardGapCount;
+		let cardWidth = ((this.cardAreaWidth - 2 * ( this.cardMarginSFactor/(cardGapCount) * this.cardAreaWidth )) - cardGapTotalWidth )/state.length;
+		let cardStartX = (this.cardMarginSFactor/(cardGapCount) * this.cardAreaWidth) + this.cardAreaStartX;
 		let cardStartY = (this.cardMarginSFactor * this.cardAreaHeight) + this.cardAreaStartY;
 		state.forEach((c) => {
 			let card = new Card(c['name'],c['name'],c['type'],cardStartX,cardStartY,cardHeight,cardWidth);
-			cardStartY += cardHeight + (this.cardAreaHeight * this.cardGapSFactor);
+			cardStartX += cardWidth + this.cardAreaWidth * this.cardGapSFactor;
 			this.cards.push(card);
 		});
 	}
 	createButtons(state)
 	{
 		let buttonAreaSFactorLW = this.buttonAreaHeight/this.buttonAreaWidth;
-		let buttonHeight = this.buttonAreaHeight - 2 * ( this.buttonMarginSFactor * this.buttonAreaHeight );
+		let buttonWidth = this.buttonAreaWidth - 2 * ( this.buttonMarginSFactor * this.buttonAreaWidth );
 		let buttonGapCount = state.length - 1;
-		let buttonGapTotalWidth = ( this.buttonAreaWidth * this.buttonGapSFactor);
-		let buttonWidth = ((this.buttonAreaWidth - 2 * ( this.buttonMarginSFactor/(buttonGapCount) * this.buttonAreaWidth )) - buttonGapTotalWidth )/state.length;
-		let buttonStartX = (this.buttonMarginSFactor/(buttonGapCount) * this.buttonAreaWidth) + this.buttonAreaStartX;
+		let buttonGapTotalHeight = ( this.buttonAreaHeight * this.buttonGapSFactor);
+		let buttonHeight = ((this.buttonAreaHeight - 2 * ( this.buttonMarginSFactor * this.buttonAreaHeight )) - buttonGapTotalHeight )/state.length;
+		let buttonStartX = (this.buttonMarginSFactor * this.buttonAreaWidth) + this.buttonAreaStartX;
 		let buttonStartY = (this.buttonMarginSFactor * this.buttonAreaHeight) + this.buttonAreaStartY;
 		state.forEach((b) => {
 			let button = new Button(b['name'],b['content'],buttonStartX,buttonStartY,buttonHeight,buttonWidth);
-			buttonStartX += buttonWidth + (this.buttonAreaWidth * this.buttonGapSFactor)/buttonGapCount;
+			buttonStartY += buttonHeight + (this.buttonAreaHeight * this.buttonGapSFactor);
 			this.buttons.push(button);
 		});
 	}
