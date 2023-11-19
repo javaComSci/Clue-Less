@@ -212,6 +212,84 @@ export class PixiMap extends GameMap
 		this.app = app;
 		super.createMap();
 		this.displayMap();
+		this.loadAssets();
+	}
+	async loadAssets()
+	{
+		let mapRoom = {
+			"frames": {
+				"HALL":
+				{
+					"frame": {'x':315,'y':46,'w':161,'h':169},
+					"spriteSourceSize": {'x':0,'y':0,'w':this.re,'h':this.re},
+					"sourceSize": {'w':161,'h':169},
+				},
+				'STUDY':
+				{
+					"frame": {'x':43,'y':35,'w':168,'h':107},
+					"spriteSourceSize": {'x':0,'y':0,'w':this.re,'h':this.re},
+					"sourceSize": {'w':0,'h':0}
+				},
+                'LIBRARY':
+				{
+					"frame": {'x':72,'y':202,'w':139,'h':124},
+					"spriteSourceSize": {'x':0,'y':0,'w':this.re,'h':this.re},
+					"sourceSize": {'w':0,'h':0}
+				},
+                'CONSERVATORY':
+				{
+					"frame": {'x':44,'y':594,'w':167,'h':101},
+					"spriteSourceSize": {'x':0,'y':0,'w':this.re,'h':this.re},
+					"sourceSize": {'w':0,'h':0}
+				},
+                'BILLIARDROOM':
+				{
+					"frame": {'x':42,'y':371,'w':169,'h':122},
+					"spriteSourceSize": {'x':0,'y':0,'w':this.re,'h':this.re},
+					"sourceSize": {'w':0,'h':0}
+				},
+                'BALLROOM':
+				{
+					"frame": {'x':286,'y':512,'w':218,'h':150},
+					"spriteSourceSize": {'x':0,'y':0,'w':this.re,'h':this.re},
+					"sourceSize": {'w':0,'h':0}
+				},
+                'LOUNGE':
+				{
+					"frame": {'x':582,'y':36,'w':166,'h':153},
+					"spriteSourceSize": {'x':0,'y':0,'w':this.re,'h':this.re},
+					"sourceSize": {'w':0,'h':0}
+				},
+                'DININGROOM':
+				{
+					"frame": {'x':521,'y':286,'w':228,'h':153},
+					"spriteSourceSize": {'x':0,'y':0,'w':this.re,'h':this.re},
+					"sourceSize": {'w':0,'h':0}
+				},
+                'KITCHEN':
+				{
+					"frame": {'x':580,'y':539,'w':140,'h':159},
+					"spriteSourceSize": {'x':0,'y':0,'w':this.re,'h':this.re},
+					"sourceSize": {'w':200,'h':200}
+				}
+			},
+			"meta": {
+				"image": "/assets/gamerooms.jpg",
+				"format": "RGBA8888",
+				"size": {"w":792,"h":752},
+				"scale": 161/this.re
+			}
+		};
+		const spriteSheet = new PIXI.Spritesheet(
+			PIXI.BaseTexture.from(mapRoom.meta.image),
+			mapRoom
+		);
+		await spriteSheet.parse();
+		for( var spriteRoom in mapRoom.frames )
+		{
+			let room = new PIXI.Sprite(spriteSheet.textures[spriteRoom]);
+			this.rooms[spriteRoom].element.addChild(room);
+		}
 	}
 	displayMap()
 	{
@@ -262,7 +340,7 @@ export class PixiMap extends GameMap
 			let hallwayX = hallwayObj.x;
 			let hallwayY = hallwayObj.y;
 
-			pixiHallway.beginFill(0x7DC2C9)
+			pixiHallway.beginFill(0xE8F1F2)
 			pixiHallway.drawRect(0,0,hallwayObj.length,hallwayObj.width);
 			pixiHallway.endFill();
 			pixiHallway.eventMode = 'static';
