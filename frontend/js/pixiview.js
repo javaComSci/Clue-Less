@@ -212,7 +212,6 @@ export class PixiMap extends GameMap
 		this.app = app;
 		super.createMap();
 		this.displayMap();
-		this.loadAssets();
 	}
 	async loadAssets()
 	{
@@ -285,16 +284,22 @@ export class PixiMap extends GameMap
 			mapRoom
 		);
 		await spriteSheet.parse();
-		for( var spriteRoom in mapRoom.frames )
+		for( var room in mapRoom.frames )
 		{
-			let room = new PIXI.Sprite(spriteSheet.textures[spriteRoom]);
-			this.rooms[spriteRoom].element.addChild(room);
+			let roomSprite = new PIXI.Sprite(spriteSheet.textures[room]);
+			let roomArea = this.rooms[room];
+			let roomStartX = roomArea.width/2 - mapRoom.frames[room].frame.w/2;
+			let roomStartY = roomArea.length/2 - mapRoom.frames[room].frame.h/2;
+			roomSprite.x = roomStartX;
+			roomSprite.y = roomStartY;
+			roomArea.element.addChild(roomSprite);
 		}
 	}
 	displayMap()
 	{
-		this.displayRooms();
 		this.displayHallways();
+		this.displayRooms();
+		this.loadAssets();
 		this.displayPassageways();
 	}
 	displayRooms() {
@@ -317,6 +322,7 @@ export class PixiMap extends GameMap
 			pixiRoom.on('pointerup', (event) => { window.client.selectRoom(roomObj.name); } );
 			pixiRoom.position.set(roomX,roomY);
 			this.rooms[room].element = pixiRoom;
+
 
 			const roomName = new PIXI.Text(room, { fontSize: 24, fill: 0xFBF8FB });
 			roomName.x = 0;
