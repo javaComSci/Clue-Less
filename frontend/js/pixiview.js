@@ -13,8 +13,111 @@ export class PixiHud extends GameHud
 		this.app = app;
 		this.displayHud();
 	}
+	async loadAssets()
+	{
+		let cards = {
+			"frames": {
+				"CARD_WHITE":
+				{
+					"frame": {'x':20,'y':17,'w':84,'h':146}
+				},
+				"CARD_PEACOCK":
+				{
+					"frame": {'x':120,'y':17,'w':84,'h':146}
+				},
+				"CARD_SCARLET":
+				{
+					"frame": {'x':220,'y':17,'w':84,'h':146}
+				},
+				"CARD_MUSTARD":
+				{
+					"frame": {'x':320,'y':17,'w':84,'h':146}
+				},
+				"CARD_GREEN":
+				{
+					"frame": {'x':420,'y':17,'w':84,'h':146}
+				},
+				"CARD_PLUM":
+				{
+					"frame": {'x':520,'y':17,'w':84,'h':146}
+				},
+				"CARD_CANDLESTICK":
+				{
+					"frame": {'x':20,'y':169,'w':84,'h':146}
+				},
+				"CARD_REVOLVER":
+				{
+					"frame": {'x':120,'y':169,'w':84,'h':146}
+				},
+				"CARD_ROPE":
+				{
+					"frame": {'x':220,'y':169,'w':84,'h':146}
+				},
+				"CARD_WRENCH":
+				{
+					"frame": {'x':320,'y':169,'w':84,'h':146}
+				},
+				"CARD_PIPE":
+				{
+					"frame": {'x':420,'y':169,'w':84,'h':146}
+				},
+				"CARD_KNIFE":
+				{
+					"frame": {'x':520,'y':169,'w':84,'h':146}
+				},
+				"CARD_STUDY":
+				{
+					"frame": {'x':20,'y':321,'w':84,'h':146}
+				},
+				"CARD_LIBRARY":
+				{
+					"frame": {'x':120,'y':321,'w':84,'h':146}
+				},
+				"CARD_CONSERVATORY":
+				{
+					"frame": {'x':220,'y':321,'w':84,'h':146}
+				},
+				"CARD_HALL":
+				{
+					"frame": {'x':320,'y':321,'w':84,'h':146}
+				},
+				"CARD_KITCHEN":
+				{
+					"frame": {'x':420,'y':321,'w':84,'h':146}
+				},
+				"CARD_BALLROOM":
+				{
+					"frame": {'x':20,'y':473,'w':84,'h':146}
+				},
+				"CARD_LOUNGE":
+				{
+					"frame": {'x':120,'y':473,'w':84,'h':146}
+				},
+				"CARD_BILLIARDROOM":
+				{
+					"frame": {'x':220,'y':473,'w':84,'h':146}
+				},
+				"CARD_DININGROOM":
+				{
+					"frame": {'x':320,'y':473,'w':84,'h':146}
+				},
+			},
+			"meta": {
+				"image": "/assets/gamepieces.jpg",
+				"format": "RGBA8888",
+				"size": {"w":640,"h":620},
+				"scale": 1
+			}
+		};
+		this.spriteSheet = new PIXI.Spritesheet(
+			PIXI.BaseTexture.from(cards.meta.image),
+			cards
+		);
+		await this.spriteSheet.parse();
+	}
 	displayHud()
 	{
+		this.loadAssets();
 		this.displayCards();
 		this.displayButtons();
 		this.displayAlerts();
@@ -109,22 +212,13 @@ export class PixiHud extends GameHud
 		hudAreaText.y = this.cardAreaStartY;
 		this.cardContainer.addChild(hudAreaText);
 		this.cards.forEach((card) => {
+			let cardSprite = new PIXI.Sprite(this.spriteSheet.textures['CARD_' + card.name]);
 			let pixiCard = new PIXI.Graphics();
 			pixiCard.eventMode = 'static';
 			pixiCard.on('pointerup', (event) => { window.client.selectCard(card.name, card.type); } );
-			pixiCard.beginFill(0xFBF8FB);
 			pixiCard.drawRect(0,0,card.width,card.length);
-			pixiCard.endFill();
-			let text = new PIXI.Text(
-				'Type:' + card.type + '\n' + 'Name:' + card.name, {
-					fontSize: 25,
-					fill: 0x000000
-				}
-			);
-			text.x = 0;
-			text.y = 0;
-			pixiCard.addChild(text);
 			pixiCard.position.set(card.x,card.y);
+			pixiCard.addChild(cardSprite);
 			this.cardContainer.addChild(pixiCard);
 		});
 		this.app.stage.addChild(this.cardContainer);
