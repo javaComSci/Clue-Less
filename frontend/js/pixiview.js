@@ -172,21 +172,12 @@ export class PixiHud extends GameHud
 		this.weaponContainer.addChild(hudAreaText);
 		this.weapons.forEach((weapon) => {
 			let pixiWeapon = new PIXI.Graphics();
+			let weaponSprite = new PIXI.Sprite(this.spriteSheet.textures['CARD_' + weapon.name]);
 			pixiWeapon.eventMode = 'static';
 			pixiWeapon.on('pointerup', (event) => { window.client.selectWeapon(weapon.name); } );
-			pixiWeapon.beginFill(0xFBF8FB);
 			pixiWeapon.drawRect(0,0,weapon.width,weapon.length);
-			pixiWeapon.endFill();
-			let text = new PIXI.Text(
-				weapon.name, {
-					fontSize: 30,
-					fill: 0x000000
-				}
-			);
-			text.x = 0;
-			text.y = 0;
-			pixiWeapon.addChild(text);
 			pixiWeapon.position.set(weapon.x,weapon.y);
+			pixiWeapon.addChild(weaponSprite);
 			this.weaponContainer.addChild(pixiWeapon);
 		});
 		this.app.stage.addChild(this.weaponContainer);

@@ -38,7 +38,7 @@ export class GameHud
 		this.cardGapSFactor = .05;
 
 		this.weaponMarginSFactor = .14;
-		this.weaponGapSFactor = .02;
+		this.weaponGapSFactor = .40;
 
 		this.alertMarginSFactor = .01;
 
@@ -63,11 +63,21 @@ export class GameHud
 		let weaponHeight = ((this.weaponAreaHeight - 2 * ( this.weaponMarginSFactor * this.weaponAreaHeight )) - weaponGapTotalHeight )/(weaponGapCount + 1);
 		let weaponStartX = (this.weaponMarginSFactor * this.weaponAreaWidth) + this.weaponAreaStartX;
 		let weaponStartY = (this.weaponMarginSFactor * this.weaponAreaHeight) + this.weaponAreaStartY;
+		let weaponCount = 1;
 		for(var weapon in WeaponConstants)
 		{
 			let weaponNew = new Weapon(weapon,weaponStartX,weaponStartY,weaponHeight,weaponWidth);
-			weaponStartY += weaponHeight + (this.weaponAreaHeight * this.weaponGapSFactor);
 			this.weapons.push(weaponNew);
+			if( weaponCount % 3 == 0 )
+			{
+				weaponStartY += weaponHeight + (this.weaponAreaHeight * this.weaponGapSFactor);
+				weaponStartX = (this.weaponMarginSFactor * this.weaponAreaWidth) + this.weaponAreaStartX;
+			}
+			else
+			{
+				weaponStartX += (this.weaponGapSFactor * weaponWidth);
+			}
+			weaponCount += 1;
 		}
 	}
 	createCards(state)
