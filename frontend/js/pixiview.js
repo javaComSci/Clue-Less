@@ -373,8 +373,10 @@ export class PixiMap extends GameMap
 		{
 			let roomSprite = new PIXI.Sprite(spriteSheet.textures[room]);
 			let roomArea = this.rooms[room];
-			let roomStartX = roomArea.width/2 - mapRoom.frames[room].frame.w/2;
-			let roomStartY = roomArea.length/2 - mapRoom.frames[room].frame.h/2;
+			let spriteCenterX = ( ( mapRoom.frames[room].frame.w/2 ) / mapRoom.meta.scale );
+			let spriteCenterY = ( ( mapRoom.frames[room].frame.h/2 ) / mapRoom.meta.scale );
+			let roomStartX = roomArea.width/2 - spriteCenterX;
+			let roomStartY = roomArea.length/2 - spriteCenterY;
 			roomSprite.x = roomStartX;
 			roomSprite.y = roomStartY;
 			roomArea.element.addChild(roomSprite);
