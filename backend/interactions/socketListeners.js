@@ -33,11 +33,15 @@ export function initializeListeners()
             // Callback will be called to notifying whether the player could be added to the game or not.
             if(!(gameId in games))
             {
-                callback("No game");
+                callback("NoGame");
+            }
+            else if (playerId.trim() == "")
+            {
+                callback("EmptyPlayerName");
             }
             else if (isPlayerExisting(playerId))
             {
-                callback("Existing player");
+                callback("ExistingPlayer");
             }
             else
             {
@@ -55,11 +59,15 @@ export function initializeListeners()
             // Callback will be called to notifying whether the game was successfully created or not.
             if((gameId in games))
             {
-                callback("Existing game");
+                callback("ExistingGame");
+            }
+            else if (playerId.trim() == "")
+            {
+                callback("EmptyPlayerName");
             }
             else if (isPlayerExisting(playerId))
             {
-                callback("Existing player");
+                callback("ExistingPlayer");
             }
             else
             {

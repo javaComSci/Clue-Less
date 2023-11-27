@@ -27,14 +27,28 @@ export class UILogin
         this.app = new PIXI.Application({ height: this.appHeight, width: this.appWidth});
 		document.body.appendChild(this.app.view);
 
-        this.createGameDisplay();
+        this.fontFamily = "\"Lucida Console\", Monaco, monospace";
+
+        PIXI.Assets.load('https://pixijs.com/assets/flowerTop.png').then((data) => {
+            this.sheet = data;
+            this.createGameDisplay()
+        });
 	}
 
-    clearStage()
+    setupStage()
     {
         while(this.app.stage.children[0]){
             this.app.stage.removeChild(this.app.stage.children[0]);
         }
+
+        
+        
+        const background = new PIXI.Sprite(this.sheet);
+        background.width = this.app.screen.width;
+        background.height = this.app.screen.height;
+        this.app.stage.addChild(background);
+
+        this.addTitle();
     }
 
     generateGameId() {
@@ -58,11 +72,14 @@ export class UILogin
                 this.gameId = this.proposedGameId;
 				this.playerId = this.proposedPlayerId;
             }
-            else if (response == "Existing game") {
-                this.renderError(this.getXPlacement(3), this.getYPlacement(10), "Game could not created", 30);
+            else if (response == "EmptyPlayerName") {
+                this.renderError(this.getXPlacement(3), this.getYPlacement(10), "Game not created. Enter non-empty player name.", 30);
             }
-			else if (response == "Existing player") {
-				this.renderError(this.getXPlacement(3), this.getYPlacement(10), "Player name already exists, please enter different name", 30);
+            else if (response == "ExistingGame") {
+                this.renderError(this.getXPlacement(3), this.getYPlacement(10), "Game not created as game already exists.", 30);
+            }
+			else if (response == "ExistingPlayer") {
+				this.renderError(this.getXPlacement(3), this.getYPlacement(10), "Game not created. Enter different player name.", 30);
 			}
         });
     }
@@ -80,10 +97,13 @@ export class UILogin
                 this.gameId = this.proposedGameId;
 				this.playerId = this.proposedPlayerId;
             }
-            else if (response == "No game") {
+            else if (response == "EmptyPlayerName") {
+                this.renderError(this.getXPlacement(3), this.getYPlacement(10), "Game not created. Enter non-empty player name.", 30);
+            }
+            else if (response == "NoGame") {
                 this.renderError(this.getXPlacement(3), this.getYPlacement(10), "Game could not be found. Please enter valid game ID.", 30);
             }
-			else if (response == "Existing player") {
+			else if (response == "ExistingPlayer") {
 				this.renderError(this.getXPlacement(3), this.getYPlacement(10), "Player name already exists, please enter different name", 30);
 			}
         });
@@ -101,8 +121,23 @@ export class UILogin
         });
     }
 
+    addTitle()
+    {
+		let text = new PIXI.Text(
+            "Clue-Less", {
+            fontSize: 100,
+            fill: 0xDE3249,
+            fontFamily: this.fontFamily
+        });
+        text.x = this.getXPlacement(3) + this.buttonWidth/2 - text.width/2;
+        text.y = this.getYPlacement(7) + this.buttonHeight/2 - text.height/2;
+
+        this.app.stage.addChild(text);
+    }
+
     createGameDisplay()
     {
+        this.setupStage();
         const graphics = new PIXI.Graphics();
 
 		// Allow user to add in a player name
@@ -132,7 +167,8 @@ export class UILogin
         let text = new PIXI.Text(
             buttonText, {
             fontSize: fontSize,
-            fill: 0xffffff
+            fill: 0xffffff,
+            fontFamily: this.fontFamily
         }
         );
         text.x = x + this.buttonWidth/2 - text.width/2;
@@ -156,7 +192,8 @@ export class UILogin
             input: {
                 fontSize: '35px',
                 width: this.buttonWidth,
-                height: this.buttonHeight
+                height: this.buttonHeight,
+                fontFamily: this.fontFamily
             }, 
             box: {
                 fill: 0xEEEEEE,
@@ -181,7 +218,8 @@ export class UILogin
         let text = new PIXI.Text(
             textValue, {
             fontSize: fontSize,
-            fill: 0xDE3249
+            fill: 0xDE3249,
+            fontFamily: this.fontFamily
         }
         );
         text.x = x + this.buttonWidth/2 - text.width/2;
@@ -192,7 +230,7 @@ export class UILogin
 
     renderJoinGameWithGameID()
     {
-        this.clearStage();
+        this.setupStage();
 
         const graphics = new PIXI.Graphics();
 
@@ -208,14 +246,15 @@ export class UILogin
 
     renderWaiting(waitingText)
     {
-        this.clearStage();
+        this.setupStage();
         
         const graphics = new PIXI.Graphics();
 
         let text = new PIXI.Text(
             waitingText, {
             fontSize: 30,
-            fill: 0xFFFFFF
+            fill: 0xFFFFFF,
+            fontFamily: this.fontFamily
         }
         );
         text.x = this.getXPlacement(3) + this.buttonWidth/2 - text.width/2;
@@ -227,7 +266,7 @@ export class UILogin
 
     displayWaitRoom(obj)
 	{
-        this.clearStage();
+        this.setupStage();
 
         let players = obj.players;
         const graphics = new PIXI.Graphics();
@@ -236,7 +275,8 @@ export class UILogin
         let gameIdText = new PIXI.Text(
             "Game ID: "  + this.gameId, {
             fontSize: 40,
-            fill: 0xFFFFFF
+            fill: 0xFFFFFF,
+            fontFamily: this.fontFamily
         });
         gameIdText.x = this.getXPlacement(3) + this.buttonWidth/2 - gameIdText.width/2;
         gameIdText.y = this.getYPlacement(13) + this.buttonHeight/2 - gameIdText.height/2;
