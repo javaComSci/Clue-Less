@@ -29,26 +29,49 @@ export class UILogin
 
         this.fontFamily = "\"Lucida Console\", Monaco, monospace";
 
-        PIXI.Assets.load('https://pixijs.com/assets/flowerTop.png').then((data) => {
+        PIXI.Assets.load('../assets/background.png').then((data) => {
             this.sheet = data;
-            this.createGameDisplay()
-        });
+            this.hand = PIXI.Sprite.from('../assets/hand.png');
+            this.createGameDisplay();
+        }); 
 	}
 
     setupStage()
     {
+        // Clear stage
         while(this.app.stage.children[0]){
             this.app.stage.removeChild(this.app.stage.children[0]);
         }
 
-        
-        
+        // Add background
         const background = new PIXI.Sprite(this.sheet);
         background.width = this.app.screen.width;
         background.height = this.app.screen.height;
         this.app.stage.addChild(background);
 
-        this.addTitle();
+        // Add prints
+        // this.hand.anchor.set(0.5);
+        // this.app.stage.addChild(this.hand);
+        // this.hand.x = 100;
+        // this.hand.y = 100;
+        // let xyLocations = [[45, 80], [1000, 500], [800, 90], [40, 1200], [300, 800]];
+        // let index = 0;
+        // let seconds = 0;
+        // this.app.ticker.add((delta) =>
+        // {
+        //     seconds += (1 / 60) * delta;
+        //     if(seconds >= 3)
+        //     {
+        //         let location = xyLocations[index];
+        //         index = (index + 1) % xyLocations.length;
+        //         this.hand.x = location[0];
+        //         this.hand.y = location[1];
+        //         this.hand.rotation += delta;
+        //         seconds = 0
+        //     }
+        // });
+
+        this.renderTitle();
     }
 
     generateGameId() {
@@ -86,8 +109,17 @@ export class UILogin
 
     onClickJoinExistingGameChoice(e)
     {
-        this.isGameStarter = false;
-        this.renderJoinGameWithGameID();
+        console.log("HERE")
+        console.log(this.proposedPlayerId.trim());
+        if (this.proposedPlayerId.trim() == "")
+        {
+            this.renderError(this.getXPlacement(3), this.getYPlacement(10), "Enter non-empty player name.", 30);
+        }
+        else
+        {
+            this.isGameStarter = false;
+            this.renderJoinGameWithGameID();
+        }
     }
 
     onClickJoinGameWithID(e)
@@ -121,13 +153,14 @@ export class UILogin
         });
     }
 
-    addTitle()
+    renderTitle()
     {
 		let text = new PIXI.Text(
             "Clue-Less", {
             fontSize: 100,
-            fill: 0xDE3249,
-            fontFamily: this.fontFamily
+            fill: 0x5C4033,
+            fontFamily: this.fontFamily,
+            fontWeight: 'bolder'
         });
         text.x = this.getXPlacement(3) + this.buttonWidth/2 - text.width/2;
         text.y = this.getYPlacement(7) + this.buttonHeight/2 - text.height/2;
@@ -160,7 +193,7 @@ export class UILogin
         let button = new PIXI.Graphics();
         button.eventMode = 'static';
         button.on('pointerup', (event) => { clickHandler(event) } );
-        button.beginFill(0xDE3249);
+        button.beginFill(0x6F4E37);
         button.drawRect(x, y, this.buttonWidth, this.buttonHeight);
         button.endFill();
         
@@ -253,7 +286,7 @@ export class UILogin
         let text = new PIXI.Text(
             waitingText, {
             fontSize: 30,
-            fill: 0xFFFFFF,
+            fill: 0x6F4E37,
             fontFamily: this.fontFamily
         }
         );
@@ -275,7 +308,7 @@ export class UILogin
         let gameIdText = new PIXI.Text(
             "Game ID: "  + this.gameId, {
             fontSize: 40,
-            fill: 0xFFFFFF,
+            fill: 0x6F4E37,
             fontFamily: this.fontFamily
         });
         gameIdText.x = this.getXPlacement(3) + this.buttonWidth/2 - gameIdText.width/2;
