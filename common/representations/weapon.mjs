@@ -12,7 +12,7 @@ export const WeaponConstants = {
 
 export const CardWeapons = [
     WeaponConstants.CANDLESTICK,
-    WeaponConstants.DRAGGER,
+    WeaponConstants.KNIFE,
     WeaponConstants.PIPE,
     WeaponConstants.REVOLVER,
     WeaponConstants.ROPE,
