@@ -37,8 +37,8 @@ export class GameHud
 		this.cardMarginSFactor = .20;
 		this.cardGapSFactor = .05;
 
-		this.weaponMarginSFactor = .14;
-		this.weaponGapSFactor = .02;
+		this.weaponMarginSFactor = .15;
+		this.weaponGapSFactor = .03;
 
 		this.alertMarginSFactor = .01;
 
@@ -57,17 +57,30 @@ export class GameHud
 	}
 	createWeapons()
 	{
-		let weaponWidth = this.weaponAreaWidth - 2 * ( this.weaponMarginSFactor * this.weaponAreaWidth );
+		let rows = 2;
+		let columns = 3;
 		let weaponGapCount = Object.keys(WeaponConstants).length - 1;
-		let weaponGapTotalHeight = ( this.weaponAreaHeight * this.weaponGapSFactor ) * weaponGapCount;
-		let weaponHeight = ((this.weaponAreaHeight - 2 * ( this.weaponMarginSFactor * this.weaponAreaHeight )) - weaponGapTotalHeight )/(weaponGapCount + 1);
+		let weaponGapTotalWidth = ( this.weaponAreaHeight * this.weaponGapSFactor ) * rows;
+		let weaponWidth = (this.weaponAreaWidth - 2 * ( this.weaponMarginSFactor * this.weaponAreaWidth ) - weaponGapTotalWidth)/columns;
+		let weaponGapTotalHeight = ( this.weaponAreaHeight * this.weaponGapSFactor );
+		let weaponHeight = ((this.weaponAreaHeight - 2 * ( this.weaponMarginSFactor * this.weaponAreaHeight )) - weaponGapTotalHeight )/rows;
 		let weaponStartX = (this.weaponMarginSFactor * this.weaponAreaWidth) + this.weaponAreaStartX;
 		let weaponStartY = (this.weaponMarginSFactor * this.weaponAreaHeight) + this.weaponAreaStartY;
+		let weaponCount = 1;
 		for(var weapon in WeaponConstants)
 		{
 			let weaponNew = new Weapon(weapon,weaponStartX,weaponStartY,weaponHeight,weaponWidth);
-			weaponStartY += weaponHeight + (this.weaponAreaHeight * this.weaponGapSFactor);
 			this.weapons.push(weaponNew);
+			if( weaponCount % columns == 0 )
+			{
+				weaponStartY += weaponHeight + (this.weaponAreaHeight * this.weaponGapSFactor);
+				weaponStartX = (this.weaponMarginSFactor * this.weaponAreaWidth) + this.weaponAreaStartX;
+			}
+			else
+			{
+				weaponStartX += weaponWidth + weaponGapTotalWidth/rows;
+			}
+			weaponCount += 1;
 		}
 	}
 	createCards(state)

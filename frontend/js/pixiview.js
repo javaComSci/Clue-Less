@@ -13,8 +13,111 @@ export class PixiHud extends GameHud
 		this.app = app;
 		this.displayHud();
 	}
+	async loadAssets()
+	{
+		let cards = {
+			"frames": {
+				"CARD_WHITE":
+				{
+					"frame": {'x':20,'y':17,'w':84,'h':146}
+				},
+				"CARD_PEACOCK":
+				{
+					"frame": {'x':120,'y':17,'w':84,'h':146}
+				},
+				"CARD_SCARLET":
+				{
+					"frame": {'x':220,'y':17,'w':84,'h':146}
+				},
+				"CARD_MUSTARD":
+				{
+					"frame": {'x':320,'y':17,'w':84,'h':146}
+				},
+				"CARD_GREEN":
+				{
+					"frame": {'x':420,'y':17,'w':84,'h':146}
+				},
+				"CARD_PLUM":
+				{
+					"frame": {'x':520,'y':17,'w':84,'h':146}
+				},
+				"CARD_CANDLESTICK":
+				{
+					"frame": {'x':20,'y':169,'w':84,'h':146}
+				},
+				"CARD_REVOLVER":
+				{
+					"frame": {'x':120,'y':169,'w':84,'h':146}
+				},
+				"CARD_ROPE":
+				{
+					"frame": {'x':220,'y':169,'w':84,'h':146}
+				},
+				"CARD_WRENCH":
+				{
+					"frame": {'x':320,'y':169,'w':84,'h':146}
+				},
+				"CARD_PIPE":
+				{
+					"frame": {'x':420,'y':169,'w':84,'h':146}
+				},
+				"CARD_KNIFE":
+				{
+					"frame": {'x':520,'y':169,'w':84,'h':146}
+				},
+				"CARD_STUDY":
+				{
+					"frame": {'x':20,'y':321,'w':84,'h':146}
+				},
+				"CARD_LIBRARY":
+				{
+					"frame": {'x':120,'y':321,'w':84,'h':146}
+				},
+				"CARD_CONSERVATORY":
+				{
+					"frame": {'x':220,'y':321,'w':84,'h':146}
+				},
+				"CARD_HALL":
+				{
+					"frame": {'x':320,'y':321,'w':84,'h':146}
+				},
+				"CARD_KITCHEN":
+				{
+					"frame": {'x':420,'y':321,'w':84,'h':146}
+				},
+				"CARD_BALLROOM":
+				{
+					"frame": {'x':20,'y':473,'w':84,'h':146}
+				},
+				"CARD_LOUNGE":
+				{
+					"frame": {'x':120,'y':473,'w':84,'h':146}
+				},
+				"CARD_BILLIARDROOM":
+				{
+					"frame": {'x':220,'y':473,'w':84,'h':146}
+				},
+				"CARD_DININGROOM":
+				{
+					"frame": {'x':320,'y':473,'w':84,'h':146}
+				},
+			},
+			"meta": {
+				"image": "/assets/gamepieces.jpg",
+				"format": "RGBA8888",
+				"size": {"w":640,"h":620},
+				"scale": 1
+			}
+		};
+		this.spriteSheet = new PIXI.Spritesheet(
+			PIXI.BaseTexture.from(cards.meta.image),
+			cards
+		);
+		await this.spriteSheet.parse();
+	}
 	displayHud()
 	{
+		this.loadAssets();
 		this.displayCards();
 		this.displayButtons();
 		this.displayAlerts();
@@ -69,22 +172,13 @@ export class PixiHud extends GameHud
 		this.weaponContainer.addChild(hudAreaText);
 		this.weapons.forEach((weapon) => {
 			let pixiWeapon = new PIXI.Graphics();
-			pixiWeapon.eventMode = 'static';
-			pixiWeapon.on('pointerup', (event) => { window.client.selectWeapon(weapon.name); } );
-			pixiWeapon.beginFill(0xFBF8FB);
-			pixiWeapon.drawRect(0,0,weapon.width,weapon.length);
-			pixiWeapon.endFill();
-			let text = new PIXI.Text(
-				weapon.name, {
-					fontSize: 30,
-					fill: 0x000000
-				}
-			);
-			text.x = 0;
-			text.y = 0;
-			pixiWeapon.addChild(text);
-			pixiWeapon.position.set(weapon.x,weapon.y);
-			this.weaponContainer.addChild(pixiWeapon);
+			let weaponSprite = new PIXI.Sprite(this.spriteSheet.textures['CARD_' + weapon.name]);
+			weaponSprite.eventMode = 'static';
+			weaponSprite.on('pointerup', (event) => { window.client.selectWeapon(weapon.name); } );
+			weaponSprite.width = weapon.width;
+			weaponSprite.height = weapon.length;
+			weaponSprite.position.set(weapon.x,weapon.y);
+			this.weaponContainer.addChild(weaponSprite);
 		});
 		this.app.stage.addChild(this.weaponContainer);
 	}
@@ -109,22 +203,13 @@ export class PixiHud extends GameHud
 		hudAreaText.y = this.cardAreaStartY;
 		this.cardContainer.addChild(hudAreaText);
 		this.cards.forEach((card) => {
+			let cardSprite = new PIXI.Sprite(this.spriteSheet.textures['CARD_' + card.name]);
 			let pixiCard = new PIXI.Graphics();
 			pixiCard.eventMode = 'static';
 			pixiCard.on('pointerup', (event) => { window.client.selectCard(card.name, card.type); } );
-			pixiCard.beginFill(0xFBF8FB);
 			pixiCard.drawRect(0,0,card.width,card.length);
-			pixiCard.endFill();
-			let text = new PIXI.Text(
-				'Type:' + card.type + '\n' + 'Name:' + card.name, {
-					fontSize: 25,
-					fill: 0x000000
-				}
-			);
-			text.x = 0;
-			text.y = 0;
-			pixiCard.addChild(text);
 			pixiCard.position.set(card.x,card.y);
+			pixiCard.addChild(cardSprite);
 			this.cardContainer.addChild(pixiCard);
 		});
 		this.app.stage.addChild(this.cardContainer);
@@ -211,13 +296,98 @@ export class PixiMap extends GameMap
 		super(height, width);
 		this.app = app;
 		super.createMap();
+		this.roomSprites;
 		this.displayMap();
+	}
+	async loadAssets()
+	{
+		let mapRoom = {
+			"frames": {
+				"HALL":
+				{
+					"frame": {'x':315,'y':46,'w':161,'h':169},
+					"spriteSourceSize": {'x':0,'y':0,'w':161,'h':169},
+					"sourceSize": {'w':161,'h':169},
+				},
+				'STUDY':
+				{
+					"frame": {'x':43,'y':35,'w':168,'h':107},
+					"spriteSourceSize": {'x':0,'y':0,'w':168,'h':107},
+					"sourceSize": {'w':168,'h':107}
+				},
+                'LIBRARY':
+				{
+					"frame": {'x':72,'y':202,'w':139,'h':124},
+					"spriteSourceSize": {'x':0,'y':0,'w':139,'h':124},
+					"sourceSize": {'w':139,'h':124}
+				},
+                'CONSERVATORY':
+				{
+					"frame": {'x':44,'y':594,'w':167,'h':101},
+					"spriteSourceSize": {'x':0,'y':0,'w':167,'h':101},
+					"sourceSize": {'w':167,'h':101}
+				},
+                'BILLIARDROOM':
+				{
+					"frame": {'x':42,'y':371,'w':169,'h':122},
+					"spriteSourceSize": {'x':0,'y':0,'w':169,'h':122},
+					"sourceSize": {'w':169,'h':122}
+				},
+                'BALLROOM':
+				{
+					"frame": {'x':286,'y':512,'w':218,'h':150},
+					"spriteSourceSize": {'x':0,'y':0,'w':218,'h':150},
+					"sourceSize": {'w':218,'h':150}
+				},
+                'LOUNGE':
+				{
+					"frame": {'x':582,'y':36,'w':166,'h':153},
+					"spriteSourceSize": {'x':0,'y':0,'w':166,'h':153},
+					"sourceSize": {'w':166,'h':153}
+				},
+                'DININGROOM':
+				{
+					"frame": {'x':521,'y':286,'w':228,'h':153},
+					"spriteSourceSize": {'x':0,'y':0,'w':228,'h':153},
+					"sourceSize": {'w':228,'h':153}
+				},
+                'KITCHEN':
+				{
+					"frame": {'x':580,'y':539,'w':140,'h':159},
+					"spriteSourceSize": {'x':0,'y':0,'w':140,'h':159},
+					"sourceSize": {'w':140,'h':159}
+				}
+			},
+			"meta": {
+				"image": "/assets/gamerooms.jpg",
+				"format": "RGBA8888",
+				"size": {"w":792,"h":752},
+				"scale": 161/this.re
+			}
+		};
+		// Set sprite coordinates based on abstract GameMap model
+		for( var room in this.rooms )
+		{
+			let roomArea = this.rooms[room];
+			let spriteCenterX = ( ( mapRoom.frames[room].frame.w/2 ) / mapRoom.meta.scale );
+			let spriteCenterY = ( ( mapRoom.frames[room].frame.h/2 ) / mapRoom.meta.scale );
+			let roomStartX = roomArea.width/2 - spriteCenterX;
+			let roomStartY = roomArea.length/2 - spriteCenterY;
+			roomArea.x = roomArea.x + roomStartX;
+			roomArea.y = roomArea.y + roomStartY;
+		}
+		this.roomSprites = new PIXI.Spritesheet(
+			PIXI.BaseTexture.from(mapRoom.meta.image),
+			mapRoom
+		);
+		await this.roomSprites.parse();
 	}
 	displayMap()
 	{
-		this.displayRooms();
 		this.displayHallways();
-		this.displayPassageways();
+		this.loadAssets();
+		this.displayRooms();
+		//this.displayPassageways();
 	}
 	displayRooms() {
 		if ( this.roomContainer != null )
@@ -227,24 +397,18 @@ export class PixiMap extends GameMap
 		}
 		this.roomContainer = new PIXI.Graphics();
 		for(var room in this.rooms) {
-			const pixiRoom = new PIXI.Graphics();
+			let roomSprite = new PIXI.Sprite(this.roomSprites.textures[room]);
 			let roomObj = this.rooms[room];
 			let roomX = roomObj.x;
 			let roomY = roomObj.y;
 
-			pixiRoom.beginFill(0x247BA0);
-			pixiRoom.drawRect(0,0,roomObj.width,roomObj.length);
-			pixiRoom.endFill();
-			pixiRoom.eventMode = 'static';
-			pixiRoom.on('pointerup', (event) => { window.client.selectRoom(roomObj.name); } );
-			pixiRoom.position.set(roomX,roomY);
-			this.rooms[room].element = pixiRoom;
+			roomSprite.eventMode = 'static';
+			roomSprite.on('pointerup', (event) => { window.client.selectRoom(roomObj.name); } );
+			roomSprite.position.x = roomX;
+			roomSprite.position.y = roomY;
+			this.rooms[room].element = roomSprite;
 
-			const roomName = new PIXI.Text(room, { fontSize: 24, fill: 0xFBF8FB });
-			roomName.x = 0;
-			roomName.y = 0;
-			pixiRoom.addChild(roomName);
-			this.roomContainer.addChild(pixiRoom);
+			this.roomContainer.addChild(roomSprite);
 		}
 		this.app.stage.addChild(this.roomContainer);
 	}
@@ -262,7 +426,7 @@ export class PixiMap extends GameMap
 			let hallwayX = hallwayObj.x;
 			let hallwayY = hallwayObj.y;
 
-			pixiHallway.beginFill(0x7DC2C9)
+			pixiHallway.beginFill(0xE8F1F2)
 			pixiHallway.drawRect(0,0,hallwayObj.length,hallwayObj.width);
 			pixiHallway.endFill();
 			pixiHallway.eventMode = 'static';
