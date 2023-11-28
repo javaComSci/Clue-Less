@@ -37,8 +37,8 @@ export class GameHud
 		this.cardMarginSFactor = .10;
 		this.cardGapSFactor = .05;
 
-		this.weaponMarginSFactor = .14;
-		this.weaponGapSFactor = .40;
+		this.weaponMarginSFactor = .15;
+		this.weaponGapSFactor = .03;
 
 		this.alertMarginSFactor = .01;
 
@@ -57,10 +57,13 @@ export class GameHud
 	}
 	createWeapons()
 	{
-		let weaponWidth = this.weaponAreaWidth - 2 * ( this.weaponMarginSFactor * this.weaponAreaWidth );
+		let rows = 2;
+		let columns = 3;
 		let weaponGapCount = Object.keys(WeaponConstants).length - 1;
-		let weaponGapTotalHeight = ( this.weaponAreaHeight * this.weaponGapSFactor ) * weaponGapCount;
-		let weaponHeight = ((this.weaponAreaHeight - 2 * ( this.weaponMarginSFactor * this.weaponAreaHeight )) - weaponGapTotalHeight )/(weaponGapCount + 1);
+		let weaponGapTotalWidth = ( this.weaponAreaHeight * this.weaponGapSFactor ) * rows;
+		let weaponWidth = (this.weaponAreaWidth - 2 * ( this.weaponMarginSFactor * this.weaponAreaWidth ) - weaponGapTotalWidth)/columns;
+		let weaponGapTotalHeight = ( this.weaponAreaHeight * this.weaponGapSFactor );
+		let weaponHeight = ((this.weaponAreaHeight - 2 * ( this.weaponMarginSFactor * this.weaponAreaHeight )) - weaponGapTotalHeight )/rows;
 		let weaponStartX = (this.weaponMarginSFactor * this.weaponAreaWidth) + this.weaponAreaStartX;
 		let weaponStartY = (this.weaponMarginSFactor * this.weaponAreaHeight) + this.weaponAreaStartY;
 		let weaponCount = 1;
@@ -68,14 +71,14 @@ export class GameHud
 		{
 			let weaponNew = new Weapon(weapon,weaponStartX,weaponStartY,weaponHeight,weaponWidth);
 			this.weapons.push(weaponNew);
-			if( weaponCount % 3 == 0 )
+			if( weaponCount % columns == 0 )
 			{
 				weaponStartY += weaponHeight + (this.weaponAreaHeight * this.weaponGapSFactor);
 				weaponStartX = (this.weaponMarginSFactor * this.weaponAreaWidth) + this.weaponAreaStartX;
 			}
 			else
 			{
-				weaponStartX += (this.weaponGapSFactor * weaponWidth);
+				weaponStartX += weaponWidth + weaponGapTotalWidth/rows;
 			}
 			weaponCount += 1;
 		}
