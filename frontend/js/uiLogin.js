@@ -50,26 +50,26 @@ export class UILogin
         this.app.stage.addChild(background);
 
         // Add prints
-        // this.hand.anchor.set(0.5);
-        // this.app.stage.addChild(this.hand);
-        // this.hand.x = 100;
-        // this.hand.y = 100;
-        // let xyLocations = [[45, 80], [1000, 500], [800, 90], [40, 1200], [300, 800]];
-        // let index = 0;
-        // let seconds = 0;
-        // this.app.ticker.add((delta) =>
-        // {
-        //     seconds += (1 / 60) * delta;
-        //     if(seconds >= 3)
-        //     {
-        //         let location = xyLocations[index];
-        //         index = (index + 1) % xyLocations.length;
-        //         this.hand.x = location[0];
-        //         this.hand.y = location[1];
-        //         this.hand.rotation += delta;
-        //         seconds = 0
-        //     }
-        // });
+        this.hand.anchor.set(0.5);
+        this.app.stage.addChild(this.hand);
+        this.hand.x = 100;
+        this.hand.y = 100;
+        let xyLocations = [[45, 80], [1000, 500], [800, 90], [40, 1200], [300, 800]];
+        let index = 0;
+        let seconds = 0;
+        this.app.ticker.add((delta) =>
+        {
+            seconds += (1 / 60) * delta;
+            if(seconds >= 3)
+            {
+                let location = xyLocations[index];
+                index = (index + 1) % xyLocations.length;
+                this.hand.x = location[0];
+                this.hand.y = location[1];
+                this.hand.rotation += delta;
+                seconds = 0
+            }
+        });
 
         this.renderTitle();
     }
