@@ -11,6 +11,39 @@ export class PixiHud extends GameHud
 	{
 		super(mapHeight, mapWidth, app.renderer.view.height, app.renderer.view.width, state);
 		this.app = app;
+		this.fontFamily = "\"Lucida Console\", Monaco, monospace";
+		this.fontOptions = {
+			'characterName': {
+				'size': 42,
+				'color': 0xffffff,
+				'family': this.fontFamily
+			},
+			'cards': {
+				'size': 42,
+				'color': 0xffffff,
+				'family': this.fontFamily
+			},
+			'actions': {
+				'size': 42,
+				'color': 0xffffff,
+				'family': this.fontFamily
+			},
+			'weapons': {
+				'size': 42,
+				'color': 0xffffff,
+				'family': this.fontFamily
+			},
+			'alerts': {
+				'size': 20,
+				'color': 0x000000,
+				'family': this.fontFamily
+			},
+			'buttons': {
+				'size': 42,
+				'color': 0x000000,
+				'family': this.fontFamily
+			},
+		};
 		this.displayHud();
 	}
 	async loadAssets()
@@ -141,8 +174,9 @@ export class PixiHud extends GameHud
 		this.charNameContainer.endFill();
 		let hudAreaText = new PIXI.Text(
 				'Your Character:\n', {
-				fontSize: 50,
-				fill: 0xffffff
+				fontSize: this.fontOptions.characterName.size,
+				fill: this.fontOptions.characterName.color,
+				fontFamily: this.fontOptions.characterName.family
 			}
 		);
 		hudAreaText.x = this.characterNameAreaStartX + this.characterNameAreaWidth/2 - hudAreaText.width/2;
@@ -175,8 +209,9 @@ export class PixiHud extends GameHud
 		this.weaponContainer.endFill();
 		let hudAreaText = new PIXI.Text(
 				'Weapons', {
-				fontSize: 45,
-				fill: 0xffffff
+				fontSize: this.fontOptions.weapons.size,
+				fill: this.fontOptions.weapons.color,
+				fontFamily: this.fontOptions.weapons.family
 			}
 		);
 		hudAreaText.x = this.weaponAreaStartX + this.weaponAreaWidth/2 - hudAreaText.width/2;
@@ -207,8 +242,9 @@ export class PixiHud extends GameHud
 		this.cardContainer.endFill();
 		let hudAreaText = new PIXI.Text(
 				'Cards', {
-				fontSize: 60,
-				fill: 0xFFFFFF
+				fontSize: this.fontOptions.cards.size,
+				fill: this.fontOptions.cards.color,
+				fontFamily: this.fontOptions.cards.family
 			}
 		);
 		hudAreaText.x = this.cardAreaStartX + this.cardAreaWidth/2 - hudAreaText.width/2;
@@ -239,8 +275,9 @@ export class PixiHud extends GameHud
 		this.buttonContainer.endFill();
 		let hudAreaText = new PIXI.Text(
 				'Actions', {
-				fontSize: 60,
-				fill: 0xffffff
+				fontSize: this.fontOptions.actions.size,
+				fill: this.fontOptions.actions.color,
+				fontFamily: this.fontOptions.actions.family
 			}
 		);
 		hudAreaText.x = this.buttonAreaStartX + this.buttonAreaWidth/2 - hudAreaText.width/2;
@@ -255,8 +292,9 @@ export class PixiHud extends GameHud
 			pixiButton.endFill();
 			let text = new PIXI.Text(
 				button.content, {
-					fontSize: 40,
-					fill: 0x000000
+					fontSize: this.fontOptions.buttons.size,
+					fill: this.fontOptions.buttons.color,
+					fontFamily: this.fontOptions.buttons.family
 				}
 			);
 			text.x = button.width/2 - text.width/2;
@@ -287,8 +325,9 @@ export class PixiHud extends GameHud
 			pixiAlert.endFill();
 			let text = new PIXI.Text(
 				alertInfo.content, {
-					fontSize: 20,
-					fill: 0x000000
+					fontSize: this.fontOptions.alerts.size,
+					fill: this.fontOptions.alerts.color,
+					fontFamily: this.fontOptions.alerts.family
 				}
 			);
 			text.x = alertInfo.x + alertInfo.width/2 - text.width/2;
