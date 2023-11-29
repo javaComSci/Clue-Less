@@ -204,13 +204,13 @@ export class PixiHud extends GameHud
 		this.cardContainer.addChild(hudAreaText);
 		this.cards.forEach((card) => {
 			let cardSprite = new PIXI.Sprite(this.spriteSheet.textures['CARD_' + card.name]);
-			let pixiCard = new PIXI.Graphics();
-			pixiCard.eventMode = 'static';
-			pixiCard.on('pointerup', (event) => { window.client.selectCard(card.name, card.type); } );
-			pixiCard.drawRect(0,0,card.width,card.length);
-			pixiCard.position.set(card.x,card.y);
-			pixiCard.addChild(cardSprite);
-			this.cardContainer.addChild(pixiCard);
+			cardSprite.eventMode = 'static';
+			cardSprite.on('pointerup', (event) => { window.client.selectCard(card.name, card.type); } );
+			cardSprite.height = card.length;
+			cardSprite.width = card.width;
+			cardSprite.position.set(card.x,card.y);
+			cardSprite.addChild(cardSprite);
+			this.cardContainer.addChild(cardSprite);
 		});
 		this.app.stage.addChild(this.cardContainer);
 	}
