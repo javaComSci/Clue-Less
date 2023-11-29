@@ -44,10 +44,14 @@ export class GameHud
 
 		this.alertMarginSFactor = .01;
 
+		this.avatarMarginSFactorX = .20;
+		this.avatarMarginSFactorY = .17;
+
 		this.buttons = [];
 		this.cards = [];
 		this.alerts = [];
 		this.weapons = [];
+		this.avatar = '';
 		this.createHud(state);
 	}
 	createHud(state)
@@ -55,6 +59,7 @@ export class GameHud
 		this.createCards(state['cards']);
 		this.createButtons(state['buttons']);
 		this.createAlerts(state['alerts']);
+		this.createAvatar(state['characterName']);
 		this.createWeapons();
 	}
 	createWeapons()
@@ -84,6 +89,15 @@ export class GameHud
 			}
 			weaponCount += 1;
 		}
+	}
+	createAvatar(name)
+	{
+		let avatarHeight = this.characterNameAreaHeight - 2 * ( this.avatarMarginSFactorY * this.characterNameAreaHeight );
+		let avatarWidth = this.characterNameAreaWidth - 2 * ( this.avatarMarginSFactorX * this.characterNameAreaWidth );
+		let avatarStartX = this.characterNameAreaStartX + (this.avatarMarginSFactorX * this.characterNameAreaWidth);
+		let avatarStartY = this.characterNameAreaStartY + (this.avatarMarginSFactorY * this.characterNameAreaHeight);
+		let avatarRep = new Card(name,name,'avatar',avatarStartX,avatarStartY,avatarHeight,avatarWidth);
+		this.avatar = avatarRep;
 	}
 	createCards(state)
 	{

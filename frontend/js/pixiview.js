@@ -89,17 +89,21 @@ export class PixiHud extends GameHud
 				{
 					"frame": {'x':20,'y':473,'w':84,'h':146}
 				},
-				"CARD_LOUNGE":
+				"CARD_DININGROOM":
 				{
 					"frame": {'x':120,'y':473,'w':84,'h':146}
 				},
-				"CARD_BILLIARDROOM":
+				"CARD_LOUNGE":
 				{
 					"frame": {'x':220,'y':473,'w':84,'h':146}
 				},
-				"CARD_DININGROOM":
+				"CARD_BILLIARDROOM":
 				{
 					"frame": {'x':320,'y':473,'w':84,'h':146}
+				},
+				"CARD_UNKNOWN":
+				{
+					"frame": {'x':420,'y':473,'w':84,'h':146}
 				},
 			},
 			"meta": {
@@ -124,30 +128,38 @@ export class PixiHud extends GameHud
 		this.displayWeapons();
 		this.displayCharacterName();
 	}
-	displayCharacterName(text)
+	displayCharacterName()
 	{
 		if ( this.charNameContainer != null )
 		{
 			// free the memory!
 			this.charNameContainer.destroy();
 		}
-		if ( text == undefined )
-		{
-			text = 'initializing...'
-		}
 		this.charNameContainer = new PIXI.Graphics();
 		this.charNameContainer.beginFill(0x0B355E);
 		this.charNameContainer.drawRect(this.characterNameAreaStartX,this.characterNameAreaStartY,this.characterNameAreaWidth,this.characterNameAreaHeight);
 		this.charNameContainer.endFill();
 		let hudAreaText = new PIXI.Text(
-				'Character:\n' + text, {
-				fontSize: 60,
+				'Your Character:\n', {
+				fontSize: 50,
 				fill: 0xffffff
 			}
 		);
 		hudAreaText.x = this.characterNameAreaStartX + this.characterNameAreaWidth/2 - hudAreaText.width/2;
 		hudAreaText.y = this.characterNameAreaStartY;
 		this.charNameContainer.addChild(hudAreaText);
+
+		if(this.avatar != '')
+		{
+			let characterCard = this.avatar;
+			let cardSprite = new PIXI.Sprite(this.spriteSheet.textures['CARD_' + characterCard.name]);
+			cardSprite.height = characterCard.length;
+			cardSprite.width = characterCard.width;
+			cardSprite.position.set(characterCard.x,characterCard.y);
+			cardSprite.addChild(cardSprite);
+			this.charNameContainer.addChild(cardSprite);
+		}
+
 		this.app.stage.addChild(this.charNameContainer);
 	}
 	displayWeapons()
