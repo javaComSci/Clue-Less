@@ -377,6 +377,7 @@ export class PixiMap extends GameMap
 		this.app = app;
 		super.createMap();
 		this.roomSprites;
+		this.roomRotate = {};
 		this.hallwaySprite;
 		this.characterSprites = {};
 		this.areaColors = {
@@ -393,54 +394,63 @@ export class PixiMap extends GameMap
 					"frame": {'x':315,'y':46,'w':161,'h':169},
 					"spriteSourceSize": {'x':0,'y':0,'w':161,'h':169},
 					"sourceSize": {'w':161,'h':169},
+					"rotate": 0
 				},
 				'STUDY':
 				{
 					"frame": {'x':43,'y':35,'w':168,'h':95},
 					"spriteSourceSize": {'x':0,'y':0,'w':168,'h':95},
-					"sourceSize": {'w':168,'h':95}
+					"sourceSize": {'w':168,'h':95},
+					"rotate": 0
 				},
                 'LIBRARY':
 				{
 					"frame": {'x':72,'y':202,'w':139,'h':124},
 					"spriteSourceSize": {'x':0,'y':0,'w':139,'h':124},
-					"sourceSize": {'w':139,'h':124}
+					"sourceSize": {'w':139,'h':124},
+					"rotate": 1.57
 				},
                 'CONSERVATORY':
 				{
 					"frame": {'x':44,'y':594,'w':167,'h':101},
 					"spriteSourceSize": {'x':0,'y':0,'w':167,'h':101},
-					"sourceSize": {'w':167,'h':101}
+					"sourceSize": {'w':167,'h':101},
+					"rotate": 3.14
 				},
                 'BILLIARDROOM':
 				{
 					"frame": {'x':42,'y':371,'w':169,'h':122},
 					"spriteSourceSize": {'x':0,'y':0,'w':169,'h':122},
-					"sourceSize": {'w':169,'h':122}
+					"sourceSize": {'w':169,'h':122},
+					"rotate": 1.57
 				},
                 'BALLROOM':
 				{
 					"frame": {'x':286,'y':512,'w':218,'h':150},
 					"spriteSourceSize": {'x':0,'y':0,'w':218,'h':150},
-					"sourceSize": {'w':218,'h':150}
+					"sourceSize": {'w':218,'h':150},
+					"rotate": 3.14
 				},
                 'LOUNGE':
 				{
 					"frame": {'x':582,'y':36,'w':166,'h':153},
 					"spriteSourceSize": {'x':0,'y':0,'w':166,'h':153},
-					"sourceSize": {'w':166,'h':153}
+					"sourceSize": {'w':166,'h':153},
+					"rotate": 0
 				},
                 'DININGROOM':
 				{
 					"frame": {'x':521,'y':286,'w':228,'h':153},
 					"spriteSourceSize": {'x':0,'y':0,'w':228,'h':153},
-					"sourceSize": {'w':228,'h':153}
+					"sourceSize": {'w':228,'h':153},
+					"rotate": -1.57
 				},
                 'KITCHEN':
 				{
 					"frame": {'x':580,'y':539,'w':140,'h':159},
 					"spriteSourceSize": {'x':0,'y':0,'w':140,'h':159},
-					"sourceSize": {'w':140,'h':159}
+					"sourceSize": {'w':140,'h':159},
+					"rotate": 3.14
 				}
 			},
 			"meta": {
@@ -452,8 +462,6 @@ export class PixiMap extends GameMap
 		};
 		// Set sprite coordinates based on abstract GameMap model
 		this.characterSprites['GREEN'] = PIXI.Sprite.from("/assets/green.png");
-
-		this.hallwayTexture = await PIXI.Assets.load("/assets/hallway.png");
 
 		await PIXI.Assets.load("/assets/background.png");
 		let backgroundSprite = new PIXI.Sprite(PIXI.Texture.from("/assets/background.png"));
@@ -467,6 +475,10 @@ export class PixiMap extends GameMap
 			mapRoom
 		);
 		await this.roomSprites.parse();
+		for( var room in mapRoom.frames )
+		{
+			this.roomRotate[room] = mapRoom.frames[room]['rotate'];
+		}
 	}
 	displayMap()
 	{
@@ -487,13 +499,15 @@ export class PixiMap extends GameMap
 		for(var room in this.rooms) {
 			let roomSprite = new PIXI.Sprite(this.roomSprites.textures[room]);
 			let roomObj = this.rooms[room];
-			let roomX = roomObj.x;
-			let roomY = roomObj.y;
+			let roomX = roomObj.x + this.rooms[room].width/2;
+			let roomY = roomObj.y + this.rooms[room].length/2;
 
 			roomSprite.eventMode = 'static';
 			roomSprite.on('pointerup', (event) => { window.client.selectRoom(roomObj.name); } );
 			roomSprite.position.x = roomX;
 			roomSprite.position.y = roomY;
+			roomSprite.anchor.set(0.5);
+			roomSprite.rotation += this.roomRotate[room];
 			roomSprite.width = this.rooms[room].width;
 			roomSprite.height = this.rooms[room].length;
 			this.rooms[room].element = roomSprite;
