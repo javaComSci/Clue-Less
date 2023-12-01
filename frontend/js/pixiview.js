@@ -393,9 +393,9 @@ export class PixiMap extends GameMap
 				},
 				'STUDY':
 				{
-					"frame": {'x':43,'y':35,'w':168,'h':107},
-					"spriteSourceSize": {'x':0,'y':0,'w':168,'h':107},
-					"sourceSize": {'w':168,'h':107}
+					"frame": {'x':43,'y':35,'w':168,'h':95},
+					"spriteSourceSize": {'x':0,'y':0,'w':168,'h':95},
+					"sourceSize": {'w':168,'h':95}
 				},
                 'LIBRARY':
 				{
@@ -450,16 +450,6 @@ export class PixiMap extends GameMap
 		// Set sprite coordinates based on abstract GameMap model
 		this.mapBackground = PIXI.Sprite.from("/assets/background.png");
 		this.app.stage.addChild(this.mapBackground);
-		for( var room in this.rooms )
-		{
-			let roomArea = this.rooms[room];
-			let spriteCenterX = ( ( mapRoom.frames[room].frame.w/2 ) / mapRoom.meta.scale );
-			let spriteCenterY = ( ( mapRoom.frames[room].frame.h/2 ) / mapRoom.meta.scale );
-			let roomStartX = roomArea.width/2 - spriteCenterX;
-			let roomStartY = roomArea.length/2 - spriteCenterY;
-			roomArea.x = roomArea.x + roomStartX;
-			roomArea.y = roomArea.y + roomStartY;
-		}
 		this.roomSprites = new PIXI.Spritesheet(
 			PIXI.BaseTexture.from(mapRoom.meta.image),
 			mapRoom
@@ -490,6 +480,8 @@ export class PixiMap extends GameMap
 			roomSprite.on('pointerup', (event) => { window.client.selectRoom(roomObj.name); } );
 			roomSprite.position.x = roomX;
 			roomSprite.position.y = roomY;
+			roomSprite.width = this.rooms[room].width;
+			roomSprite.height = this.rooms[room].length;
 			this.rooms[room].element = roomSprite;
 
 			this.roomContainer.addChild(roomSprite);
