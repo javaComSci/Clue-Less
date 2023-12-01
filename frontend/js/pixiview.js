@@ -13,36 +13,43 @@ export class PixiHud extends GameHud
 		this.app = app;
 		this.spriteActionButton;
 		this.spriteSheet;
+		this.areaColors = {
+			'characterName': 0xE1E497,
+			'actions': 0xF9FAD7,
+			'weapons': 0xE1E497,
+			'alerts': 0xFFFF00,
+			'cards': 0xF9FAD7,
+		};
 		this.fontFamily = "\"Lucida Console\", Monaco, monospace";
 		this.fontOptions = {
 			'characterName': {
 				'size': 42,
-				'color': 0xffffff,
+				'color': 0x6F4E37,
 				'family': this.fontFamily
 			},
 			'cards': {
 				'size': 42,
-				'color': 0xffffff,
+				'color': 0x6F4E37,
 				'family': this.fontFamily
 			},
 			'actions': {
 				'size': 42,
-				'color': 0xffffff,
+				'color': 0x6F4E37,
 				'family': this.fontFamily
 			},
 			'weapons': {
 				'size': 42,
-				'color': 0xffffff,
+				'color': 0x6F4E37,
 				'family': this.fontFamily
 			},
 			'alerts': {
 				'size': 20,
-				'color': 0x000000,
+				'color': 0x303004,
 				'family': this.fontFamily
 			},
 			'buttons': {
 				'size': 25,
-				'color': 0x000000,
+				'color': 0x6F4E37,
 				'family': this.fontFamily
 			},
 		};
@@ -192,7 +199,7 @@ export class PixiHud extends GameHud
 			this.charNameContainer.destroy();
 		}
 		this.charNameContainer = new PIXI.Graphics();
-		this.charNameContainer.beginFill(0x0B355E);
+		this.charNameContainer.beginFill(this.areaColors.characterName);
 		this.charNameContainer.drawRect(this.characterNameAreaStartX,this.characterNameAreaStartY,this.characterNameAreaWidth,this.characterNameAreaHeight);
 		this.charNameContainer.endFill();
 		let hudAreaText = new PIXI.Text(
@@ -227,7 +234,7 @@ export class PixiHud extends GameHud
 			this.weaponContainer.destroy();
 		}
 		this.weaponContainer = new PIXI.Graphics();
-		this.weaponContainer.beginFill(0x0B355E);
+		this.weaponContainer.beginFill(this.areaColors.weapons);
 		this.weaponContainer.drawRect(this.weaponAreaStartX,this.weaponAreaStartY,this.weaponAreaWidth,this.weaponAreaHeight);
 		this.weaponContainer.endFill();
 		let hudAreaText = new PIXI.Text(
@@ -260,7 +267,7 @@ export class PixiHud extends GameHud
 			this.cardContainer.destroy();
 		}
 		this.cardContainer = new PIXI.Graphics();
-		this.cardContainer.beginFill(0x247BA0);
+		this.cardContainer.beginFill(this.areaColors.cards);
 		this.cardContainer.drawRect(this.cardAreaStartX,this.cardAreaStartY,this.cardAreaWidth,this.cardAreaHeight);
 		this.cardContainer.endFill();
 		let hudAreaText = new PIXI.Text(
@@ -293,7 +300,7 @@ export class PixiHud extends GameHud
 			this.buttonContainer.destroy();
 		}
 		this.buttonContainer = new PIXI.Graphics();
-		this.buttonContainer.beginFill(0x247BA0);
+		this.buttonContainer.beginFill(this.areaColors.actions);
 		this.buttonContainer.drawRect(this.buttonAreaStartX,this.buttonAreaStartY,this.buttonAreaWidth,this.buttonAreaHeight);
 		this.buttonContainer.endFill();
 		let hudAreaText = new PIXI.Text(
@@ -336,14 +343,14 @@ export class PixiHud extends GameHud
 			this.alertContainer.destroy();
 		}
 		this.alertContainer = new PIXI.Graphics();
-		this.alertContainer.beginFill(0x0B355E);
+		this.alertContainer.beginFill(this.areaColors.alerts);
 		this.alertContainer.drawRect(this.alertAreaStartX,this.alertAreaStartY,this.alertAreaWidth,this.alertAreaHeight);
 		this.alertContainer.endFill();
 		this.alerts.forEach((alertInfo) => {
 			let pixiAlert = new PIXI.Graphics();
 			pixiAlert.eventMode = 'static';
 			pixiAlert.on('pointerup', (event) => { window.client.testme(alertInfo.content); } );
-			pixiAlert.beginFill(0xFBF8FB);
+			pixiAlert.beginFill(this.areaColors.alerts);
 			pixiAlert.drawRect(0,0,alertInfo.width,alertInfo.length);
 			pixiAlert.endFill();
 			let text = new PIXI.Text(
@@ -371,6 +378,9 @@ export class PixiMap extends GameMap
 		this.app = app;
 		super.createMap();
 		this.roomSprites;
+		this.areaColors = {
+			'hallways': 0xE1E497,
+		};
 		this.displayMap();
 	}
 	async loadAssets()
@@ -440,6 +450,8 @@ export class PixiMap extends GameMap
 			}
 		};
 		// Set sprite coordinates based on abstract GameMap model
+		this.mapBackground = PIXI.Sprite.from("/assets/background.png");
+		this.app.stage.addChild(this.mapBackground);
 		for( var room in this.rooms )
 		{
 			let roomArea = this.rooms[room];
@@ -458,8 +470,8 @@ export class PixiMap extends GameMap
 	}
 	displayMap()
 	{
-		this.displayHallways();
 		this.loadAssets();
+		this.displayHallways();
 		this.displayRooms();
 		//this.displayPassageways();
 	}
@@ -500,7 +512,7 @@ export class PixiMap extends GameMap
 			let hallwayX = hallwayObj.x;
 			let hallwayY = hallwayObj.y;
 
-			pixiHallway.beginFill(0xE8F1F2)
+			pixiHallway.beginFill(this.areaColors.hallways);
 			pixiHallway.drawRect(0,0,hallwayObj.length,hallwayObj.width);
 			pixiHallway.endFill();
 			pixiHallway.eventMode = 'static';
@@ -555,7 +567,6 @@ export class PixiMap extends GameMap
 					break;	
 			}	
 				
-			// pixiCharacter.beginFill(0xFBF8FB);
 			pixiCharacter.drawRect(0,0,this.ce,this.ce);
 			pixiCharacter.endFill();
 			pixiCharacter.position.set(charX,charY);
