@@ -376,6 +376,7 @@ export class PixiMap extends GameMap
 		this.app = app;
 		super.createMap();
 		this.roomSprites;
+		this.characterSprites = {};
 		this.areaColors = {
 			'hallways': 0xE1E497,
 		};
@@ -448,6 +449,7 @@ export class PixiMap extends GameMap
 			}
 		};
 		// Set sprite coordinates based on abstract GameMap model
+		this.characterSprites['GREEN'] = PIXI.Sprite.from("/assets/green.png");
 		this.mapBackground = PIXI.Sprite.from("/assets/background.png");
 		this.app.stage.addChild(this.mapBackground);
 		this.roomSprites = new PIXI.Spritesheet(
@@ -542,6 +544,9 @@ export class PixiMap extends GameMap
 					break;
 				case CharacterConstants.GREEN:
 					pixiCharacter.beginFill(0x02e107);
+					this.characterSprites['GREEN'].x = 0;
+					this.characterSprites['GREEN'].y = 0;
+					pixiCharacter.addChild(this.characterSprites['GREEN']);
 					break;
 				case CharacterConstants.MUSTARD:
 					pixiCharacter.beginFill(0xFFFF00);
