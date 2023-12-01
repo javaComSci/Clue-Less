@@ -220,7 +220,6 @@ export class PixiHud extends GameHud
 			cardSprite.height = characterCard.length;
 			cardSprite.width = characterCard.width;
 			cardSprite.position.set(characterCard.x,characterCard.y);
-			cardSprite.addChild(cardSprite);
 			this.charNameContainer.addChild(cardSprite);
 		}
 
@@ -287,7 +286,6 @@ export class PixiHud extends GameHud
 			cardSprite.height = card.length;
 			cardSprite.width = card.width;
 			cardSprite.position.set(card.x,card.y);
-			cardSprite.addChild(cardSprite);
 			this.cardContainer.addChild(cardSprite);
 		});
 		this.app.stage.addChild(this.cardContainer);
