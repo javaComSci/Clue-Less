@@ -55,7 +55,7 @@ export class PixiHud extends GameHud
 		};
 		this.displayHud();
 	}
-	loadAssets()
+	async loadAssets()
 	{
 		let cards = {
 			"frames": {
@@ -177,19 +177,20 @@ export class PixiHud extends GameHud
 			PIXI.BaseTexture.from(cards.meta.image),
 			cards
 		);
-
-	}
-	async displayHud()
-	{
-		this.loadAssets();
 		await this.spriteActionButton.parse();
 		await this.spriteSheet.parse();
 
-		this.displayButtons();
-		this.displayCards();
-		this.displayWeapons();
-		this.displayCharacterName();
-		this.displayAlerts();
+	}
+	displayHud()
+	{
+		this.loadAssets().then(()=>
+		{
+			this.displayButtons();
+			this.displayCards();
+			this.displayWeapons();
+			this.displayCharacterName();
+			this.displayAlerts();
+		});
 	}
 	displayCharacterName()
 	{
@@ -376,6 +377,7 @@ export class PixiMap extends GameMap
 		this.app = app;
 		super.createMap();
 		this.roomSprites;
+		this.hallwaySprite;
 		this.characterSprites = {};
 		this.areaColors = {
 			'hallways': 0xE1E497,
@@ -450,8 +452,16 @@ export class PixiMap extends GameMap
 		};
 		// Set sprite coordinates based on abstract GameMap model
 		this.characterSprites['GREEN'] = PIXI.Sprite.from("/assets/green.png");
-		this.mapBackground = PIXI.Sprite.from("/assets/background.png");
-		this.app.stage.addChild(this.mapBackground);
+
+		this.hallwayTexture = await PIXI.Assets.load("/assets/hallway.png");
+
+		await PIXI.Assets.load("/assets/background.png");
+		let backgroundSprite = new PIXI.Sprite(PIXI.Texture.from("/assets/background.png"));
+		backgroundSprite.height = this.sh;
+		backgroundSprite.width = this.sw;
+		backgroundSprite.position.set(0,0);
+		this.app.stage.addChild(backgroundSprite);
+
 		this.roomSprites = new PIXI.Spritesheet(
 			PIXI.BaseTexture.from(mapRoom.meta.image),
 			mapRoom
@@ -460,9 +470,11 @@ export class PixiMap extends GameMap
 	}
 	displayMap()
 	{
-		this.loadAssets();
-		this.displayHallways();
-		this.displayRooms();
+		this.loadAssets().then(() =>
+		{
+			this.displayHallways();
+			this.displayRooms();
+		});
 		//this.displayPassageways();
 	}
 	displayRooms() {
@@ -544,9 +556,6 @@ export class PixiMap extends GameMap
 					break;
 				case CharacterConstants.GREEN:
 					pixiCharacter.beginFill(0x02e107);
-					this.characterSprites['GREEN'].x = 0;
-					this.characterSprites['GREEN'].y = 0;
-					pixiCharacter.addChild(this.characterSprites['GREEN']);
 					break;
 				case CharacterConstants.MUSTARD:
 					pixiCharacter.beginFill(0xFFFF00);
