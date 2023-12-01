@@ -11,6 +11,8 @@ export class PixiHud extends GameHud
 	{
 		super(mapHeight, mapWidth, app.renderer.view.height, app.renderer.view.width, state);
 		this.app = app;
+		this.spriteActionButton;
+		this.spriteSheet;
 		this.fontFamily = "\"Lucida Console\", Monaco, monospace";
 		this.fontOptions = {
 			'characterName': {
@@ -39,14 +41,14 @@ export class PixiHud extends GameHud
 				'family': this.fontFamily
 			},
 			'buttons': {
-				'size': 42,
+				'size': 25,
 				'color': 0x000000,
 				'family': this.fontFamily
 			},
 		};
 		this.displayHud();
 	}
-	async loadAssets()
+	loadAssets()
 	{
 		let cards = {
 			"frames": {
@@ -146,20 +148,41 @@ export class PixiHud extends GameHud
 				"scale": 1
 			}
 		};
+		let button = {
+			"frames": {
+				"BUTTON":
+				{
+					"frame": {'x':54,'y':121,'w':152,'h':119}
+				},
+			},
+			"meta": {
+				"image": "/assets/gamebutton.png",
+				"format": "RGBA8888",
+				"size": {"w":360,"h":360},
+				"scale": 1
+			}
+		};
+		this.spriteActionButton = new PIXI.Spritesheet(
+			PIXI.BaseTexture.from(button.meta.image),
+			button
+		);
 		this.spriteSheet = new PIXI.Spritesheet(
 			PIXI.BaseTexture.from(cards.meta.image),
 			cards
 		);
-		await this.spriteSheet.parse();
+
 	}
-	displayHud()
+	async displayHud()
 	{
 		this.loadAssets();
-		this.displayCards();
+		await this.spriteActionButton.parse();
+		await this.spriteSheet.parse();
+
 		this.displayButtons();
-		this.displayAlerts();
+		this.displayCards();
 		this.displayWeapons();
 		this.displayCharacterName();
+		this.displayAlerts();
 	}
 	displayCharacterName()
 	{
@@ -284,12 +307,13 @@ export class PixiHud extends GameHud
 		hudAreaText.y = this.buttonAreaStartY;
 		this.buttonContainer.addChild(hudAreaText);
 		this.buttons.forEach((button) => {
-			let pixiButton = new PIXI.Graphics();
-			pixiButton.eventMode = 'static';
-			pixiButton.on('pointerup', (event) => { window.client.selectButton(button.name); } );
-			pixiButton.beginFill(0xFBF8FB);
-			pixiButton.drawRect(0,0,button.width,button.length);
-			pixiButton.endFill();
+			let buttonSprite = new PIXI.Sprite(this.spriteActionButton.textures['BUTTON']);
+			this.app.stage.addChild(buttonSprite);
+			buttonSprite.eventMode = 'static';
+			buttonSprite.on('pointerup', (event) => { window.client.selectButton(button.name); } );
+			buttonSprite.height = button.length;
+			buttonSprite.width = button.width;
+			buttonSprite.position.set(button.x,button.y);
 			let text = new PIXI.Text(
 				button.content, {
 					fontSize: this.fontOptions.buttons.size,
@@ -297,11 +321,10 @@ export class PixiHud extends GameHud
 					fontFamily: this.fontOptions.buttons.family
 				}
 			);
-			text.x = button.width/2 - text.width/2;
-			text.y = button.length/2 - text.height/2;
-			pixiButton.addChild(text);
-			pixiButton.position.set(button.x,button.y);
-			this.buttonContainer.addChild(pixiButton);
+			text.x = (buttonSprite.width/2 / buttonSprite.scale.x) - text.width/2;
+			text.y = (buttonSprite.height/2 / buttonSprite.scale.y) - text.height/2;
+			buttonSprite.addChild(text);
+			this.buttonContainer.addChild(buttonSprite);
 		});
 		this.app.stage.addChild(this.buttonContainer);
 	}
