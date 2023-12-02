@@ -36,7 +36,7 @@ export class UILogin
         }); 
 	}
 
-    setupStage()
+    setupStage(shouldGeneratePrints)
     {
         // Clear stage
         while(this.app.stage.children[0]){
@@ -49,12 +49,21 @@ export class UILogin
         background.height = this.app.screen.height;
         this.app.stage.addChild(background);
 
-        // Add prints
+        if (shouldGeneratePrints)
+        {
+            this.generatePrints();
+        }
+
+        this.renderTitle();
+    }
+
+    generatePrints() {
         this.hand.anchor.set(0.5);
         this.app.stage.addChild(this.hand);
-        this.hand.x = 100;
-        this.hand.y = 100;
-        let xyLocations = [[45, 80], [1000, 500], [800, 90], [40, 1200], [300, 800]];
+        this.hand.x = 400;
+        this.hand.y = 550;
+        this.hand.rotation = 0.5;
+        let xLocations = [400, 500, 600, 700, 800, 900, 1000];
         let index = 0;
         let seconds = 0;
         this.app.ticker.add((delta) =>
@@ -62,16 +71,12 @@ export class UILogin
             seconds += (1 / 60) * delta;
             if(seconds >= 3)
             {
-                let location = xyLocations[index];
-                index = (index + 1) % xyLocations.length;
-                this.hand.x = location[0];
-                this.hand.y = location[1];
-                this.hand.rotation += delta;
+                let location = xLocations[index];
+                index = (index + 1) % xLocations.length;
+                this.hand.x = location;
                 seconds = 0
             }
         });
-
-        this.renderTitle();
     }
 
     generateGameId() {
@@ -109,8 +114,6 @@ export class UILogin
 
     onClickJoinExistingGameChoice(e)
     {
-        console.log("HERE")
-        console.log(this.proposedPlayerId.trim());
         if (this.proposedPlayerId.trim() == "")
         {
             this.renderError(this.getXPlacement(3), this.getYPlacement(10), "Enter non-empty player name.", 30);
@@ -170,7 +173,7 @@ export class UILogin
 
     createGameDisplay()
     {
-        this.setupStage();
+        this.setupStage(false);
         const graphics = new PIXI.Graphics();
 
 		// Allow user to add in a player name
@@ -263,7 +266,7 @@ export class UILogin
 
     renderJoinGameWithGameID()
     {
-        this.setupStage();
+        this.setupStage(false);
 
         const graphics = new PIXI.Graphics();
 
@@ -277,55 +280,61 @@ export class UILogin
         input.focus();
     }
 
-    renderWaiting(waitingText)
-    {
-        this.setupStage();
-        
-        const graphics = new PIXI.Graphics();
-
-        let text = new PIXI.Text(
-            waitingText, {
-            fontSize: 30,
+    getDisplayWaitingText(xFactor, yFactor, text, fontSize) {
+        let waitText = new PIXI.Text(
+            text, {
+            fontSize: fontSize,
             fill: 0x6F4E37,
             fontFamily: this.fontFamily
-        }
-        );
-        text.x = this.getXPlacement(3) + this.buttonWidth/2 - text.width/2;
-        text.y = this.getYPlacement(15) + this.buttonHeight/2 - text.height/2;
-
-        graphics.addChild(text);
-        this.app.stage.addChild(graphics);
+        });
+        waitText.x = this.getXPlacement(xFactor) + this.buttonWidth/2 - waitText.width/2;
+        waitText.y = this.getYPlacement(yFactor) + this.buttonHeight/2 - waitText.height/2;
+        return waitText;
     }
 
     displayWaitRoom(obj)
 	{
-        this.setupStage();
-
-        let players = obj.players;
+        this.setupStage(true);
         const graphics = new PIXI.Graphics();
 
-        // Display game ID
-        let gameIdText = new PIXI.Text(
-            "Game ID: "  + this.gameId, {
-            fontSize: 40,
-            fill: 0x6F4E37,
-            fontFamily: this.fontFamily
-        });
-        gameIdText.x = this.getXPlacement(3) + this.buttonWidth/2 - gameIdText.width/2;
-        gameIdText.y = this.getYPlacement(13) + this.buttonHeight/2 - gameIdText.height/2;
+        let gameIdText = this.getDisplayWaitingText(3, 13, "Game ID: "  + this.gameId, 60);
         graphics.addChild(gameIdText);
 
-        // Display player list
+        if (!this.isGameStarter)
+        {
+            let moreInfoText = this.getDisplayWaitingText(3, 15, "Waiting for host to start the game...", 30);
+            graphics.addChild(moreInfoText);
+        }
         
-        // Display "Start" button for the host if more than 3 players
+        // Display "Start" button and all players for the host
         if (this.isGameStarter)
         {
+            let playersText = this.getDisplayPlayersList(obj, 3, 15);
+            graphics.addChild(playersText);
+
             let startButton = this.createButton(this.getXPlacement(3), this.getYPlacement(20), "Start Game", 30, (e) => this.onClickStartGame(e));
             graphics.addChild(startButton);
         }
 
         this.app.stage.addChild(graphics);
 	}
+
+    getDisplayPlayersList(obj, xFactor, yFactor)
+    {
+        let playersObj = obj.players;
+        let players = playersObj.map((a) => {
+            return a.playerId;
+        });
+        let playersText = new PIXI.Text(
+            "Players: "  + players, {
+            fontSize: 40,
+            fill: 0x6F4E37,
+            fontFamily: this.fontFamily
+        });
+        playersText.x = this.getXPlacement(xFactor) + this.buttonWidth/2 - playersText.width/2;
+        playersText.y = this.getYPlacement(yFactor) + this.buttonHeight/2 - playersText.height/2;
+        return playersText;
+    }
 
     getXPlacement(factor)
     {
