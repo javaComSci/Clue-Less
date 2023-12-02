@@ -139,7 +139,10 @@ export class UILogin
                 this.renderError(this.getXPlacement(3), this.getYPlacement(10), "Game could not be found. Please enter valid game ID.", 30);
             }
 			else if (response == "ExistingPlayer") {
-				this.renderError(this.getXPlacement(3), this.getYPlacement(10), "Player name already exists, please enter different name", 30);
+				this.renderError(this.getXPlacement(3), this.getYPlacement(10), "Player name already exists. Please enter different name.", 30);
+			}
+            else if (response == "AlreadyInProgress") {
+				this.renderError(this.getXPlacement(3), this.getYPlacement(10), "Game is already in progress. Please enter a different game ID.", 30);
 			}
         });
     }
@@ -312,7 +315,7 @@ export class UILogin
             let playersText = this.getDisplayPlayersList(obj, 3, 15);
             graphics.addChild(playersText);
 
-            let startButton = this.createButton(this.getXPlacement(3), this.getYPlacement(20), "Start Game", 30, (e) => this.onClickStartGame(e));
+            let startButton = this.createButton(this.getXPlacement(3), this.getYPlacement(19), "Start Game", 30, (e) => this.onClickStartGame(e));
             graphics.addChild(startButton);
         }
 

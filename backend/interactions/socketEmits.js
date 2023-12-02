@@ -1,4 +1,5 @@
 import { getIOInstance } from '../../index.js';
+import { deleteGameInstance } from './socketListeners.js';
 
 export function logToConsole(message)
 {
@@ -92,15 +93,21 @@ export function emitAccusationCorrect(gameId, winningPlayer, accusedCharacter, a
 {
     console.log(`ACCUSATION: ${accusedCharacter} in ${accusedLocation} with ${accusedWeapon} is correct. PLAYER ${winningPlayer.playerId} WON! GAME OVER!`);
     getIOInstance().to(getGameSocketId(gameId)).emit('ACCUSATION_CORRECT', { winningPlayer: winningPlayer, accusedCharacter: accusedCharacter, accusedWeapon: accusedWeapon, accusedLocation: accusedLocation });
+
+    // As game is over, delete game istance
+    deleteGameInstance(gameId);
 }
 
 export function emitAccusationIncorrect(gameId, currentPlayer, accusedCharacter, accusedWeapon, accusedLocation, correctCharacter, correctWeapon, correctLocation, isGameOver)
 {
+    getIOInstance().to(getPerUserRoomId(gameId, currentPlayer.playerId)).emit('ACCUSATION_SOLUTION', { correctCharacter: correctCharacter, correctWeapon: correctWeapon, correctLocation: correctLocation });
+    getIOInstance().to(getGameSocketId(gameId)).emit('ACCUSATION_INCORRECT', { accusingPlayer: currentPlayer, accusedCharacter: accusedCharacter, accusedWeapon: accusedWeapon, accusedLocation: accusedLocation, isGameOver: isGameOver });
+
     console.log(`ACCUSATION: ${accusedCharacter} in ${accusedLocation} with ${accusedWeapon} is incorrect. Player ${currentPlayer.playerId} can no longer make any moves`);
     if (isGameOver)
     {
         console.log(`GAME IS OVER. NO ONE WON.`);
+        // As game is over, delete game instance
+        deleteGameInstance(gameId);
     }
-    getIOInstance().to(getPerUserRoomId(gameId, currentPlayer.playerId)).emit('ACCUSATION_SOLUTION', { correctCharacter: correctCharacter, correctWeapon: correctWeapon, correctLocation: correctLocation });
-    getIOInstance().to(getGameSocketId(gameId)).emit('ACCUSATION_INCORRECT', { accusingPlayer: currentPlayer, accusedCharacter: accusedCharacter, accusedWeapon: accusedWeapon, accusedLocation: accusedLocation, isGameOver: isGameOver });
 }

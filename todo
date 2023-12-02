@@ -17,12 +17,6 @@ FRONTEND STYLING:
 ACCUSATION INCORRECT:
 - support getting game state update when accusation is incorrect
 
-
-DREAM:
-LOGIN SCREEN:
-- waiting room
-- delete game after game end rather than reuse of gameid
-
 AUDIO:
 - background music (maybe for login screen)
 - sound effects 

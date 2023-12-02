@@ -1,6 +1,7 @@
 import { getIOInstance } from '../../index.js';
 import { GameEngine } from '../engine/gameEngine.js';
 import { getPerUserRoomId, getGameSocketId, emitPlayers, emitNavigateToGameBoard } from './socketEmits.js';
+import { GameState } from '../engine/gameState.js';
 
 // Keep the games object as global to map the gameId to game instance.
 let games = {};
@@ -9,8 +10,6 @@ function isPlayerExisting(playerId)
 {
     for (const game in games)
     {
-        console.log(games[game].players);
-
         for (const player in games[game].players)
         {
             if (games[game].players[player].playerId == playerId)
@@ -42,6 +41,10 @@ export function initializeListeners()
             else if (isPlayerExisting(playerId))
             {
                 callback("ExistingPlayer");
+            }
+            else if (gameId in games && games[gameId].gameState != GameState.INITIATING)
+            {
+                callback("AlreadyInProgress");
             }
             else
             {
@@ -83,7 +86,7 @@ export function initializeListeners()
         socket.on('start', ({ gameId, playerId }, callback) => {
             console.log(`Getting the game start request for game ${gameId}, player: ${playerId}.`);
 
-            if (games[gameId].players.length >= 3) {
+            if (games[gameId] && games[gameId].players.length >= 3) {
                 emitNavigateToGameBoard(gameId);
                 games[gameId].startGame();
                 callback(true);
@@ -94,23 +97,27 @@ export function initializeListeners()
         });
 
         socket.on('move', ({ gameId, playerId, newCharacterLocation }) => {
-            games[gameId].processMove(playerId, newCharacterLocation);
+            games[gameId] && games[gameId].processMove(playerId, newCharacterLocation);
         });
 
         socket.on('suggestion', ({ gameId, playerId, suggestedCharacterName, suggestedWeaponName }) => {
-            games[gameId].processSuggestion(playerId, suggestedCharacterName, suggestedWeaponName);
+            games[gameId] && games[gameId].processSuggestion(playerId, suggestedCharacterName, suggestedWeaponName);
         });
 
         socket.on('proof', ({ gameId, playerId, proofCard }) => {
-            games[gameId].processProof(playerId, proofCard);
+            games[gameId] && games[gameId].processProof(playerId, proofCard);
         });
 
         socket.on('accuse', ({ gameId, playerId, accusingCharacter, accusingWeapon, accusingLocation }) => {
-            games[gameId].processAccusation(playerId, accusingCharacter, accusingWeapon, accusingLocation);
+            games[gameId] && games[gameId].processAccusation(playerId, accusingCharacter, accusingWeapon, accusingLocation);
         });
 
         socket.on('turncomplete', ({ gameId, playerId }) => {
-            games[gameId].processTurnCompletion(playerId);
+            games[gameId] && games[gameId].processTurnCompletion(playerId);
         });
     });
+}
+
+export function deleteGameInstance(gameId) {
+    delete games[gameId];
 }
