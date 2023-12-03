@@ -24,15 +24,16 @@ export class GameHud
 		this.characterNameAreaWidth = screenWidth - mapWidth;
 		this.buttonAreaStartX = mapWidth;
 		this.buttonAreaStartY = this.characterNameAreaHeight;
-		this.buttonAreaHeight = screenHeight/2;
+		this.buttonAreaHeight = screenHeight/3;
 		this.buttonAreaWidth = screenWidth - mapWidth;
 		this.weaponAreaStartX = mapWidth;
 		this.weaponAreaStartY = this.alertAreaStartY + this.alertAreaHeight;
 		this.weaponAreaHeight = screenHeight/4 - this.alertAreaHeight;
 		this.weaponAreaWidth = screenWidth - mapWidth;
 
-		this.buttonMarginSFactor = .15;
-		this.buttonGapSFactor = .05;
+		this.buttonMarginSFactorX = .20;
+		this.buttonMarginSFactorY = .10;
+		this.buttonGapSFactor = .02;
 
 		this.cardMarginSFactorX = .20;
 		this.cardMarginSFactorY = .20;
@@ -117,12 +118,12 @@ export class GameHud
 	createButtons(state)
 	{
 		let buttonAreaSFactorLW = this.buttonAreaHeight/this.buttonAreaWidth;
-		let buttonWidth = this.buttonAreaWidth - 2 * ( this.buttonMarginSFactor * this.buttonAreaWidth );
+		let buttonWidth = this.buttonAreaWidth - 2 * ( this.buttonMarginSFactorX * this.buttonAreaWidth );
 		let buttonGapCount = state.length - 1;
 		let buttonGapTotalHeight = ( this.buttonAreaHeight * this.buttonGapSFactor);
-		let buttonHeight = ((this.buttonAreaHeight - 2 * ( this.buttonMarginSFactor * this.buttonAreaHeight )) - buttonGapTotalHeight )/state.length;
-		let buttonStartX = (this.buttonMarginSFactor * this.buttonAreaWidth) + this.buttonAreaStartX;
-		let buttonStartY = (this.buttonMarginSFactor * this.buttonAreaHeight) + this.buttonAreaStartY;
+		let buttonHeight = ((this.buttonAreaHeight - 2 * ( this.buttonMarginSFactorY * this.buttonAreaHeight )) - buttonGapTotalHeight )/state.length;
+		let buttonStartX = (this.buttonMarginSFactorX * this.buttonAreaWidth) + this.buttonAreaStartX;
+		let buttonStartY = (this.buttonMarginSFactorY * this.buttonAreaHeight) + this.buttonAreaStartY;
 		state.forEach((b) => {
 			let button = new Button(b['name'],b['content'],buttonStartX,buttonStartY,buttonHeight,buttonWidth);
 			buttonStartY += buttonHeight + (this.buttonAreaHeight * this.buttonGapSFactor);
