@@ -25,7 +25,7 @@ export class GameMap
 		// hallway ( short side )
 		this.hs = this.re/3;
 		// character edge
-		this.ce = this.hs/2;
+		this.ce = 2 * this.hs/3;
 		// passageway edge
 		this.pe = this.hs/2;
 		/*

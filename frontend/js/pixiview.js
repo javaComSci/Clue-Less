@@ -460,6 +460,40 @@ export class PixiMap extends GameMap
 				"scale": 161/this.re
 			}
 		};
+		let characters = {
+			"frames": {
+				"WHITE":
+				{
+					"frame": {'x':20,'y':30,'w':70,'h':120}
+				},
+				"PEACOCK":
+				{
+					"frame": {'x':120,'y':30,'w':80,'h':110}
+				},
+				"SCARLET":
+				{
+					"frame": {'x':240,'y':30,'w':70,'h':110}
+				},
+				"MUSTARD":
+				{
+					"frame": {'x':340,'y':30,'w':70,'h':110}
+				},
+				"GREEN":
+				{
+					"frame": {'x':400,'y':30,'w':90,'h':110}
+				},
+				"PLUM":
+				{
+					"frame": {'x':510,'y':30,'w':90,'h':110}
+				},
+			},
+			"meta": {
+				"image": "/assets/characters.png",
+				"format": "RGBA8888",
+				"size": {"w":640,"h":620},
+				"scale": 1
+			}
+		};
 		// Set sprite coordinates based on abstract GameMap model
 		this.characterSprites['GREEN'] = PIXI.Sprite.from("/assets/green.png");
 
@@ -479,6 +513,11 @@ export class PixiMap extends GameMap
 		{
 			this.roomRotate[room] = mapRoom.frames[room]['rotate'];
 		}
+		this.characterSprites = new PIXI.Spritesheet(
+			PIXI.BaseTexture.from(characters.meta.image),
+			characters
+		);
+		await this.characterSprites.parse();
 	}
 	displayMap()
 	{
@@ -559,38 +598,42 @@ export class PixiMap extends GameMap
 			let charX = coordinates['x'];
 			let charY = coordinates['y'];
 
-			let pixiCharacter = new PIXI.Graphics();
-			pixiCharacter.eventMode = 'static';
-			pixiCharacter.on('pointerup', (event) => { window.client.selectPlayer(character.name); } );
+			let characterSprite = new PIXI.Sprite(this.characterSprites.textures[character.name]);
+			characterSprite.eventMode = 'static';
+			characterSprite.on('pointerup', (event) => { window.client.selectPlayer(character.name); } );
+			characterSprite.position.set(charX,charY);
+			characterSprite.width = charRep.width;
+			characterSprite.height = charRep.length;
+			this.characterContainer.addChild(characterSprite);
+		});
+		this.app.stage.addChild(this.characterContainer);
 
+			/*
 			switch (character.name)
 			{
 				case CharacterConstants.SCARLET:
-					pixiCharacter.beginFill(0xbe3228);
+					characterSprite.beginFill(0xbe3228);
 					break;
 				case CharacterConstants.GREEN:
-					pixiCharacter.beginFill(0x02e107);
+					characterSprite.beginFill(0x02e107);
 					break;
 				case CharacterConstants.MUSTARD:
-					pixiCharacter.beginFill(0xFFFF00);
+					characterSprite.beginFill(0xFFFF00);
 					break;
 				case CharacterConstants.WHITE:
-					pixiCharacter.beginFill(0xffffff);
+					characterSprite.beginFill(0xffffff);
 					break;
 				case CharacterConstants.PEACOCK:
-					pixiCharacter.beginFill(0x0000FF);
+					characterSprite.beginFill(0x0000FF);
 					break;
 				case CharacterConstants.PLUM:
-					pixiCharacter.beginFill(0x800080);
+					characterSprite.beginFill(0x800080);
 					break;	
 			}	
 				
-			pixiCharacter.drawRect(0,0,this.ce,this.ce);
-			pixiCharacter.endFill();
-			pixiCharacter.position.set(charX,charY);
-			this.characterContainer.addChild(pixiCharacter);
-		});
-		this.app.stage.addChild(this.characterContainer);
+			characterSprite.drawRect(0,0,this.ce,this.ce);
+			characterSprite.endFill();
+			*/
 	}
 	displayPassageways() {
 		if ( this.passagewayContainer != null )
