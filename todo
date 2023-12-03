@@ -1,15 +1,10 @@
-Todo:
-
 FRONTEND STYLING:
-- assets (ASK)
-    - cards, characters, weapons, rooms, hallways
 - art-style (text)
     - actions, weapons, cards, character
 - buttons for the actions
 - styling alerts
 - weapons being in locations with icons
 - alert font larger
-- swapping actions and cards
 - some way of communicating that button cannot be clicked (either visiblity = hidden or greyed out)
 - selected room, weapon, character
 - current player character as image on the top right

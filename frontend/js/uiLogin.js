@@ -49,10 +49,14 @@ export class UILogin
         background.height = this.app.screen.height;
         this.app.stage.addChild(background);
 
-        if (shouldGeneratePrints)
-        {
-            this.generatePrints();
-        }
+        // if (shouldGeneratePrints)
+        // {
+        //     this.generatePrints();
+        // }
+
+        // this.generatePrintsDiagonal();
+        this.generatePrints();
+        // this.generatePrintsEverywhere();
 
         this.renderTitle();
     }
@@ -60,7 +64,7 @@ export class UILogin
     generatePrints() {
         this.hand.anchor.set(0.5);
         this.app.stage.addChild(this.hand);
-        this.hand.x = 400;
+        this.hand.x = 800;
         this.hand.y = 550;
         this.hand.rotation = 0.5;
         let xLocations = [400, 500, 600, 700, 800, 900, 1000];
@@ -74,6 +78,62 @@ export class UILogin
                 let location = xLocations[index];
                 index = (index + 1) % xLocations.length;
                 this.hand.x = location;
+                seconds = 0
+                this.hand.rotation += delta
+            }
+        });
+    }
+
+    generatePrintsEverywhere() {
+        this.hand.anchor.set(0.5);
+        this.app.stage.addChild(this.hand);
+        this.hand.x = 400;
+        this.hand.y = 550;
+        this.hand.rotation = 0.5;
+        let xLocations = [400, 500, 457, 700, 890, 230, 100];
+        let yLocations = [100, 700, 500, 200, 1000, 560, 234];
+        let index = 0;
+        let seconds = 0;
+        this.app.ticker.add((delta) =>
+        {
+            seconds += (1 / 60) * delta;
+            if(seconds >= 3)
+            {
+                let xLocation = xLocations[index];
+                let yLocation = yLocations[index];
+                index = (index + 1) % xLocations.length;
+                this.hand.x = xLocation;
+                this.hand.y = yLocation;
+                this.hand.rotation += delta;
+                seconds = 0
+            }
+        });
+    }
+
+    generatePrintsDiagonal() {
+        this.hand.anchor.set(0.5);
+        this.app.stage.addChild(this.hand);
+        this.hand.x = 100;
+        this.hand.y = 1600;
+        this.hand.rotation = 0.5;
+        let index = 0;
+        let seconds = 0;
+        this.app.ticker.add((delta) =>
+        {
+            seconds += (1 / 60) * delta;
+            if(seconds >= 3)
+            {
+                let xLocation = this.hand.x + 100;
+                let yLocation = this.hand.y - 100;
+                if (xLocation == this.appHeight) {
+                    xLocation = 100;
+                }
+                if (yLocation == 100) {
+                    yLocation = 1600;
+                }
+                this.hand.x = xLocation;
+                this.hand.y = yLocation;
+                this.hand.rotation += delta;
                 seconds = 0
             }
         });
