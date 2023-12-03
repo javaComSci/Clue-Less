@@ -73,15 +73,15 @@ export class PixiHud extends GameHud
 				},
 				"CARD_MUSTARD":
 				{
-					"frame": {'x':320,'y':17,'w':84,'h':146}
+					"frame": {'x':315,'y':17,'w':90,'h':146}
 				},
 				"CARD_GREEN":
 				{
-					"frame": {'x':420,'y':17,'w':84,'h':146}
+					"frame": {'x':415,'y':17,'w':84,'h':146}
 				},
 				"CARD_PLUM":
 				{
-					"frame": {'x':520,'y':17,'w':84,'h':146}
+					"frame": {'x':510,'y':17,'w':94,'h':146}
 				},
 				"CARD_CANDLESTICK":
 				{
@@ -464,27 +464,27 @@ export class PixiMap extends GameMap
 			"frames": {
 				"WHITE":
 				{
-					"frame": {'x':20,'y':30,'w':70,'h':120}
+					"frame": {'x':30,'y':30,'w':65,'h':120}
 				},
 				"PEACOCK":
 				{
-					"frame": {'x':120,'y':30,'w':80,'h':110}
+					"frame": {'x':120,'y':31,'w':80,'h':110}
 				},
 				"SCARLET":
 				{
-					"frame": {'x':240,'y':30,'w':70,'h':110}
+					"frame": {'x':230,'y':30,'w':64,'h':110}
 				},
 				"MUSTARD":
 				{
-					"frame": {'x':340,'y':30,'w':70,'h':110}
+					"frame": {'x':330,'y':31,'w':65,'h':110}
 				},
 				"GREEN":
 				{
-					"frame": {'x':400,'y':30,'w':90,'h':110}
+					"frame": {'x':415,'y':30,'w':85,'h':110}
 				},
 				"PLUM":
 				{
-					"frame": {'x':510,'y':30,'w':90,'h':110}
+					"frame": {'x':510,'y':31,'w':90,'h':110}
 				},
 			},
 			"meta": {
@@ -598,42 +598,43 @@ export class PixiMap extends GameMap
 			let charX = coordinates['x'];
 			let charY = coordinates['y'];
 
-			let characterSprite = new PIXI.Sprite(this.characterSprites.textures[character.name]);
-			characterSprite.eventMode = 'static';
-			characterSprite.on('pointerup', (event) => { window.client.selectPlayer(character.name); } );
-			characterSprite.position.set(charX,charY);
-			characterSprite.width = charRep.width;
-			characterSprite.height = charRep.length;
-			this.characterContainer.addChild(characterSprite);
-		});
-		this.app.stage.addChild(this.characterContainer);
-
-			/*
+			let characterMarker = new PIXI.Graphics();
 			switch (character.name)
 			{
 				case CharacterConstants.SCARLET:
-					characterSprite.beginFill(0xbe3228);
+					characterMarker.beginFill(0xFF336B);
 					break;
 				case CharacterConstants.GREEN:
-					characterSprite.beginFill(0x02e107);
+					characterMarker.beginFill(0x02E107);
 					break;
 				case CharacterConstants.MUSTARD:
-					characterSprite.beginFill(0xFFFF00);
+					characterMarker.beginFill(0xFFFF00);
 					break;
 				case CharacterConstants.WHITE:
-					characterSprite.beginFill(0xffffff);
+					characterMarker.beginFill(0xffffff);
 					break;
 				case CharacterConstants.PEACOCK:
-					characterSprite.beginFill(0x0000FF);
+					characterMarker.beginFill(0x33ECFF);
 					break;
 				case CharacterConstants.PLUM:
-					characterSprite.beginFill(0x800080);
+					characterMarker.beginFill(0xE033FF);
 					break;	
 			}	
-				
-			characterSprite.drawRect(0,0,this.ce,this.ce);
-			characterSprite.endFill();
-			*/
+			characterMarker.drawRect(0,0,this.ce,this.ce);
+			characterMarker.endFill();
+			characterMarker.eventMode = 'static';
+			characterMarker.on('pointerup', (event) => { window.client.selectPlayer(character.name); } );
+			characterMarker.position.set(charX,charY);
+
+			let characterSprite = new PIXI.Sprite(this.characterSprites.textures[character.name]);
+			characterSprite.width = charRep.width;
+			characterSprite.height = charRep.length;
+
+			characterMarker.addChild(characterSprite);
+			this.characterContainer.addChild(characterMarker);
+		});
+		this.app.stage.addChild(this.characterContainer);
+
 	}
 	displayPassageways() {
 		if ( this.passagewayContainer != null )
