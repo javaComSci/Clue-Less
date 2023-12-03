@@ -190,6 +190,7 @@ export class PixiHud extends GameHud
 			this.displayWeapons();
 			this.displayCharacterName();
 			this.displayAlerts();
+			this.displayNotes();
 		});
 	}
 	displayCharacterName()
@@ -366,6 +367,11 @@ export class PixiHud extends GameHud
 			this.alertContainer.addChild(pixiAlert);
 		});
 		this.app.stage.addChild(this.alertContainer);
+	}
+	displayNotes()
+	{
+		this.notesInput.placeholder = 'Track your investigation here!';
+		this.app.stage.addChild(this.notesInput);
 	}
 }
 

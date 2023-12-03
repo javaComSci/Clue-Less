@@ -26,6 +26,10 @@ export class GameHud
 		this.buttonAreaStartY = this.characterNameAreaHeight;
 		this.buttonAreaHeight = screenHeight/3;
 		this.buttonAreaWidth = screenWidth - mapWidth;
+		this.notesAreaStartX = mapWidth;
+		this.notesAreaStartY = this.buttonAreaHeight + this.buttonAreaStartY;
+		this.notesAreaHeight = mapHeight - this.notesAreaStartY;
+		this.notesAreaWidth = screenWidth - mapWidth;
 		this.weaponAreaStartX = mapWidth;
 		this.weaponAreaStartY = this.alertAreaStartY + this.alertAreaHeight;
 		this.weaponAreaHeight = screenHeight/4 - this.alertAreaHeight;
@@ -53,6 +57,7 @@ export class GameHud
 		this.alerts = [];
 		this.weapons = [];
 		this.avatar = '';
+		this.notesInput = '';
 		this.createHud(state);
 	}
 	createHud(state)
@@ -62,6 +67,7 @@ export class GameHud
 		this.createAlerts(state['alerts']);
 		this.createAvatar(state['characterName']);
 		this.createWeapons();
+		this.createNotes();
 	}
 	createWeapons()
 	{
@@ -99,6 +105,23 @@ export class GameHud
 		let avatarStartY = this.characterNameAreaStartY + (this.avatarMarginSFactorY * this.characterNameAreaHeight);
 		let avatarRep = new Card(name,name,'avatar',avatarStartX,avatarStartY,avatarHeight,avatarWidth);
 		this.avatar = avatarRep;
+	}
+	createNotes()
+	{
+		let notesInput = new PIXI.TextInput({
+			input: {
+				fontSize: '20px',
+				width: this.notesAreaWidth,
+				height: this.notesAreaHeight,
+				multiline: true
+			},
+			box: {
+				fill: 0xEEEEEE,
+			}
+		});
+		notesInput.x = this.notesAreaStartX;
+		notesInput.y = this.notesAreaStartY;
+		this.notesInput = notesInput;
 	}
 	createCards(state)
 	{
