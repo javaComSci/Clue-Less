@@ -4,9 +4,18 @@
 	<body>
 		<script src="https://pixijs.download/release/pixi.min.js"></script>
 		<script src="PIXI.TextInput.min.js"></script>
-		<script type="module">
-			import { UIClient } from '/js/uiClient.js';
-			window.client = new UIClient();
+		<script src="https://unpkg.com/@pixi/sound/dist/pixi-sound.js"></script>
+		<script>
+			// Credits of SneakySnitch "Sneaky Snitch" Kevin MacLeod (incompetech.com)
+			// Licensed under Creative Commons: By Attribution 4.0 License
+			// http://creativecommons.org/licenses/by/4.0/
+			PIXI.sound.add('my-sound', '/assets/music/SneakySnitch.mp3');
+			PIXI.sound.play('my-sound');
 		</script>
+		<script type="module">
+			import { GameClient } from '/js/gameClient.js';
+			window.client = new GameClient();
+		</script>
+		<div id="buttonContainer"></div>
 	</body>
 </html>

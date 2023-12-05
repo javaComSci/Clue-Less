@@ -9,6 +9,8 @@ export class EngineRecv
 		 */
 		this.socket = socket;
 		this.socketRecvMessages = {
+			'GAME_PLAYERS' 	        			: this.msgPlayers.bind(this),
+			'SHOW_GAME_BOARD'					: this.msgShowGameBoard.bind(this),
 			'insufficientPlayerCount' 	        : this.msgInsufficientPlayerCount.bind(this),
 			'PLAYER_START_INFO' 		        : this.msgPlayerStartInfo.bind(this),
 			'GAME_STATE' 				        : this.msgGameState.bind(this),
@@ -36,6 +38,18 @@ export class EngineRecv
 	/*
 	 * STUBS
 	 */
+	msgPlayers()
+	{
+		this.socket.on('GAME_PLAYERS', function (obj) {
+			window.client.displayWaitRoom(obj);
+		});
+	}
+	msgShowGameBoard()
+	{
+		this.socket.on('SHOW_GAME_BOARD', function (obj) {
+			window.client.displayGameBoard(obj);
+		});
+	}
 	msgInsufficientPlayerCount()
 	{
 		this.socket.on('insufficientPlayerCount', function (obj) {

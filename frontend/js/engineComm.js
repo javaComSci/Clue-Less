@@ -16,4 +16,8 @@ export class EngineComm {
 	{
 		this.sender.msg(action, data);
 	}
+	sendWithCallback(action, data, callback)
+	{
+		this.sender.pushMsgWithCallback(action, data, callback);
+	}
 }

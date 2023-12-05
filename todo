@@ -1,10 +1,19 @@
-- alerts
-- non-overlapping players
-- colors 
+FRONTEND STYLING:
+- art-style (text)
+    - actions, weapons, cards, character
+- buttons for the actions
+- styling alerts
+- weapons being in locations with icons
+- alert font larger
+- some way of communicating that button cannot be clicked (either visiblity = hidden or greyed out)
+- selected room, weapon, character
+- current player character as image on the top right
 
-For demo:
-- maybe restart server
-- redeploy code 
+ACCUSATION INCORRECT:
+- support getting game state update when accusation is incorrect
 
-for target:
-- delete game after game end rather than reuse of gameid
+ANIMATION:
+- gif of the character
+
+NOTES:
+- linking to external service or text box
