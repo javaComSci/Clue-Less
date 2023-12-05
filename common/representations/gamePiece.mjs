@@ -20,7 +20,7 @@ export class GamePiece
     {
         if (this.currentLocation in LocationConstants.Hallway)
         {
-            let connectingRooms = hallway.split("_");
+            let connectingRooms = this.currentLocation.split("_");
             this.movePiece(connectingRooms[0], this.pieceMover);
         }
     }

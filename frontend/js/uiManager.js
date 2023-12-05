@@ -16,7 +16,7 @@ export class UIManager
 				{'name':'END_TURN','content':'End Turn'}],
 			'cards':[],
 			'alerts': [],
-			'characterName': 'Pending...'
+			'characterName': 'UNKNOWN'
 		};
 		this.defaultStateMap = {};
 		this.currentStateUI = this.defaultStateUI;

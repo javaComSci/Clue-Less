@@ -97,6 +97,7 @@ export class GameClient
 	}
 	playerWins(data)
 	{
+		this.disabledActionState();
 		this.promptPlayer('INFO_PLAYER_WINS',data);
 	}
 	accusationSolution(data)

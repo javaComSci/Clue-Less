@@ -32,7 +32,8 @@ export class UIState
 		}
 		if( state['characterName'] != undefined )
 		{
-			this.pixihud.displayCharacterName(state['characterName']);
+			this.pixihud.createAvatar(state['characterName']);
+			this.pixihud.displayCharacterName();
 		}
 	}
 	updateMapState(state)

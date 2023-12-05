@@ -3,7 +3,7 @@ import { GameCard } from './gameCard.mjs';
 
 export const WeaponConstants = {
     CANDLESTICK: 'CANDLESTICK',
-    DRAGGER: 'DRAGGER',
+    KNIFE: 'KNIFE',
     PIPE: 'PIPE',
     REVOLVER: 'REVOLVER',
     ROPE: 'ROPE',
@@ -12,7 +12,7 @@ export const WeaponConstants = {
 
 export const CardWeapons = [
     WeaponConstants.CANDLESTICK,
-    WeaponConstants.DRAGGER,
+    WeaponConstants.KNIFE,
     WeaponConstants.PIPE,
     WeaponConstants.REVOLVER,
     WeaponConstants.ROPE,

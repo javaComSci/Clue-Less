@@ -10,10 +10,10 @@ export class GameHud
 		/*
 		 * Define areas for the hud
 		 */
-		this.buttonAreaStartX = 0;
-		this.buttonAreaStartY = mapHeight + 50;
-		this.buttonAreaHeight = screenHeight - mapHeight;
-		this.buttonAreaWidth = mapWidth;
+		this.cardAreaStartX = 0;
+		this.cardAreaStartY = mapHeight + 50;
+		this.cardAreaHeight = screenHeight - mapHeight;
+		this.cardAreaWidth = mapWidth;
 		this.alertAreaStartX = 0;
 		this.alertAreaStartY = mapHeight;
 		this.alertAreaHeight = 50;
@@ -22,30 +22,42 @@ export class GameHud
 		this.characterNameAreaStartY = 0;
 		this.characterNameAreaHeight = screenHeight/4;
 		this.characterNameAreaWidth = screenWidth - mapWidth;
-		this.cardAreaStartX = mapWidth;
-		this.cardAreaStartY = this.characterNameAreaHeight;
-		this.cardAreaHeight = screenHeight/2;
-		this.cardAreaWidth = screenWidth - mapWidth;
+		this.buttonAreaStartX = mapWidth;
+		this.buttonAreaStartY = this.characterNameAreaHeight;
+		this.buttonAreaHeight = screenHeight/3;
+		this.buttonAreaWidth = screenWidth - mapWidth;
+		this.notesAreaStartX = mapWidth;
+		this.notesAreaStartY = this.buttonAreaHeight + this.buttonAreaStartY;
+		this.notesAreaHeight = mapHeight - this.notesAreaStartY;
+		this.notesAreaWidth = screenWidth - mapWidth;
 		this.weaponAreaStartX = mapWidth;
 		this.weaponAreaStartY = this.alertAreaStartY + this.alertAreaHeight;
 		this.weaponAreaHeight = screenHeight/4 - this.alertAreaHeight;
 		this.weaponAreaWidth = screenWidth - mapWidth;
 
-		this.buttonMarginSFactor = .25;
-		this.buttonGapSFactor = .125;
+		this.buttonMarginSFactorX = .20;
+		this.buttonMarginSFactorY = .10;
+		this.buttonGapSFactor = .02;
 
-		this.cardMarginSFactor = .10;
+		this.cardMarginSFactorX = .20;
+		this.cardMarginSFactorY = .20;
 		this.cardGapSFactor = .05;
+		this.cardSizingFactor = 5;
 
-		this.weaponMarginSFactor = .14;
-		this.weaponGapSFactor = .02;
+		this.weaponMarginSFactor = .15;
+		this.weaponGapSFactor = .03;
 
 		this.alertMarginSFactor = .01;
+
+		this.avatarMarginSFactorX = .20;
+		this.avatarMarginSFactorY = .17;
 
 		this.buttons = [];
 		this.cards = [];
 		this.alerts = [];
 		this.weapons = [];
+		this.avatar = '';
+		this.notesInput = '';
 		this.createHud(state);
 	}
 	createHud(state)
@@ -53,49 +65,91 @@ export class GameHud
 		this.createCards(state['cards']);
 		this.createButtons(state['buttons']);
 		this.createAlerts(state['alerts']);
+		this.createAvatar(state['characterName']);
 		this.createWeapons();
+		this.createNotes();
 	}
 	createWeapons()
 	{
-		let weaponWidth = this.weaponAreaWidth - 2 * ( this.weaponMarginSFactor * this.weaponAreaWidth );
+		let rows = 2;
+		let columns = 3;
 		let weaponGapCount = Object.keys(WeaponConstants).length - 1;
-		let weaponGapTotalHeight = ( this.weaponAreaHeight * this.weaponGapSFactor ) * weaponGapCount;
-		let weaponHeight = ((this.weaponAreaHeight - 2 * ( this.weaponMarginSFactor * this.weaponAreaHeight )) - weaponGapTotalHeight )/(weaponGapCount + 1);
+		let weaponGapTotalWidth = ( this.weaponAreaHeight * this.weaponGapSFactor ) * rows;
+		let weaponWidth = (this.weaponAreaWidth - 2 * ( this.weaponMarginSFactor * this.weaponAreaWidth ) - weaponGapTotalWidth)/columns;
+		let weaponGapTotalHeight = ( this.weaponAreaHeight * this.weaponGapSFactor );
+		let weaponHeight = ((this.weaponAreaHeight - 2 * ( this.weaponMarginSFactor * this.weaponAreaHeight )) - weaponGapTotalHeight )/rows;
 		let weaponStartX = (this.weaponMarginSFactor * this.weaponAreaWidth) + this.weaponAreaStartX;
 		let weaponStartY = (this.weaponMarginSFactor * this.weaponAreaHeight) + this.weaponAreaStartY;
+		let weaponCount = 1;
 		for(var weapon in WeaponConstants)
 		{
 			let weaponNew = new Weapon(weapon,weaponStartX,weaponStartY,weaponHeight,weaponWidth);
-			weaponStartY += weaponHeight + (this.weaponAreaHeight * this.weaponGapSFactor);
 			this.weapons.push(weaponNew);
+			if( weaponCount % columns == 0 )
+			{
+				weaponStartY += weaponHeight + (this.weaponAreaHeight * this.weaponGapSFactor);
+				weaponStartX = (this.weaponMarginSFactor * this.weaponAreaWidth) + this.weaponAreaStartX;
+			}
+			else
+			{
+				weaponStartX += weaponWidth + weaponGapTotalWidth/rows;
+			}
+			weaponCount += 1;
 		}
+	}
+	createAvatar(name)
+	{
+		let avatarHeight = this.characterNameAreaHeight - 2 * ( this.avatarMarginSFactorY * this.characterNameAreaHeight );
+		let avatarWidth = this.characterNameAreaWidth - 2 * ( this.avatarMarginSFactorX * this.characterNameAreaWidth );
+		let avatarStartX = this.characterNameAreaStartX + (this.avatarMarginSFactorX * this.characterNameAreaWidth);
+		let avatarStartY = this.characterNameAreaStartY + (this.avatarMarginSFactorY * this.characterNameAreaHeight);
+		let avatarRep = new Card(name,name,'avatar',avatarStartX,avatarStartY,avatarHeight,avatarWidth);
+		this.avatar = avatarRep;
+	}
+	createNotes()
+	{
+		let notesInput = new PIXI.TextInput({
+			input: {
+				fontSize: '20px',
+				width: this.notesAreaWidth,
+				height: this.notesAreaHeight,
+				multiline: true
+			},
+			box: {
+				fill: 0xEEEEEE,
+			}
+		});
+		notesInput.x = this.notesAreaStartX;
+		notesInput.y = this.notesAreaStartY;
+		this.notesInput = notesInput;
 	}
 	createCards(state)
 	{
-		let cardWidth = this.cardAreaWidth - 2 * ( this.cardMarginSFactor * this.cardAreaWidth );
+		let cardHeight = this.cardAreaHeight - 2 * ( this.cardMarginSFactorY * this.cardAreaHeight );
 		let cardGapCount = state.length - 1;
-		let cardGapTotalHeight = ( this.cardAreaHeight * this.cardGapSFactor ) * cardGapCount;
-		let cardHeight = ((this.cardAreaHeight - 2 * ( this.cardMarginSFactor * this.cardAreaHeight )) - cardGapTotalHeight )/state.length;
-		let cardStartX = (this.cardMarginSFactor * this.cardAreaWidth) + this.cardAreaStartX;
-		let cardStartY = (this.cardMarginSFactor * this.cardAreaHeight) + this.cardAreaStartY;
+		let cardGapTotalWidth = ( this.cardAreaWidth * this.cardGapSFactor ) * cardGapCount;
+		let cardWidth = (this.cardAreaWidth - 2 * ( this.cardMarginSFactorX * this.cardAreaWidth ))/this.cardSizingFactor;
+		let cardStartX = this.cardAreaWidth/2 - ( cardGapTotalWidth + (cardWidth * state.length))/2;
+		//let cardStartX = (this.cardMarginSFactorX/(cardGapCount) * this.cardAreaWidth) + this.cardAreaStartX;
+		let cardStartY = (this.cardMarginSFactorY * this.cardAreaHeight) + this.cardAreaStartY;
 		state.forEach((c) => {
 			let card = new Card(c['name'],c['name'],c['type'],cardStartX,cardStartY,cardHeight,cardWidth);
-			cardStartY += cardHeight + (this.cardAreaHeight * this.cardGapSFactor);
+			cardStartX += cardWidth + this.cardAreaWidth * this.cardGapSFactor;
 			this.cards.push(card);
 		});
 	}
 	createButtons(state)
 	{
 		let buttonAreaSFactorLW = this.buttonAreaHeight/this.buttonAreaWidth;
-		let buttonHeight = this.buttonAreaHeight - 2 * ( this.buttonMarginSFactor * this.buttonAreaHeight );
+		let buttonWidth = this.buttonAreaWidth - 2 * ( this.buttonMarginSFactorX * this.buttonAreaWidth );
 		let buttonGapCount = state.length - 1;
-		let buttonGapTotalWidth = ( this.buttonAreaWidth * this.buttonGapSFactor);
-		let buttonWidth = ((this.buttonAreaWidth - 2 * ( this.buttonMarginSFactor/(buttonGapCount) * this.buttonAreaWidth )) - buttonGapTotalWidth )/state.length;
-		let buttonStartX = (this.buttonMarginSFactor/(buttonGapCount) * this.buttonAreaWidth) + this.buttonAreaStartX;
-		let buttonStartY = (this.buttonMarginSFactor * this.buttonAreaHeight) + this.buttonAreaStartY;
+		let buttonGapTotalHeight = ( this.buttonAreaHeight * this.buttonGapSFactor);
+		let buttonHeight = ((this.buttonAreaHeight - 2 * ( this.buttonMarginSFactorY * this.buttonAreaHeight )) - buttonGapTotalHeight )/state.length;
+		let buttonStartX = (this.buttonMarginSFactorX * this.buttonAreaWidth) + this.buttonAreaStartX;
+		let buttonStartY = (this.buttonMarginSFactorY * this.buttonAreaHeight) + this.buttonAreaStartY;
 		state.forEach((b) => {
 			let button = new Button(b['name'],b['content'],buttonStartX,buttonStartY,buttonHeight,buttonWidth);
-			buttonStartX += buttonWidth + (this.buttonAreaWidth * this.buttonGapSFactor)/buttonGapCount;
+			buttonStartY += buttonHeight + (this.buttonAreaHeight * this.buttonGapSFactor);
 			this.buttons.push(button);
 		});
 	}

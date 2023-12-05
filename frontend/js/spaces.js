@@ -61,8 +61,8 @@ export class Hallway extends Space
 	{
 		super(x, y, length, width);
 		this.name = name;
-		this.playerLocationX = x + length/3;
-		this.playerLocationY = y + width/3;
+		this.playerLocationX = x + length/6;
+		this.playerLocationY = y + width/6;
 	}
 	getPlayerLocation()
 	{
