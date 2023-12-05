@@ -21,7 +21,7 @@ export class GameMap
 		// room edge
 		this.re = this.mh/5;
 		// hallway ( long side )
-		this.hl = 2 * this.re;
+		this.hl = this.re;
 		// hallway ( short side )
 		this.hs = this.re/3;
 		// character edge
@@ -33,30 +33,30 @@ export class GameMap
 		 */
 		this.room_coordinates = {
 			'STUDY': { 'x': this.mb, 'y': this.mb },
-			'LIBRARY': { 'x': this.mb, 'y': this.mb + this.re + this.re },
-			'CONSERVATORY': { 'x': this.mb, 'y': this.mb + 2 * ( this.re + this.re ) },
-			'HALL': { 'x': this.mb + this.re + this.re, 'y': this.mb },
-			'BILLIARDROOM': { 'x': this.mb + this.re + this.re, 'y': this.mb + this.re + this.re },
-			'BALLROOM': { 'x': this.mb + this.re + this.re, 'y': this.mb + 2 * ( this.re + this.re ) },
-			'LOUNGE': { 'x': this.mb + 2 * ( this.re + this.re ), 'y': this.mb },
-			'DININGROOM': { 'x': this.mb + 2 * ( this.re + this.re ), 'y': this.mb + this.re + this.re },
-			'KITCHEN': { 'x': this.mb + 2 * ( this.re + this.re ), 'y': this.mb + 2 * ( this.re + this.re ) }
+			'LIBRARY': { 'x': this.mb, 'y': this.mb + this.re + this.hl },
+			'CONSERVATORY': { 'x': this.mb, 'y': this.mb + 2 * ( this.re + this.hl ) },
+			'HALL': { 'x': this.mb + this.re + this.hl, 'y': this.mb },
+			'BILLIARDROOM': { 'x': this.mb + this.re + this.hl, 'y': this.mb + this.re + this.hl },
+			'BALLROOM': { 'x': this.mb + this.re + this.hl, 'y': this.mb + 2 * ( this.re + this.hl ) },
+			'LOUNGE': { 'x': this.mb + 2 * ( this.re + this.hl ), 'y': this.mb },
+			'DININGROOM': { 'x': this.mb + 2 * ( this.re + this.hl ), 'y': this.mb + this.re + this.hl },
+			'KITCHEN': { 'x': this.mb + 2 * ( this.re + this.hl ), 'y': this.mb + 2 * ( this.re + this.hl ) }
 		};
 		this.hallway_across_coordinates = {
-			'STUDY_HALL': { 'x': this.mb + this.re/2, 'y': this.mb + this.re/3 },
-			'LIBRARY_BILLIARDROOM': { 'x': this.mb + this.re/2, 'y': this.mb + this.re/3 + this.re + this.re },
-			'BALLROOM_CONSERVATORY': { 'x': this.mb + this.re/2, 'y': this.mb + this.re/3 + 2 * ( this.re + this.re ) },
-			'HALL_LOUNGE': { 'x': this.mb + this.re/2 + this.hl, 'y': this.mb + this.re/3 },
-			'DININGROOM_BILLIARDROOM': { 'x': this.mb + this.re/2 + this.hl, 'y': this.mb + this.re/3 + this.re + this.re },
-			'KITCHEN_BALLROOM': { 'x': this.mb + this.re/2 + this.hl, 'y': this.mb + this.re/3 + 2 * ( this.re + this.re ) },
+			'STUDY_HALL': { 'x': this.mb + this.re, 'y': this.mb + this.re/3 },
+			'LIBRARY_BILLIARDROOM': { 'x': this.mb + this.re, 'y': this.mb + this.re/3 + this.hl + this.re },
+			'BALLROOM_CONSERVATORY': { 'x': this.mb + this.re, 'y': this.mb + this.re/3 + 2 * ( this.hl + this.re ) },
+			'HALL_LOUNGE': { 'x': this.mb + this.re + this.hl + this.re, 'y': this.mb + this.re/3 },
+			'DININGROOM_BILLIARDROOM': { 'x': this.mb + this.re + this.hl + this.re, 'y': this.mb + this.re/3 + this.hl + this.re },
+			'KITCHEN_BALLROOM': { 'x': this.mb + this.re + this.hl + this.re, 'y': this.mb + this.re/3 + 2 * ( this.hl + this.re ) },
 		};
 		this.hallway_down_coordinates = {
-			'LIBRARY_STUDY': { 'x': this.mb + this.re/3, 'y': this.mb + this.re/2 },
-			'CONSERVATORY_LIBRARY': { 'x': this.mb + this.re/3, 'y': this.mb + this.re/2 + this.hl },
-			'HALL_BILLIARDROOM': { 'x': this.mb + this.re/3 + this.re + this.re, 'y': this.mb + this.re/2 },
-			'BALLROOM_BILLIARDROOM': { 'x': this.mb + this.re/3 + this.re + this.re, 'y': this.mb + this.re/2 + this.hl },
-			'LOUNGE_DININGROOM': { 'x': this.mb + this.re/3 + 2 * ( this.re + this.re ), 'y': this.mb + this.re/2 },
-			'DININGROOM_KITCHEN': { 'x': this.mb + this.re/3 + 2 * ( this.re + this.re ), 'y': this.mb + this.re/2 + this.hl }
+			'LIBRARY_STUDY': { 'x': this.mb + this.re/3, 'y': this.mb + this.re },
+			'CONSERVATORY_LIBRARY': { 'x': this.mb + this.re/3, 'y': this.mb + this.hl + ( 2 * this.re ) },
+			'HALL_BILLIARDROOM': { 'x': this.mb + this.re/3 + this.hl + this.re, 'y': this.mb + this.re },
+			'BALLROOM_BILLIARDROOM': { 'x': this.mb + this.re/3 + this.hl + this.re, 'y': this.mb + this.re + this.hl + this.re },
+			'LOUNGE_DININGROOM': { 'x': this.mb + this.re/3 + 2 * ( this.hl + this.re ), 'y': this.mb + this.re },
+			'DININGROOM_KITCHEN': { 'x': this.mb + this.re/3 + 2 * ( this.hl + this.re ), 'y': this.mb + this.re + this.hl + this.re }
 		};
 		this.starts_coordinates = {
 			'HALL_LOUNGE_HOME': { 'x': this.hallway_across_coordinates['HALL_LOUNGE'].x + this.hl/2,
