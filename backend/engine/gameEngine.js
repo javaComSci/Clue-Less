@@ -322,8 +322,8 @@ export class GameEngine {
 					emitAccusationIncorrect(this.gameId, this.getCurrentPlayer(), accusingCharacter, accusingWeapon, accusingLocation, this.mysteryCards[0], this.mysteryCards[1], this.mysteryCards[2], false);
 					
 					// UNCOMMENT THIS FOR ALLOWING HALLWAYS TO WORK
-					// this.getCurrentPlayer().character.movePieceToNearestRoom();
-					// this.emitCurrentGameState();
+					this.getCurrentPlayer().character.movePieceToNearestRoom();
+					this.emitCurrentGameState();
 
 					this.setGameState(GameState.PROCESSED_ACCUSATION);
 					this.requestTurnCompletion();
