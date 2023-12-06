@@ -1,19 +1,7 @@
-FRONTEND STYLING:
-- art-style (text)
-    - actions, weapons, cards, character
-- buttons for the actions
-- styling alerts
+FRONTEND STYLING (Will Not Do):
 - weapons being in locations with icons
-- alert font larger
 - some way of communicating that button cannot be clicked (either visiblity = hidden or greyed out)
 - selected room, weapon, character
-- current player character as image on the top right
 
-ACCUSATION INCORRECT:
-- support getting game state update when accusation is incorrect
-
-ANIMATION:
-- gif of the character
-
-NOTES:
-- linking to external service or text box
+FINAL TO-DO:
+- font size for messages - Charles
