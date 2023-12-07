@@ -43,7 +43,7 @@ export class PixiHud extends GameHud
 				'family': this.fontFamily
 			},
 			'alerts': {
-				'size': 20,
+				'size': 17,
 				'color': 0x303004,
 				'family': this.fontFamily
 			},
@@ -344,27 +344,23 @@ export class PixiHud extends GameHud
 		}
 		this.alertContainer = new PIXI.Graphics();
 		this.alertContainer.beginFill(this.areaColors.alerts);
-		this.alertContainer.drawRect(this.alertAreaStartX,this.alertAreaStartY,this.alertAreaWidth,this.alertAreaHeight);
+		this.alertContainer.drawRect(0,0,this.alertAreaWidth,this.alertAreaHeight);
 		this.alertContainer.endFill();
+		this.alertContainer.position.set(this.alertAreaStartX,this.alertAreaStartY);
 		this.alerts.forEach((alertInfo) => {
-			let pixiAlert = new PIXI.Graphics();
-			pixiAlert.eventMode = 'static';
-			pixiAlert.on('pointerup', (event) => { window.client.testme(alertInfo.content); } );
-			pixiAlert.beginFill(this.areaColors.alerts);
-			pixiAlert.drawRect(0,0,alertInfo.width,alertInfo.length);
-			pixiAlert.endFill();
 			let text = new PIXI.Text(
 				alertInfo.content, {
 					fontSize: this.fontOptions.alerts.size,
 					fill: this.fontOptions.alerts.color,
-					fontFamily: this.fontOptions.alerts.family
+					fontFamily: this.fontOptions.alerts.family,
+					align: "center",
+					wordWrap: true,
+					wordWrapWidth: this.alertAreaWidth,
+					breakWords: true
 				}
 			);
-			text.x = alertInfo.x + alertInfo.width/2 - text.width/2;
-			text.y = 0;
-			pixiAlert.addChild(text);
-			pixiAlert.position.set(alertInfo.x,alertInfo.y);
-			this.alertContainer.addChild(pixiAlert);
+			text.x = alertInfo.width/2 - text.width/2;;
+			this.alertContainer.addChild(text);
 		});
 		this.app.stage.addChild(this.alertContainer);
 	}
