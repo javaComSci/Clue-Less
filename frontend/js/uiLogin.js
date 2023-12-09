@@ -36,6 +36,21 @@ export class UILogin
         }); 
 
         this.error = undefined;
+
+        let xLocations = [400, 500, 600, 700, 800, 900, 1000];
+        let index = 0;
+        let seconds = 0;
+        this.handTicker = (delta) => {
+            seconds += (1 / 60) * delta;
+            if(seconds >= 3)
+            {
+                let location = xLocations[index];
+                index = (index + 1) % xLocations.length;
+                this.hand.x = location;
+                seconds = 0
+                this.hand.rotation += delta
+            }
+        };
 	}
 
     setupStage(shouldGeneratePrints)
@@ -51,39 +66,23 @@ export class UILogin
         background.height = this.app.screen.height;
         this.app.stage.addChild(background);
 
-        // if (shouldGeneratePrints)
-        // {
-        //     this.generatePrints();
-        // }
-
-        // this.generatePrintsDiagonal();
-        this.generatePrints();
-        // this.generatePrintsEverywhere();
-
+        this.generatePrints(shouldGeneratePrints);
+        
         this.renderTitle();
     }
 
-    generatePrints() {
+    generatePrints(shouldGeneratePrints) {
         this.hand.anchor.set(0.5);
         this.app.stage.addChild(this.hand);
         this.hand.x = 800;
         this.hand.y = 550;
         this.hand.rotation = 0.5;
-        let xLocations = [400, 500, 600, 700, 800, 900, 1000];
-        let index = 0;
-        let seconds = 0;
-        this.app.ticker.add((delta) =>
-        {
-            seconds += (1 / 60) * delta;
-            if(seconds >= 3)
-            {
-                let location = xLocations[index];
-                index = (index + 1) % xLocations.length;
-                this.hand.x = location;
-                seconds = 0
-                this.hand.rotation += delta
-            }
-        });
+        
+        if (shouldGeneratePrints) {
+            this.app.ticker.add(this.handTicker);
+        } else {
+            this.app.ticker.remove(this.handTicker);
+        }
     }
 
     generatePrintsEverywhere() {
@@ -238,7 +237,7 @@ export class UILogin
 
     createGameDisplay()
     {
-        this.setupStage(false);
+        this.setupStage(true);
         const graphics = new PIXI.Graphics();
 
 		// Allow user to add in a player name
@@ -364,7 +363,7 @@ export class UILogin
 
     displayWaitRoom(obj)
 	{
-        this.setupStage(true);
+        this.setupStage(false);
         const graphics = new PIXI.Graphics();
 
         let gameIdText = this.getDisplayWaitingText(3, 13, "Game ID: "  + this.gameId, 60);
