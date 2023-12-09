@@ -34,6 +34,8 @@ export class UILogin
             this.hand = PIXI.Sprite.from('../assets/hand.png');
             this.createGameDisplay();
         }); 
+
+        this.error = undefined;
 	}
 
     setupStage(shouldGeneratePrints)
@@ -314,6 +316,10 @@ export class UILogin
 
     renderError(x, y, textValue, fontSize)
     {
+        if (this.error) {
+            this.app.stage.removeChild(this.error);
+        }
+        
         let text = new PIXI.Text(
             textValue, {
             fontSize: fontSize,
@@ -324,7 +330,8 @@ export class UILogin
         text.x = x + this.buttonWidth/2 - text.width/2;
         text.y = y + this.buttonHeight/2 - text.height/2;
         
-        this.app.stage.addChild(text);
+        this.error = text;
+        this.app.stage.addChild(this.error);
     }
 
     renderJoinGameWithGameID()
