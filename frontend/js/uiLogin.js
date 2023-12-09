@@ -163,13 +163,13 @@ export class UILogin
 				this.playerId = this.proposedPlayerId;
             }
             else if (response == "EmptyPlayerName") {
-                this.renderError(this.getXPlacement(3), this.getYPlacement(10), "Game not created. Enter non-empty player name.", 30);
+                this.renderError(this.getXPlacement(3), this.getYPlacement(25), "Game not created. Enter non-empty player name.", 30);
             }
             else if (response == "ExistingGame") {
-                this.renderError(this.getXPlacement(3), this.getYPlacement(10), "Game not created as game already exists.", 30);
+                this.renderError(this.getXPlacement(3), this.getYPlacement(25), "Game not created as game already exists.", 30);
             }
 			else if (response == "ExistingPlayer") {
-				this.renderError(this.getXPlacement(3), this.getYPlacement(10), "Game not created. Enter different player name.", 30);
+				this.renderError(this.getXPlacement(3), this.getYPlacement(25), "Game not created. Enter different player name.", 30);
 			}
         });
     }
@@ -178,7 +178,7 @@ export class UILogin
     {
         if (this.proposedPlayerId.trim() == "")
         {
-            this.renderError(this.getXPlacement(3), this.getYPlacement(10), "Enter non-empty player name.", 30);
+            this.renderError(this.getXPlacement(3), this.getYPlacement(25), "Enter non-empty player name.", 30);
         }
         else
         {
@@ -195,16 +195,16 @@ export class UILogin
 				this.playerId = this.proposedPlayerId;
             }
             else if (response == "EmptyPlayerName") {
-                this.renderError(this.getXPlacement(3), this.getYPlacement(10), "Game not created. Enter non-empty player name.", 30);
+                this.renderError(this.getXPlacement(3), this.getYPlacement(25), "Game not created. Enter non-empty player name.", 30);
             }
             else if (response == "NoGame") {
-                this.renderError(this.getXPlacement(3), this.getYPlacement(10), "Game could not be found. Please enter valid game ID.", 30);
+                this.renderError(this.getXPlacement(3), this.getYPlacement(25), "Game could not be found. Please enter valid game ID.", 30);
             }
 			else if (response == "ExistingPlayer") {
-				this.renderError(this.getXPlacement(3), this.getYPlacement(10), "Player name already exists. Please enter different name.", 30);
+				this.renderError(this.getXPlacement(3), this.getYPlacement(25), "Player name already exists. Please enter different name.", 30);
 			}
             else if (response == "AlreadyInProgress") {
-				this.renderError(this.getXPlacement(3), this.getYPlacement(10), "Game is already in progress. Please enter a different game ID.", 30);
+				this.renderError(this.getXPlacement(3), this.getYPlacement(25), "Game is already in progress. Please enter a different game ID.", 30);
 			}
         });
     }
@@ -216,7 +216,7 @@ export class UILogin
                 // All the players need to see the game board now. Relying on the server to communicate that the game is starting to the clients.
             }
             else {
-                this.renderError(this.getXPlacement(3), this.getYPlacement(14), "Game could not be started due to insufficient number of players. At least 3 players are required to start the game.", 20);
+                this.renderError(this.getXPlacement(3), this.getYPlacement(25), "Game could not be started due to invalid number of players. At least 3 players are required to start the game, and at most 6 players can be in the game.", 20);
             }
         });
     }
@@ -319,7 +319,7 @@ export class UILogin
         if (this.error) {
             this.app.stage.removeChild(this.error);
         }
-        
+
         let text = new PIXI.Text(
             textValue, {
             fontSize: fontSize,
@@ -370,19 +370,22 @@ export class UILogin
         let gameIdText = this.getDisplayWaitingText(3, 13, "Game ID: "  + this.gameId, 60);
         graphics.addChild(gameIdText);
 
+        let playerIdText = this.getDisplayWaitingText(3, 15, "Player ID: "  + this.playerId, 40);
+        graphics.addChild(playerIdText);
+
         if (!this.isGameStarter)
         {
-            let moreInfoText = this.getDisplayWaitingText(3, 15, "Waiting for host to start the game...", 30);
+            let moreInfoText = this.getDisplayWaitingText(3, 17, "Waiting for host to start the game...", 35);
             graphics.addChild(moreInfoText);
         }
         
         // Display "Start" button and all players for the host
         if (this.isGameStarter)
         {
-            let playersText = this.getDisplayPlayersList(obj, 3, 15);
+            let playersText = this.getDisplayPlayersList(obj, 3, 17);
             graphics.addChild(playersText);
 
-            let startButton = this.createButton(this.getXPlacement(3), this.getYPlacement(19), "Start Game", 30, (e) => this.onClickStartGame(e));
+            let startButton = this.createButton(this.getXPlacement(3), this.getYPlacement(20), "Start Game", 30, (e) => this.onClickStartGame(e));
             graphics.addChild(startButton);
         }
 

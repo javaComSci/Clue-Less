@@ -86,7 +86,7 @@ export function initializeListeners()
         socket.on('start', ({ gameId, playerId }, callback) => {
             console.log(`Getting the game start request for game ${gameId}, player: ${playerId}.`);
 
-            if (games[gameId] && games[gameId].players.length >= 3) {
+            if (games[gameId] && games[gameId].players.length >= 3 && games[gameId].players.length <= 6) {
                 emitNavigateToGameBoard(gameId);
                 games[gameId].startGame();
                 callback(true);
